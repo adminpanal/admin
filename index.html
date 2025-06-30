@@ -10,6 +10,8 @@
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --admin-gradient: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+            --user-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             --bg-color: #f8f9fa;
             --card-bg: white;
@@ -110,6 +112,9 @@
             font-weight: bold;
             transition: all 0.3s;
             width: 100%;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
         }
 
         .btn:hover {
@@ -129,6 +134,14 @@
 
         .btn-success {
             background: linear-gradient(135deg, #27ae60, #229954);
+        }
+
+        .btn-admin {
+            background: var(--admin-gradient);
+        }
+
+        .btn-user {
+            background: var(--user-gradient);
         }
 
         /* Main Dashboard Styles */
@@ -164,6 +177,22 @@
             display: flex;
             align-items: center;
             gap: 15px;
+        }
+
+        .user-badge {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .user-badge.admin {
+            background: var(--admin-gradient);
+        }
+
+        .user-badge.user {
+            background: var(--user-gradient);
         }
 
         .theme-toggle {
@@ -336,6 +365,16 @@
             font-size: 0.9em;
         }
 
+        .permission-warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            border-left: 4px solid #ffc107;
+        }
+
         /* Data Display */
         .data-section {
             background: var(--card-bg);
@@ -396,6 +435,7 @@
         .item-actions {
             display: flex;
             gap: 5px;
+            flex-wrap: wrap;
         }
 
         /* Status indicators */
@@ -464,6 +504,24 @@
             background: #f8d7da;
             color: #721c24;
             border-right-color: #dc3545;
+        }
+
+        .log-entry.auto_checkin {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-right-color: #17a2b8;
+        }
+
+        .log-entry.auto_checkout {
+            background: #f8d7da;
+            color: #721c24;
+            border-right-color: #dc3545;
+        }
+
+        .log-entry.location_update {
+            background: #e2e3e5;
+            color: #383d41;
+            border-right-color: #6c757d;
         }
 
         /* Notifications */
@@ -568,6 +626,11 @@
             .data-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .item-actions {
+                flex-direction: column;
+                gap: 5px;
+            }
         }
 
         /* Dark theme map styles */
@@ -625,6 +688,19 @@
             50% { opacity: 0.5; }
             100% { opacity: 1; }
         }
+
+        /* Hidden sections for limited users */
+        .section-hidden {
+            display: none !important;
+        }
+
+        .demo-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body data-theme="light">
@@ -634,7 +710,7 @@
     <div class="login-container" id="loginScreen">
         <div class="login-card">
             <h1>🔐 تسجيل الدخول</h1>
-            <p style="margin-bottom: 30px; color: var(--text-secondary);">لوحة التحكم الإدارية</p>
+            <p style="margin-bottom: 30px; color: var(--text-secondary);">نظام إدارة الحضور والانصراف</p>
             
             <div class="form-group">
                 <label>اسم المستخدم</label>
@@ -648,10 +724,10 @@
             
             <button class="btn" onclick="login()">دخول</button>
             
-            <div style="margin-top: 20px; padding: 15px; background: #e3f2fd; border-radius: 8px; font-size: 0.9em;">
-                <strong>معلومات تجريبية:</strong><br>
-                المستخدم: admin<br>
-                كلمة المرور: admin123
+            <div class="demo-info">
+                <strong>حسابات تجريبية:</strong><br>
+                مدير: admin / admin123<br>
+                مستخدم: user1 / user123
             </div>
         </div>
     </div>
@@ -661,12 +737,13 @@
         <!-- Top Bar -->
         <div class="top-bar">
             <div class="logo-section">
-                <h1>🎛️ لوحة التحكم المتقدمة</h1>
-                <p style="color: var(--text-secondary);">إدارة شاملة للمراكز والأفراد <span class="real-time-indicator"></span></p>
+                <h1>🎛️ لوحة التحكم</h1>
+                <p style="color: var(--text-secondary);">إدارة المراكز والأفراد <span class="real-time-indicator"></span></p>
             </div>
             
             <div class="user-section">
-                <span id="welcomeMessage">مرحباً، admin</span>
+                <div class="user-badge" id="userRoleBadge">مستخدم</div>
+                <span id="welcomeMessage">مرحباً</span>
                 <button class="theme-toggle" onclick="toggleTheme()" title="تغيير السمة">🌙</button>
                 <button class="btn btn-danger btn-small" onclick="logout()">خروج</button>
             </div>
@@ -704,12 +781,12 @@
             <!-- Sidebar with Collapsible Sections -->
             <div class="sidebar">
                 <!-- Add Center Section -->
-                <div class="sidebar-section">
+                <div class="sidebar-section" id="addCenterSection">
                     <div class="section-header" onclick="toggleSection('centerSection')">
                         <span>🏢 إضافة مركز جديد</span>
                         <span class="toggle-icon">▼</span>
                     </div>
-                    <div class="section-content" id="centerSection">
+                    <div class="section-content collapsed" id="centerSection">
                         <div class="section-tip">
                             💡 انقر على الخريطة لتحديد الموقع
                         </div>
@@ -735,12 +812,16 @@
                 </div>
 
                 <!-- Add Employee Section -->
-                <div class="sidebar-section">
+                <div class="sidebar-section" id="addEmployeeSection">
                     <div class="section-header" onclick="toggleSection('employeeSection')">
                         <span>👤 إضافة فرد جديد</span>
                         <span class="toggle-icon">▼</span>
                     </div>
-                    <div class="section-content" id="employeeSection">
+                    <div class="section-content collapsed" id="employeeSection">
+                        <div class="permission-warning" id="employeePermissionWarning" style="display: none;">
+                            ⚠️ يمكنك إضافة أفراد في المراكز المسموحة لك فقط
+                        </div>
+                        
                         <div class="form-group">
                             <label>اسم الفرد</label>
                             <input type="text" id="employeeName" placeholder="أدخل اسم الفرد">
@@ -790,7 +871,7 @@
                     <h2 class="section-title">📊 إدارة البيانات</h2>
                     <div class="data-grid">
                         <div>
-                            <h3 style="color: var(--text-color); margin-bottom: 15px;">المراكز المضافة</h3>
+                            <h3 style="color: var(--text-color); margin-bottom: 15px;">المراكز المتاحة</h3>
                             <div id="centersList"></div>
                         </div>
                         <div>
@@ -876,16 +957,16 @@
         let supabase;
         let map;
         let currentUser = null;
-        let allEmployees = [];
-        let allCenters = [];
+        let userPermissions = null;
+        let allowedCenters = [];
+        let allowedEmployees = [];
         let currentEditingEmployee = null;
         let currentEditingCenter = null;
 
         // Session Management (in-memory storage)
-        const SESSION_KEY = 'dashboard_session';
         let sessionData = {
             isLoggedIn: false,
-            username: null,
+            user: null,
             loginTime: null
         };
 
@@ -919,11 +1000,18 @@
 
         // Initialize Section States
         function initializeSections() {
-            // Set initial states for collapsible sections
-            document.getElementById('centerSection').classList.add('collapsed');
-            document.getElementById('employeeSection').classList.add('collapsed');
-            document.querySelector('#centerSection').parentElement.querySelector('.section-header').classList.add('collapsed');
-            document.querySelector('#employeeSection').parentElement.querySelector('.section-header').classList.add('collapsed');
+            const centerSection = document.getElementById('centerSection');
+            const employeeSection = document.getElementById('employeeSection');
+            
+            if (centerSection) {
+                centerSection.classList.add('collapsed');
+                centerSection.parentElement.querySelector('.section-header').classList.add('collapsed');
+            }
+            
+            if (employeeSection) {
+                employeeSection.classList.add('collapsed');
+                employeeSection.parentElement.querySelector('.section-header').classList.add('collapsed');
+            }
         }
 
         // Toggle Section Visibility
@@ -958,7 +1046,7 @@
         }
 
         // Authentication Functions
-        function login() {
+        async function login() {
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
 
@@ -967,20 +1055,35 @@
                 return;
             }
 
-            // Simple demo authentication
-            if (username === 'admin' && password === 'admin123') {
-                sessionData = {
-                    isLoggedIn: true,
-                    username: username,
-                    loginTime: new Date().toISOString()
-                };
-                
-                showNotification('تم تسجيل الدخول بنجاح! 🎉', 'success');
-                setTimeout(() => {
-                    showDashboard();
-                }, 1000);
-            } else {
-                showNotification('اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
+            try {
+                const { data, error } = await supabase.rpc('authenticate_user', {
+                    user_username: username,
+                    user_password: password
+                });
+
+                if (error) throw error;
+
+                const result = data;
+                if (result.success) {
+                    sessionData = {
+                        isLoggedIn: true,
+                        user: result.user,
+                        loginTime: new Date().toISOString()
+                    };
+                    
+                    currentUser = result.user;
+                    userPermissions = result.user.permissions;
+                    
+                    showNotification('تم تسجيل الدخول بنجاح! 🎉', 'success');
+                    setTimeout(() => {
+                        showDashboard();
+                    }, 1000);
+                } else {
+                    showNotification('❌ ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('خطأ في تسجيل الدخول:', error);
+                showNotification('حدث خطأ في تسجيل الدخول', 'error');
             }
         }
 
@@ -988,9 +1091,14 @@
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 sessionData = {
                     isLoggedIn: false,
-                    username: null,
+                    user: null,
                     loginTime: null
                 };
+                
+                currentUser = null;
+                userPermissions = null;
+                allowedCenters = [];
+                allowedEmployees = [];
                 
                 document.getElementById('loginScreen').style.display = 'flex';
                 document.getElementById('dashboard').classList.remove('active');
@@ -1003,10 +1111,12 @@
             }
         }
 
-        function showDashboard() {
+        async function showDashboard() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('dashboard').classList.add('active');
-            document.getElementById('welcomeMessage').textContent = `مرحباً، ${sessionData.username}`;
+            
+            // Update UI based on user role and permissions
+            updateUIForUser();
             
             // Initialize dashboard with delay to ensure proper loading
             setTimeout(() => {
@@ -1016,6 +1126,51 @@
                     setupRealTimeUpdates();
                 }, 1000);
             }, 500);
+        }
+
+        function updateUIForUser() {
+            const welcomeMsg = document.getElementById('welcomeMessage');
+            const userRoleBadge = document.getElementById('userRoleBadge');
+            const userSection = document.querySelector('.user-section');
+            
+            welcomeMsg.textContent = `مرحباً، ${currentUser.full_name}`;
+            
+            // Update role badge
+            if (currentUser.role === 'admin') {
+                userRoleBadge.textContent = '👨‍💼 مدير';
+                userRoleBadge.className = 'user-badge admin';
+                
+                // Add admin management link
+                const adminLink = document.createElement('a');
+                adminLink.href = 'admin-users.html';
+                adminLink.target = '_blank';
+                adminLink.className = 'btn btn-admin btn-small';
+                adminLink.textContent = '👥 إدارة المستخدمين';
+                userSection.insertBefore(adminLink, userSection.children[userSection.children.length - 2]);
+            } else {
+                userRoleBadge.textContent = '👤 مستخدم';
+                userRoleBadge.className = 'user-badge user';
+            }
+            
+            // Show/hide sections based on permissions
+            updateSectionsVisibility();
+        }
+
+        function updateSectionsVisibility() {
+            const addCenterSection = document.getElementById('addCenterSection');
+            const addEmployeeSection = document.getElementById('addEmployeeSection');
+            const employeePermissionWarning = document.getElementById('employeePermissionWarning');
+            
+            // Hide sections if no permission
+            if (!userPermissions.can_add_centers) {
+                addCenterSection.classList.add('section-hidden');
+            }
+            
+            if (!userPermissions.can_add_employees) {
+                addEmployeeSection.classList.add('section-hidden');
+            } else if (currentUser.role !== 'admin') {
+                employeePermissionWarning.style.display = 'block';
+            }
         }
 
         // Theme Management
@@ -1036,12 +1191,11 @@
 
         // Map Functions
         function initializeMap() {
-        // تفعيل دعم النصوص العربية RTL
-        mapboxgl.setRTLTextPlugin(
-            'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js',
-            null,
-            true
-        );
+            mapboxgl.setRTLTextPlugin(
+                'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js',
+                null,
+                true
+            );
 
             try {
                 map = new mapboxgl.Map({
@@ -1052,17 +1206,18 @@
                     locale: 'ar'
                 });
 
-                // Add navigation controls
                 map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
-                // Add click event for center selection
-                map.on('click', function(e) {
-                    const coordinates = e.lngLat;
-                    document.getElementById('centerLng').value = coordinates.lng.toFixed(6);
-                    document.getElementById('centerLat').value = coordinates.lat.toFixed(6);
-                    
-                    showNotification(`تم تحديد الموقع: ${coordinates.lat.toFixed(4)}, ${coordinates.lng.toFixed(4)}`, 'success');
-                });
+                // Add click event for center selection (only if user can add centers)
+                if (userPermissions && userPermissions.can_add_centers) {
+                    map.on('click', function(e) {
+                        const coordinates = e.lngLat;
+                        document.getElementById('centerLng').value = coordinates.lng.toFixed(6);
+                        document.getElementById('centerLat').value = coordinates.lat.toFixed(6);
+                        
+                        showNotification(`تم تحديد الموقع: ${coordinates.lat.toFixed(4)}, ${coordinates.lng.toFixed(4)}`, 'success');
+                    });
+                }
 
                 map.on('load', function() {
                     console.log('Map loaded successfully');
@@ -1099,7 +1254,6 @@
                             duration: 2000
                         });
 
-                        // Add marker for user location with proper Arabic text
                         new mapboxgl.Marker({ color: '#ff6b6b' })
                             .setLngLat([longitude, latitude])
                             .setPopup(new mapboxgl.Popup({ className: 'arabic-popup' }).setHTML('<div style="direction: rtl; text-align: center; font-family: \'Segoe UI\', Arial, sans-serif;"><strong>📍 موقعك الحالي</strong></div>'))
@@ -1201,199 +1355,16 @@
             });
         }
 
-        // Edit Functions
-        function editEmployee(employeeId) {
-            currentEditingEmployee = allEmployees.find(emp => emp.id === employeeId);
-            if (!currentEditingEmployee) return;
-
-            document.getElementById('editEmployeeName').value = currentEditingEmployee.name;
-            document.getElementById('editEmployeePhone').value = currentEditingEmployee.phone;
-            document.getElementById('editEmployeePosition').value = currentEditingEmployee.position || '';
-            document.getElementById('editEmployeeStatus').value = currentEditingEmployee.status;
-            
-            // Populate center dropdown
-            const centerSelect = document.getElementById('editEmployeeCenter');
-            centerSelect.innerHTML = '<option value="">اختر المركز</option>';
-            allCenters.forEach(center => {
-                const option = document.createElement('option');
-                option.value = center.id;
-                option.textContent = center.name;
-                if (center.id === currentEditingEmployee.center_id) {
-                    option.selected = true;
-                }
-                centerSelect.appendChild(option);
-            });
-
-            showModal('editEmployeeModal');
-        }
-
-        function editCenter(centerId) {
-            currentEditingCenter = allCenters.find(center => center.id === centerId);
-            if (!currentEditingCenter) return;
-
-            document.getElementById('editCenterName').value = currentEditingCenter.name;
-            document.getElementById('editCenterLng').value = currentEditingCenter.longitude;
-            document.getElementById('editCenterLat').value = currentEditingCenter.latitude;
-            document.getElementById('editCenterRadius').value = currentEditingCenter.radius;
-
-            showModal('editCenterModal');
-        }
-
-        async function updateEmployee() {
-            if (!currentEditingEmployee) return;
-
-            const name = document.getElementById('editEmployeeName').value.trim();
-            const phone = document.getElementById('editEmployeePhone').value.trim();
-            const position = document.getElementById('editEmployeePosition').value.trim();
-            const status = document.getElementById('editEmployeeStatus').value;
-            const centerId = document.getElementById('editEmployeeCenter').value;
-
-            if (!name || !phone) {
-                showNotification('يرجى ملء الحقول المطلوبة', 'warning');
-                return;
-            }
-
-            try {
-                const { error } = await supabase
-                    .from('employees')
-                    .update({
-                        name: name,
-                        phone: phone,
-                        position: position,
-                        status: status,
-                        center_id: centerId || null
-                    })
-                    .eq('id', currentEditingEmployee.id);
-
-                if (error) throw error;
-
-                closeModal('editEmployeeModal');
-                await loadData();
-                showNotification('تم تحديث بيانات الفرد بنجاح ✅', 'success');
-            } catch (error) {
-                console.error('Error updating employee:', error);
-                showNotification('حدث خطأ في تحديث البيانات', 'error');
-            }
-        }
-
-        async function updateCenter() {
-            if (!currentEditingCenter) return;
-
-            const name = document.getElementById('editCenterName').value.trim();
-            const lng = parseFloat(document.getElementById('editCenterLng').value);
-            const lat = parseFloat(document.getElementById('editCenterLat').value);
-            const radius = parseInt(document.getElementById('editCenterRadius').value);
-
-            if (!name || !lng || !lat || !radius) {
-                showNotification('يرجى ملء جميع الحقول', 'warning');
-                return;
-            }
-
-            try {
-                const { error } = await supabase
-                    .from('centers')
-                    .update({
-                        name: name,
-                        longitude: lng,
-                        latitude: lat,
-                        radius: radius
-                    })
-                    .eq('id', currentEditingCenter.id);
-
-                if (error) throw error;
-
-                closeModal('editCenterModal');
-                await loadData();
-                showNotification('تم تحديث بيانات المركز بنجاح ✅', 'success');
-            } catch (error) {
-                console.error('Error updating center:', error);
-                showNotification('حدث خطأ في تحديث البيانات', 'error');
-            }
-        }
-
-        // CRUD Functions
-        async function addCenter() {
-            const name = document.getElementById('centerName').value.trim();
-            const lng = parseFloat(document.getElementById('centerLng').value);
-            const lat = parseFloat(document.getElementById('centerLat').value);
-            const radius = parseInt(document.getElementById('centerRadius').value);
-
-            if (!name || !lng || !lat || !radius) {
-                showNotification('يرجى ملء جميع الحقول واختيار موقع على الخريطة', 'warning');
-                return;
-            }
-
-            try {
-                const { data, error } = await supabase
-                    .from('centers')
-                    .insert([{ name, longitude: lng, latitude: lat, radius }]);
-
-                if (error) throw error;
-
-                // Clear form
-                document.getElementById('centerName').value = '';
-                document.getElementById('centerLng').value = '';
-                document.getElementById('centerLat').value = '';
-                document.getElementById('centerRadius').value = '100';
-
-                await loadData();
-                showNotification('تم إضافة المركز بنجاح ✅', 'success');
-            } catch (error) {
-                console.error('Error adding center:', error);
-                showNotification('حدث خطأ في إضافة المركز', 'error');
-            }
-        }
-
-        async function addEmployee() {
-            const name = document.getElementById('employeeName').value.trim();
-            const phone = document.getElementById('employeePhone').value.trim();
-            const password = document.getElementById('employeePassword').value.trim();
-            const position = document.getElementById('employeePosition').value.trim();
-            const centerId = document.getElementById('employeeCenter').value;
-
-            if (!name || !phone || !password || !centerId) {
-                showNotification('يرجى ملء جميع الحقول المطلوبة', 'warning');
-                return;
-            }
-
-            if (password.length < 6) {
-                showNotification('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'warning');
-                return;
-            }
-
-            try {
-                const { data, error } = await supabase.rpc('add_employee', {
-                    employee_name: name,
-                    employee_phone: phone,
-                    employee_password: password,
-                    employee_position: position || 'فرد',
-                    employee_center_id: parseInt(centerId)
-                });
-
-                if (error) throw error;
-
-                const result = data;
-                if (result.success) {
-                    // Clear form
-                    document.getElementById('employeeName').value = '';
-                    document.getElementById('employeePhone').value = '';
-                    document.getElementById('employeePassword').value = '';
-                    document.getElementById('employeePosition').value = '';
-                    document.getElementById('employeeCenter').value = '';
-
-                    await loadData();
-                    showNotification(`✅ تم إضافة الفرد بنجاح!`, 'success');
-                } else {
-                    showNotification('❌ ' + result.error, 'error');
-                }
-            } catch (error) {
-                console.error('Error adding employee:', error);
-                showNotification('حدث خطأ في إضافة الفرد: ' + error.message, 'error');
-            }
-        }
-
-        // Load Data Functions
+        // Data Loading Functions
         async function loadData() {
+            if (currentUser.role === 'admin') {
+                await loadAllData();
+            } else {
+                await loadUserData();
+            }
+        }
+
+        async function loadAllData() {
             await Promise.all([
                 loadCenters(),
                 loadEmployees(),
@@ -1402,14 +1373,54 @@
                 refreshEmployeeLocations()
             ]);
             
-            // Only update map markers if map is ready
+            allowedCenters = [...allCenters];
+            allowedEmployees = [...allEmployees];
+            
             if (map && map.isStyleLoaded()) {
                 updateMapMarkers();
-            } else {
-                // Wait for map to load then update
-                if (map) {
-                    map.on('load', updateMapMarkers);
-                }
+            }
+        }
+
+        async function loadUserData() {
+            await Promise.all([
+                loadAllowedCenters(),
+                loadAllowedEmployees(),
+                updateStats(),
+                refreshEmployeeLocations()
+            ]);
+            
+            if (map && map.isStyleLoaded()) {
+                updateMapMarkers();
+            }
+        }
+
+        async function loadAllowedCenters() {
+            try {
+                const { data: centers, error } = await supabase.rpc('get_user_allowed_centers', {
+                    user_id: currentUser.id
+                });
+
+                if (error) throw error;
+
+                allowedCenters = centers || [];
+                displayCenters(allowedCenters);
+            } catch (error) {
+                console.error('Error loading allowed centers:', error);
+            }
+        }
+
+        async function loadAllowedEmployees() {
+            try {
+                const { data: employees, error } = await supabase.rpc('get_user_allowed_employees', {
+                    user_id: currentUser.id
+                });
+
+                if (error) throw error;
+
+                allowedEmployees = employees || [];
+                displayEmployees(allowedEmployees);
+            } catch (error) {
+                console.error('Error loading allowed employees:', error);
             }
         }
 
@@ -1423,39 +1434,7 @@
                 if (error) throw error;
 
                 allCenters = centers || [];
-                
-                const centersList = document.getElementById('centersList');
-                const centerSelect = document.getElementById('employeeCenter');
-                
-                centersList.innerHTML = '';
-                centerSelect.innerHTML = '<option value="">اختر المركز</option>';
-
-                if (centers && centers.length > 0) {
-                    centers.forEach(center => {
-                        // Add to centers list with edit button
-                        const centerDiv = document.createElement('div');
-                        centerDiv.className = 'item-card';
-                        centerDiv.innerHTML = `
-                            <div class="item-info">
-                                <strong>${center.name}</strong>
-                                <small>نطاق: ${center.radius} متر • إحداثيات: ${center.latitude.toFixed(4)}, ${center.longitude.toFixed(4)}</small>
-                            </div>
-                            <div class="item-actions">
-                                <button class="btn btn-success btn-small" onclick="editCenter(${center.id})">تعديل</button>
-                                <button class="btn btn-danger btn-small" onclick="deleteCenter(${center.id})">حذف</button>
-                            </div>
-                        `;
-                        centersList.appendChild(centerDiv);
-
-                        // Add to select dropdown
-                        const option = document.createElement('option');
-                        option.value = center.id;
-                        option.textContent = center.name;
-                        centerSelect.appendChild(option);
-                    });
-                } else {
-                    centersList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">لا توجد مراكز مضافة بعد</p>';
-                }
+                displayCenters(allCenters);
             } catch (error) {
                 console.error('Error loading centers:', error);
             }
@@ -1471,46 +1450,119 @@
                 if (error) throw error;
 
                 allEmployees = employees || [];
-                
-                const employeesList = document.getElementById('employeesList');
-                employeesList.innerHTML = '';
-
-                if (employees && employees.length > 0) {
-                    employees.forEach(employee => {
-                        const employeeDiv = document.createElement('div');
-                        employeeDiv.className = `item-card employee-card ${employee.status}`;
-                        employeeDiv.innerHTML = `
-                            <div class="item-info">
-                                <strong>${employee.name}</strong>
-                                <small>${employee.position || 'موظف'} • 📱 ${employee.phone}</small><br>
-                                <small>المركز: ${employee.centers?.name || 'غير محدد'}</small>
-                            </div>
-                            <div class="item-actions">
-                                <span class="status-badge status-${employee.status}">
-                                    ${employee.status === 'active' ? '🟢 نشط' : '🔴 غير نشط'}
-                                </span>
-                                <button class="btn btn-success btn-small" onclick="editEmployee(${employee.id})">تعديل</button>
-                                <button class="btn btn-danger btn-small" onclick="deleteEmployee(${employee.id})">حذف</button>
-                            </div>
-                        `;
-                        employeesList.appendChild(employeeDiv);
-                    });
-                } else {
-                    employeesList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">لا توجد أفراد مضافين بعد</p>';
-                }
+                displayEmployees(allEmployees);
             } catch (error) {
                 console.error('Error loading employees:', error);
             }
         }
 
+        function displayCenters(centers) {
+            const centersList = document.getElementById('centersList');
+            const centerSelect = document.getElementById('employeeCenter');
+            
+            centersList.innerHTML = '';
+            centerSelect.innerHTML = '<option value="">اختر المركز</option>';
+
+            if (centers && centers.length > 0) {
+                centers.forEach(center => {
+                    // Display in list
+                    const centerDiv = document.createElement('div');
+                    centerDiv.className = 'item-card';
+                    
+                    let actionsHtml = '';
+                    if (userPermissions.can_edit_centers) {
+                        actionsHtml += `<button class="btn btn-success btn-small" onclick="editCenter(${center.id || center.center_id})">تعديل</button>`;
+                    }
+                    if (userPermissions.can_delete_centers) {
+                        actionsHtml += `<button class="btn btn-danger btn-small" onclick="deleteCenter(${center.id || center.center_id})">حذف</button>`;
+                    }
+                    
+                    const centerName = center.name || center.center_name;
+                    const centerLat = center.latitude;
+                    const centerLng = center.longitude;
+                    const centerRadius = center.radius;
+                    
+                    centerDiv.innerHTML = `
+                        <div class="item-info">
+                            <strong>${centerName}</strong>
+                            <small>نطاق: ${centerRadius} متر • إحداثيات: ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)}</small>
+                        </div>
+                        <div class="item-actions">
+                            ${actionsHtml}
+                        </div>
+                    `;
+                    centersList.appendChild(centerDiv);
+
+                    // Add to select dropdown
+                    const option = document.createElement('option');
+                    option.value = center.id || center.center_id;
+                    option.textContent = centerName;
+                    centerSelect.appendChild(option);
+                });
+            } else {
+                centersList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">لا توجد مراكز متاحة</p>';
+            }
+        }
+
+        function displayEmployees(employees) {
+            const employeesList = document.getElementById('employeesList');
+            employeesList.innerHTML = '';
+
+            if (employees && employees.length > 0) {
+                employees.forEach(employee => {
+                    const employeeDiv = document.createElement('div');
+                    employeeDiv.className = `item-card employee-card ${employee.status}`;
+                    
+                    let actionsHtml = `
+                        <span class="status-badge status-${employee.status}">
+                            ${employee.status === 'active' ? '🟢 نشط' : '🔴 غير نشط'}
+                        </span>
+                    `;
+                    
+                    if (userPermissions.can_edit_employees) {
+                        actionsHtml += `<button class="btn btn-success btn-small" onclick="editEmployee(${employee.id || employee.employee_id})">تعديل</button>`;
+                    }
+                    if (userPermissions.can_delete_employees) {
+                        actionsHtml += `<button class="btn btn-danger btn-small" onclick="deleteEmployee(${employee.id || employee.employee_id})">حذف</button>`;
+                    }
+                    
+                    const empName = employee.name || employee.employee_name;
+                    const empPhone = employee.phone;
+                    const empPosition = employee.position;
+                    const empCenterName = employee.centers?.name || employee.center_name || 'غير محدد';
+                    
+                    employeeDiv.innerHTML = `
+                        <div class="item-info">
+                            <strong>${empName}</strong>
+                            <small>${empPosition || 'موظف'} • 📱 ${empPhone}</small><br>
+                            <small>المركز: ${empCenterName}</small>
+                        </div>
+                        <div class="item-actions">
+                            ${actionsHtml}
+                        </div>
+                    `;
+                    employeesList.appendChild(employeeDiv);
+                });
+            } else {
+                employeesList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">لا توجد أفراد متاحين</p>';
+            }
+        }
+
         async function loadLogs() {
             try {
-                const { data: logs, error } = await supabase
+                let query = supabase
                     .from('logs')
                     .select(`*, employees (name), centers (name)`)
                     .order('created_at', { ascending: false })
                     .limit(100);
 
+                // Filter logs for regular users
+                if (currentUser.role !== 'admin' && allowedEmployees.length > 0) {
+                    const employeeIds = allowedEmployees.map(emp => emp.employee_id || emp.id);
+                    query = query.in('employee_id', employeeIds);
+                }
+
+                const { data: logs, error } = await query;
                 if (error) throw error;
 
                 const logsContainer = document.getElementById('activityLogs');
@@ -1539,9 +1591,27 @@
 
         async function refreshEmployeeLocations() {
             try {
+                let employeeIds = [];
+                
+                if (currentUser.role === 'admin') {
+                    // Admin sees all employees
+                    const { data: allEmps } = await supabase.from('employees').select('id');
+                    employeeIds = allEmps ? allEmps.map(emp => emp.id) : [];
+                } else {
+                    // Regular user sees only allowed employees
+                    employeeIds = allowedEmployees.map(emp => emp.employee_id || emp.id);
+                }
+
+                if (employeeIds.length === 0) {
+                    document.getElementById('employeeLocations').innerHTML = 
+                        '<p style="color: var(--text-secondary); text-align: center;">لا توجد مواقع متاحة</p>';
+                    return;
+                }
+
                 const { data: latestLogs, error } = await supabase
                     .from('logs')
                     .select(`*, employees (id, name, status, phone), centers (name)`)
+                    .in('employee_id', employeeIds)
                     .not('latitude', 'is', null)
                     .not('longitude', 'is', null)
                     .order('created_at', { ascending: false });
@@ -1609,23 +1679,344 @@
 
         async function updateStats() {
             try {
-                const [employeesCount, activeCount, centersCount, logsCount] = await Promise.all([
-                    supabase.from('employees').select('*', { count: 'exact', head: true }),
-                    supabase.from('employees').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-                    supabase.from('centers').select('*', { count: 'exact', head: true }),
-                    supabase.from('logs').select('*', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().split('T')[0])
-                ]);
+                let employeesCount, activeCount, centersCount, logsCount;
 
-                document.getElementById('totalEmployees').textContent = employeesCount.count || 0;
-                document.getElementById('activeEmployees').textContent = activeCount.count || 0;
-                document.getElementById('totalCenters').textContent = centersCount.count || 0;
-                document.getElementById('todayLogs').textContent = logsCount.count || 0;
+                if (currentUser.role === 'admin') {
+                    // Admin sees all stats
+                    const [empRes, activeRes, centerRes, logsRes] = await Promise.all([
+                        supabase.from('employees').select('*', { count: 'exact', head: true }),
+                        supabase.from('employees').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+                        supabase.from('centers').select('*', { count: 'exact', head: true }),
+                        supabase.from('logs').select('*', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().split('T')[0])
+                    ]);
+                    
+                    employeesCount = empRes.count || 0;
+                    activeCount = activeRes.count || 0;
+                    centersCount = centerRes.count || 0;
+                    logsCount = logsRes.count || 0;
+                } else {
+                    // Regular user sees limited stats
+                    employeesCount = allowedEmployees.length;
+                    activeCount = allowedEmployees.filter(emp => emp.status === 'active').length;
+                    centersCount = allowedCenters.length;
+                    
+                    // Count logs for allowed employees
+                    const employeeIds = allowedEmployees.map(emp => emp.employee_id || emp.id);
+                    if (employeeIds.length > 0) {
+                        const { count } = await supabase
+                            .from('logs')
+                            .select('*', { count: 'exact', head: true })
+                            .in('employee_id', employeeIds)
+                            .gte('created_at', new Date().toISOString().split('T')[0]);
+                        logsCount = count || 0;
+                    } else {
+                        logsCount = 0;
+                    }
+                }
+
+                document.getElementById('totalEmployees').textContent = employeesCount;
+                document.getElementById('activeEmployees').textContent = activeCount;
+                document.getElementById('totalCenters').textContent = centersCount;
+                document.getElementById('todayLogs').textContent = logsCount;
             } catch (error) {
                 console.error('Error updating stats:', error);
             }
         }
 
-        // Map Functions (enhanced for Arabic support)
+        // CRUD Functions
+        async function addCenter() {
+            if (!userPermissions.can_add_centers) {
+                showNotification('ليس لديك صلاحية لإضافة المراكز', 'warning');
+                return;
+            }
+
+            const name = document.getElementById('centerName').value.trim();
+            const lng = parseFloat(document.getElementById('centerLng').value);
+            const lat = parseFloat(document.getElementById('centerLat').value);
+            const radius = parseInt(document.getElementById('centerRadius').value);
+
+            if (!name || !lng || !lat || !radius) {
+                showNotification('يرجى ملء جميع الحقول واختيار موقع على الخريطة', 'warning');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('centers')
+                    .insert([{ name, longitude: lng, latitude: lat, radius }])
+                    .select();
+
+                if (error) throw error;
+
+                // Add permission for this user to access the new center if regular user
+                if (currentUser.role !== 'admin' && data[0]) {
+                    await supabase
+                        .from('user_center_permissions')
+                        .insert([{
+                            user_id: currentUser.id,
+                            center_id: data[0].id,
+                            can_view: true,
+                            can_manage: true
+                        }]);
+                }
+
+                // Clear form
+                document.getElementById('centerName').value = '';
+                document.getElementById('centerLng').value = '';
+                document.getElementById('centerLat').value = '';
+                document.getElementById('centerRadius').value = '100';
+
+                await loadData();
+                showNotification('تم إضافة المركز بنجاح ✅', 'success');
+            } catch (error) {
+                console.error('Error adding center:', error);
+                showNotification('حدث خطأ في إضافة المركز', 'error');
+            }
+        }
+
+        async function addEmployee() {
+            if (!userPermissions.can_add_employees) {
+                showNotification('ليس لديك صلاحية لإضافة الأفراد', 'warning');
+                return;
+            }
+
+            const name = document.getElementById('employeeName').value.trim();
+            const phone = document.getElementById('employeePhone').value.trim();
+            const password = document.getElementById('employeePassword').value.trim();
+            const position = document.getElementById('employeePosition').value.trim();
+            const centerId = document.getElementById('employeeCenter').value;
+
+            if (!name || !phone || !password || !centerId) {
+                showNotification('يرجى ملء جميع الحقول المطلوبة', 'warning');
+                return;
+            }
+
+            if (password.length < 6) {
+                showNotification('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'warning');
+                return;
+            }
+
+            // Check if user has permission for this center
+            if (currentUser.role !== 'admin') {
+                const hasPermission = allowedCenters.some(center => 
+                    (center.center_id || center.id) == centerId && center.can_manage !== false
+                );
+
+                if (!hasPermission) {
+                    showNotification('ليس لديك صلاحية لإضافة أفراد في هذا المركز', 'warning');
+                    return;
+                }
+            }
+
+            try {
+                const { data, error } = await supabase.rpc('add_employee', {
+                    employee_name: name,
+                    employee_phone: phone,
+                    employee_password: password,
+                    employee_position: position || 'فرد',
+                    employee_center_id: parseInt(centerId)
+                });
+
+                if (error) throw error;
+
+                const result = data;
+                if (result.success) {
+                    // Clear form
+                    document.getElementById('employeeName').value = '';
+                    document.getElementById('employeePhone').value = '';
+                    document.getElementById('employeePassword').value = '';
+                    document.getElementById('employeePosition').value = '';
+                    document.getElementById('employeeCenter').value = '';
+
+                    await loadData();
+                    showNotification(`✅ تم إضافة الفرد بنجاح!`, 'success');
+                } else {
+                    showNotification('❌ ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error adding employee:', error);
+                showNotification('حدث خطأ في إضافة الفرد: ' + error.message, 'error');
+            }
+        }
+
+        // Edit Functions
+        function editEmployee(employeeId) {
+            if (!userPermissions.can_edit_employees) {
+                showNotification('ليس لديك صلاحية لتعديل الأفراد', 'warning');
+                return;
+            }
+
+            const employee = (currentUser.role === 'admin' ? allEmployees : allowedEmployees)
+                .find(emp => (emp.id || emp.employee_id) === employeeId);
+            
+            if (!employee) return;
+
+            currentEditingEmployee = employee;
+
+            document.getElementById('editEmployeeName').value = employee.name || employee.employee_name;
+            document.getElementById('editEmployeePhone').value = employee.phone;
+            document.getElementById('editEmployeePosition').value = employee.position || '';
+            document.getElementById('editEmployeeStatus').value = employee.status;
+            
+            // Populate center dropdown
+            const centerSelect = document.getElementById('editEmployeeCenter');
+            centerSelect.innerHTML = '<option value="">اختر المركز</option>';
+            
+            const centersToShow = currentUser.role === 'admin' ? allCenters : allowedCenters;
+            centersToShow.forEach(center => {
+                const option = document.createElement('option');
+                option.value = center.id || center.center_id;
+                option.textContent = center.name || center.center_name;
+                if ((center.id || center.center_id) === employee.center_id) {
+                    option.selected = true;
+                }
+                centerSelect.appendChild(option);
+            });
+
+            showModal('editEmployeeModal');
+        }
+
+        function editCenter(centerId) {
+            if (!userPermissions.can_edit_centers) {
+                showNotification('ليس لديك صلاحية لتعديل المراكز', 'warning');
+                return;
+            }
+
+            const center = (currentUser.role === 'admin' ? allCenters : allowedCenters)
+                .find(c => (c.id || c.center_id) === centerId);
+            
+            if (!center) return;
+
+            currentEditingCenter = center;
+
+            document.getElementById('editCenterName').value = center.name || center.center_name;
+            document.getElementById('editCenterLng').value = center.longitude;
+            document.getElementById('editCenterLat').value = center.latitude;
+            document.getElementById('editCenterRadius').value = center.radius;
+
+            showModal('editCenterModal');
+        }
+
+        async function updateEmployee() {
+            if (!currentEditingEmployee || !userPermissions.can_edit_employees) return;
+
+            const name = document.getElementById('editEmployeeName').value.trim();
+            const phone = document.getElementById('editEmployeePhone').value.trim();
+            const position = document.getElementById('editEmployeePosition').value.trim();
+            const status = document.getElementById('editEmployeeStatus').value;
+            const centerId = document.getElementById('editEmployeeCenter').value;
+
+            if (!name || !phone) {
+                showNotification('يرجى ملء الحقول المطلوبة', 'warning');
+                return;
+            }
+
+            try {
+                const { error } = await supabase
+                    .from('employees')
+                    .update({
+                        name: name,
+                        phone: phone,
+                        position: position,
+                        status: status,
+                        center_id: centerId || null
+                    })
+                    .eq('id', currentEditingEmployee.id || currentEditingEmployee.employee_id);
+
+                if (error) throw error;
+
+                closeModal('editEmployeeModal');
+                await loadData();
+                showNotification('تم تحديث بيانات الفرد بنجاح ✅', 'success');
+            } catch (error) {
+                console.error('Error updating employee:', error);
+                showNotification('حدث خطأ في تحديث البيانات', 'error');
+            }
+        }
+
+        async function updateCenter() {
+            if (!currentEditingCenter || !userPermissions.can_edit_centers) return;
+
+            const name = document.getElementById('editCenterName').value.trim();
+            const lng = parseFloat(document.getElementById('editCenterLng').value);
+            const lat = parseFloat(document.getElementById('editCenterLat').value);
+            const radius = parseInt(document.getElementById('editCenterRadius').value);
+
+            if (!name || !lng || !lat || !radius) {
+                showNotification('يرجى ملء جميع الحقول', 'warning');
+                return;
+            }
+
+            try {
+                const { error } = await supabase
+                    .from('centers')
+                    .update({
+                        name: name,
+                        longitude: lng,
+                        latitude: lat,
+                        radius: radius
+                    })
+                    .eq('id', currentEditingCenter.id || currentEditingCenter.center_id);
+
+                if (error) throw error;
+
+                closeModal('editCenterModal');
+                await loadData();
+                showNotification('تم تحديث بيانات المركز بنجاح ✅', 'success');
+            } catch (error) {
+                console.error('Error updating center:', error);
+                showNotification('حدث خطأ في تحديث البيانات', 'error');
+            }
+        }
+
+        // Delete Functions (Admin only)
+        async function deleteCenter(centerId) {
+            if (!userPermissions.can_delete_centers) {
+                showNotification('ليس لديك صلاحية لحذف المراكز', 'warning');
+                return;
+            }
+
+            if (confirm('هل أنت متأكد من حذف هذا المركز؟ سيتم حذف جميع المرتبطين به.')) {
+                try {
+                    const { error } = await supabase
+                        .from('centers')
+                        .delete()
+                        .eq('id', centerId);
+
+                    if (error) throw error;
+                    await loadData();
+                    showNotification('تم حذف المركز بنجاح ✅', 'success');
+                } catch (error) {
+                    console.error('Error deleting center:', error);
+                    showNotification('حدث خطأ في حذف المركز', 'error');
+                }
+            }
+        }
+
+        async function deleteEmployee(employeeId) {
+            if (!userPermissions.can_delete_employees) {
+                showNotification('ليس لديك صلاحية لحذف الأفراد', 'warning');
+                return;
+            }
+
+            if (confirm('هل أنت متأكد من الحذف؟')) {
+                try {
+                    const { error } = await supabase
+                        .from('employees')
+                        .delete()
+                        .eq('id', employeeId);
+
+                    if (error) throw error;
+                    await loadData();
+                    showNotification('تم الحذف بنجاح ✅', 'success');
+                } catch (error) {
+                    console.error('Error deleting employee:', error);
+                    showNotification('حدث خطأ في الحذف', 'error');
+                }
+            }
+        }
+
+        // Map Functions
         async function updateMapMarkers() {
             if (!map || !map.isStyleLoaded()) {
                 console.log('Map not ready yet...');
@@ -1639,20 +2030,19 @@
                 });
                 if (map.getSource('centers')) map.removeSource('centers');
 
-                const { data: centers, error } = await supabase.from('centers').select('*');
-                if (error) throw error;
+                const centersToShow = currentUser.role === 'admin' ? allCenters : allowedCenters;
 
-                if (centers && centers.length > 0) {
+                if (centersToShow && centersToShow.length > 0) {
                     const geojsonData = {
                         type: 'FeatureCollection',
-                        features: centers.map(center => ({
+                        features: centersToShow.map(center => ({
                             type: 'Feature',
                             geometry: {
                                 type: 'Point',
                                 coordinates: [center.longitude, center.latitude]
                             },
                             properties: {
-                                name: center.name,
+                                name: center.name || center.center_name,
                                 radius: center.radius
                             }
                         }))
@@ -1669,13 +2059,12 @@
                         source: 'centers',
                         paint: {
                             'circle-radius': 15,
-                            'circle-color': '#667eea',
+                            'circle-color': currentUser.role === 'admin' ? '#667eea' : '#4facfe',
                             'circle-stroke-width': 3,
                             'circle-stroke-color': '#ffffff'
                         }
                     });
 
-                    // Add Arabic labels with proper font support
                     map.addLayer({
                         id: 'center-labels',
                         type: 'symbol',
@@ -1696,7 +2085,6 @@
                         }
                     });
 
-                    // Add popups with improved Arabic text rendering
                     map.on('click', 'centers-layer', (e) => {
                         const coordinates = e.features[0].geometry.coordinates.slice();
                         const { name, radius } = e.features[0].properties;
@@ -1715,10 +2103,9 @@
                             .addTo(map);
                     });
 
-                    // Fit map bounds
-                    if (centers.length > 1) {
+                    if (centersToShow.length > 1) {
                         const bounds = new mapboxgl.LngLatBounds();
-                        centers.forEach(center => {
+                        centersToShow.forEach(center => {
                             bounds.extend([center.longitude, center.latitude]);
                         });
                         map.fitBounds(bounds, { padding: 50 });
@@ -1730,10 +2117,7 @@
         }
 
         function updateMapWithEmployees(employeeLocations) {
-            if (!map || !map.isStyleLoaded()) {
-                console.log('Map not ready for employee markers...');
-                return;
-            }
+            if (!map || !map.isStyleLoaded()) return;
 
             // Clear existing employee layers
             ['employees-layer', 'employee-labels'].forEach(layerId => {
@@ -1784,7 +2168,6 @@
                 }
             });
 
-            // Add Arabic employee labels with proper font support
             map.addLayer({
                 id: 'employee-labels',
                 type: 'symbol',
@@ -1805,7 +2188,6 @@
                 }
             });
 
-            // Add popups for employees with phone numbers and improved Arabic text
             map.on('click', 'employees-layer', (e) => {
                 const coordinates = e.features[0].geometry.coordinates.slice();
                 const properties = e.features[0].properties;
@@ -1829,7 +2211,6 @@
                     .addTo(map);
             });
 
-            // Change cursor on hover
             map.on('mouseenter', 'employees-layer', () => {
                 map.getCanvas().style.cursor = 'pointer';
             });
@@ -1879,7 +2260,10 @@
                 'in': '🟢 دخول',
                 'out': '🔴 خروج',
                 'move': '🟡 انتقال',
-                'out_of_range': '⚠️ خارج النطاق'
+                'out_of_range': '⚠️ خارج النطاق',
+                'auto_checkin': '🟢 دخول تلقائي',
+                'auto_checkout': '🔴 خروج تلقائي',
+                'location_update': '📍 تحديث موقع'
             };
             return actions[action] || action;
         }
@@ -1899,43 +2283,6 @@
             }, 5000);
         }
 
-        // Delete Functions
-        async function deleteCenter(centerId) {
-            if (confirm('هل أنت متأكد من حذف هذا المركز؟ سيتم حذف جميع المرتبطين به.')) {
-                try {
-                    const { error } = await supabase
-                        .from('centers')
-                        .delete()
-                        .eq('id', centerId);
-
-                    if (error) throw error;
-                    await loadData();
-                    showNotification('تم حذف المركز بنجاح ✅', 'success');
-                } catch (error) {
-                    console.error('Error deleting center:', error);
-                    showNotification('حدث خطأ في حذف المركز', 'error');
-                }
-            }
-        }
-
-        async function deleteEmployee(employeeId) {
-            if (confirm('هل أنت متأكد من الحذف؟')) {
-                try {
-                    const { error } = await supabase
-                        .from('employees')
-                        .delete()
-                        .eq('id', employeeId);
-
-                    if (error) throw error;
-                    await loadData();
-                    showNotification('تم الحذف بنجاح ✅', 'success');
-                } catch (error) {
-                    console.error('Error deleting employee:', error);
-                    showNotification('حدث خطأ في الحذف', 'error');
-                }
-            }
-        }
-
         // Real-time Updates
         function setupRealTimeUpdates() {
             supabase
@@ -1950,8 +2297,14 @@
             supabase
                 .channel('employees_channel')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'employees' }, () => {
-                    loadEmployees();
-                    updateStats();
+                    loadData();
+                })
+                .subscribe();
+
+            supabase
+                .channel('centers_channel')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'centers' }, () => {
+                    loadData();
                 })
                 .subscribe();
         }
@@ -1962,7 +2315,7 @@
                 updateStats();
                 refreshEmployeeLocations();
             }
-        }, 15000);
+        }, 30000);
 
         // Close modals when clicking outside
         window.onclick = function(event) {
