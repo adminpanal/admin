@@ -847,6 +847,75 @@
                         <button class="btn" onclick="addEmployee()">إضافة فرد</button>
                     </div>
                 </div>
+
+                <!-- Add User Section (Admin Only) -->
+                <div class="sidebar-section" id="addUserSection" style="display: none;">
+                    <div class="section-header" onclick="toggleSection('userSection')">
+                        <span>👥 إضافة مستخدم جديد</span>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="section-content collapsed" id="userSection">
+                        <div class="section-tip">
+                            👨‍💼 إنشاء حسابات جديدة لإدارة النظام
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>اسم المستخدم</label>
+                            <input type="text" id="newUsername" placeholder="اسم مستخدم فريد">
+                        </div>
+                        <div class="form-group">
+                            <label>الاسم الكامل</label>
+                            <input type="text" id="newUserFullName" placeholder="الاسم الكامل">
+                        </div>
+                        <div class="form-group">
+                            <label>كلمة المرور</label>
+                            <input type="password" id="newUserPassword" placeholder="كلمة مرور قوية (6+ أحرف)">
+                        </div>
+                        <div class="form-group">
+                            <label>البريد الإلكتروني</label>
+                            <input type="email" id="newUserEmail" placeholder="البريد الإلكتروني (اختياري)">
+                        </div>
+                        <div class="form-group">
+                            <label>رقم الهاتف</label>
+                            <input type="text" id="newUserPhone" placeholder="رقم الهاتف (اختياري)">
+                        </div>
+                        <div class="form-group">
+                            <label>نوع المستخدم</label>
+                            <select id="newUserRole" onchange="toggleUserPermissions()">
+                                <option value="user">مستخدم عادي</option>
+                                <option value="admin">مدير</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="userPermissionsSection">
+                            <label>الصلاحيات</label>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                                <label style="display: flex; align-items: center; gap: 8px; margin: 0; font-weight: normal;">
+                                    <input type="checkbox" id="canAddCenters" checked>
+                                    إضافة مراكز
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; margin: 0; font-weight: normal;">
+                                    <input type="checkbox" id="canAddEmployees" checked>
+                                    إضافة أفراد
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; margin: 0; font-weight: normal;">
+                                    <input type="checkbox" id="canEditCenters" checked>
+                                    تعديل مراكز
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; margin: 0; font-weight: normal;">
+                                    <input type="checkbox" id="canEditEmployees" checked>
+                                    تعديل أفراد
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group" id="userCentersSection">
+                            <label>المراكز المسموحة (للمستخدم العادي فقط)</label>
+                            <div id="userCenterCheckboxes" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; margin-top: 8px;">
+                                <!-- سيتم ملؤها تلقائياً -->
+                            </div>
+                        </div>
+                        <button class="btn" onclick="addUser()">إضافة مستخدم</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Content Area -->
@@ -960,6 +1029,8 @@
         let userPermissions = null;
         let allowedCenters = [];
         let allowedEmployees = [];
+        let allCenters = []; // Initialize as empty array
+        let allEmployees = []; // Initialize as empty array
         let currentEditingEmployee = null;
         let currentEditingCenter = null;
 
@@ -1002,6 +1073,7 @@
         function initializeSections() {
             const centerSection = document.getElementById('centerSection');
             const employeeSection = document.getElementById('employeeSection');
+            const userSection = document.getElementById('userSection');
             
             if (centerSection) {
                 centerSection.classList.add('collapsed');
@@ -1011,6 +1083,11 @@
             if (employeeSection) {
                 employeeSection.classList.add('collapsed');
                 employeeSection.parentElement.querySelector('.section-header').classList.add('collapsed');
+            }
+
+            if (userSection) {
+                userSection.classList.add('collapsed');
+                userSection.parentElement.querySelector('.section-header').classList.add('collapsed');
             }
         }
 
@@ -1139,14 +1216,6 @@
             if (currentUser.role === 'admin') {
                 userRoleBadge.textContent = '👨‍💼 مدير';
                 userRoleBadge.className = 'user-badge admin';
-                
-                // Add admin management link
-                const adminLink = document.createElement('a');
-                adminLink.href = 'admin-users.html';
-                adminLink.target = '_blank';
-                adminLink.className = 'btn btn-admin btn-small';
-                adminLink.textContent = '👥 إدارة المستخدمين';
-                userSection.insertBefore(adminLink, userSection.children[userSection.children.length - 2]);
             } else {
                 userRoleBadge.textContent = '👤 مستخدم';
                 userRoleBadge.className = 'user-badge user';
@@ -1159,6 +1228,7 @@
         function updateSectionsVisibility() {
             const addCenterSection = document.getElementById('addCenterSection');
             const addEmployeeSection = document.getElementById('addEmployeeSection');
+            const addUserSection = document.getElementById('addUserSection');
             const employeePermissionWarning = document.getElementById('employeePermissionWarning');
             
             // Hide sections if no permission
@@ -1170,6 +1240,12 @@
                 addEmployeeSection.classList.add('section-hidden');
             } else if (currentUser.role !== 'admin') {
                 employeePermissionWarning.style.display = 'block';
+            }
+
+            // Show user management section for admins only
+            if (currentUser.role === 'admin') {
+                addUserSection.style.display = 'block';
+                // Will populate checkboxes after data is loaded
             }
         }
 
@@ -1376,6 +1452,11 @@
             allowedCenters = [...allCenters];
             allowedEmployees = [...allEmployees];
             
+            // Update user center checkboxes if admin and data is loaded
+            if (currentUser && currentUser.role === 'admin' && allCenters.length > 0) {
+                populateUserCenterCheckboxes();
+            }
+            
             if (map && map.isStyleLoaded()) {
                 updateMapMarkers();
             }
@@ -1388,6 +1469,14 @@
                 updateStats(),
                 refreshEmployeeLocations()
             ]);
+            
+            // Load all centers data for user management (admin only)
+            if (currentUser.role === 'admin') {
+                await loadCenters(); // Load all centers for admin
+                if (allCenters.length > 0) {
+                    populateUserCenterCheckboxes();
+                }
+            }
             
             if (map && map.isStyleLoaded()) {
                 updateMapMarkers();
@@ -1499,6 +1588,11 @@
                     option.textContent = centerName;
                     centerSelect.appendChild(option);
                 });
+                
+                // Update user center checkboxes if admin and allCenters is populated
+                if (currentUser && currentUser.role === 'admin' && allCenters.length > 0) {
+                    populateUserCenterCheckboxes();
+                }
             } else {
                 centersList.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">لا توجد مراكز متاحة</p>';
             }
@@ -2233,6 +2327,141 @@
             });
             
             showNotification(`تم التركيز على موقع ${name}`, 'info');
+        }
+
+        // User Management Functions
+        function toggleUserPermissions() {
+            const roleSelect = document.getElementById('newUserRole');
+            const permissionsSection = document.getElementById('userPermissionsSection');
+            const centersSection = document.getElementById('userCentersSection');
+
+            if (!roleSelect || !permissionsSection || !centersSection) return;
+
+            const role = roleSelect.value;
+
+            if (role === 'admin') {
+                permissionsSection.style.display = 'none';
+                centersSection.style.display = 'none';
+            } else {
+                permissionsSection.style.display = 'block';
+                centersSection.style.display = 'block';
+            }
+        }
+
+        function populateUserCenterCheckboxes() {
+            const container = document.getElementById('userCenterCheckboxes');
+            
+            if (!container) return;
+            
+            // Check if allCenters is loaded
+            if (!allCenters || allCenters.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 10px;">جاري تحميل المراكز...</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            allCenters.forEach(center => {
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 5px; border-radius: 5px; background: var(--bg-color);';
+                checkboxDiv.innerHTML = `
+                    <input type="checkbox" id="user_center_${center.id}" value="${center.id}">
+                    <label for="user_center_${center.id}" style="margin: 0; font-weight: normal; cursor: pointer; flex: 1;">${center.name}</label>
+                `;
+                container.appendChild(checkboxDiv);
+            });
+        }
+
+        async function addUser() {
+            if (currentUser.role !== 'admin') {
+                showNotification('ليس لديك صلاحية لإضافة المستخدمين', 'warning');
+                return;
+            }
+
+            const username = document.getElementById('newUsername').value.trim();
+            const fullName = document.getElementById('newUserFullName').value.trim();
+            const password = document.getElementById('newUserPassword').value.trim();
+            const email = document.getElementById('newUserEmail').value.trim();
+            const phone = document.getElementById('newUserPhone').value.trim();
+            const role = document.getElementById('newUserRole').value;
+
+            // Validation
+            if (!username || !fullName || !password) {
+                showNotification('يرجى ملء الحقول المطلوبة (اسم المستخدم، الاسم الكامل، كلمة المرور)', 'warning');
+                return;
+            }
+
+            if (password.length < 6) {
+                showNotification('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'warning');
+                return;
+            }
+
+            // Get selected centers for regular users
+            const selectedCenters = [];
+            if (role === 'user') {
+                const centerCheckboxes = document.querySelectorAll('#userCenterCheckboxes input[type="checkbox"]:checked');
+                centerCheckboxes.forEach(checkbox => {
+                    selectedCenters.push(parseInt(checkbox.value));
+                });
+
+                if (selectedCenters.length === 0) {
+                    showNotification('يرجى اختيار مركز واحد على الأقل للمستخدم العادي', 'warning');
+                    return;
+                }
+            }
+
+            try {
+                const { data, error } = await supabase.rpc('add_user', {
+                    user_username: username,
+                    user_password: password,
+                    user_full_name: fullName,
+                    user_email: email || null,
+                    user_phone: phone || null,
+                    user_role: role,
+                    center_ids: selectedCenters.length > 0 ? selectedCenters : null
+                });
+
+                if (error) throw error;
+
+                const result = data;
+                if (result.success) {
+                    clearUserForm();
+                    showNotification(`✅ تم إضافة المستخدم "${fullName}" بنجاح!`, 'success');
+                } else {
+                    showNotification('❌ ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error adding user:', error);
+                showNotification('حدث خطأ في إضافة المستخدم: ' + error.message, 'error');
+            }
+        }
+
+        function clearUserForm() {
+            // Clear basic fields
+            const fields = ['newUsername', 'newUserFullName', 'newUserPassword', 'newUserEmail', 'newUserPhone'];
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) field.value = '';
+            });
+
+            // Reset role
+            const roleSelect = document.getElementById('newUserRole');
+            if (roleSelect) roleSelect.value = 'user';
+
+            // Clear center checkboxes
+            const checkboxes = document.querySelectorAll('#userCenterCheckboxes input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+
+            // Reset permissions checkboxes
+            const permissionCheckboxes = ['canAddCenters', 'canAddEmployees', 'canEditCenters', 'canEditEmployees'];
+            permissionCheckboxes.forEach(checkboxId => {
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox) checkbox.checked = true;
+            });
+
+            toggleUserPermissions();
         }
 
         // Helper Functions
