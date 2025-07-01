@@ -1066,7 +1066,7 @@
         // Mapbox Configuration
         mapboxgl.accessToken = 'pk.eyJ1IjoiYW1lZXI3ZWx3YXMiLCJhIjoiY21iODAxaTFyMGFsajJqc2J2dGtvY2pmdSJ9.MNY-7y2onlfAnM0PUhNt8g';
 
-        // تحديث: دوال التوقيت المُصححة لقاعدة البيانات
+        // تحديث: دوال التوقيت المُصححة لقاعدة البيانات (نظام 12 ساعة)
         function getCurrentTimestamp() {
             return new Date().toISOString();
         }
@@ -1084,9 +1084,16 @@
                     minute: '2-digit',
                     second: '2-digit',
                     timeZone: 'Asia/Baghdad',
-                    hour12: false
+                    hour12: true // نظام 12 ساعة
                 };
-                return date.toLocaleString('ar-IQ', options);
+                
+                let formatted = date.toLocaleString('ar-IQ', options);
+                
+                // تحويل AM/PM إلى العربية
+                formatted = formatted.replace(/AM/g, 'ص');
+                formatted = formatted.replace(/PM/g, 'م');
+                
+                return formatted;
             } catch (error) {
                 console.error('Error formatting date:', error);
                 return 'تاريخ غير صالح';
@@ -1125,6 +1132,32 @@
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             return today.toISOString();
+        }
+
+        // دالة لتنسيق التوقيت في نظام 12 ساعة للعرض
+        function formatTime12Hour(timestamp) {
+            if (!timestamp) return 'غير محدد';
+            
+            try {
+                const date = new Date(timestamp);
+                const options = {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: 'Asia/Baghdad',
+                    hour12: true
+                };
+                
+                let formatted = date.toLocaleString('ar-IQ', options);
+                
+                // تحويل AM/PM إلى العربية
+                formatted = formatted.replace(/AM/g, 'ص');
+                formatted = formatted.replace(/PM/g, 'م');
+                
+                return formatted;
+            } catch (error) {
+                console.error('Error formatting time:', error);
+                return 'وقت غير صالح';
+            }
         }
 
         // Initialize Application
@@ -1757,7 +1790,7 @@
                             ${getActionText(log.action)} 
                             ${log.centers?.name || ''} 
                             <br><small class="time-display">📅 ${fullTime}</small>
-                            <br><small class="time-ago real-time-update">${timeAgo}</small>
+                            <br><small class="time-ago real-time-update" data-timestamp="${logTime}">${timeAgo}</small>
                         `;
                         logsContainer.appendChild(logDiv);
                     });
@@ -1845,7 +1878,7 @@
                     <div class="item-info">
                         <strong>${empData.employee.name}</strong>
                         <small style="color: ${statusColor};">● ${statusText} • 📱 ${empData.employee.phone}</small><br>
-                        <small>آخر موقع: ${actionText} - <span class="time-ago">${timeDiff}</span></small><br>
+                        <small>آخر موقع: ${actionText} - <span class="time-ago" data-timestamp="${empData.location.time}">${timeDiff}</span></small><br>
                         <small>المركز: ${empData.center?.name || 'غير محدد'}</small>
                     </div>
                     <div>
