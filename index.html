@@ -592,24 +592,6 @@
             color: var(--text-color);
         }
 
-        /* Time display styles */
-        .time-display {
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .time-ago {
-            color: #7f8c8d;
-            font-size: 0.9em;
-            font-style: italic;
-        }
-
-        .real-time-update {
-            color: #27ae60;
-            font-size: 0.8em;
-        }
-
         /* Responsive Design */
         @media (max-width: 1200px) {
             .main-layout {
@@ -1066,67 +1048,6 @@
         // Mapbox Configuration
         mapboxgl.accessToken = 'pk.eyJ1IjoiYW1lZXI3ZWx3YXMiLCJhIjoiY21iODAxaTFyMGFsajJqc2J2dGtvY2pmdSJ9.MNY-7y2onlfAnM0PUhNt8g';
 
-        // تحديث: دوال التوقيت المُصححة لقاعدة البيانات
-        function getCurrentTimestamp() {
-            return new Date().toISOString();
-        }
-
-        function formatLocalDateTime(timestamp) {
-            if (!timestamp) return 'غير محدد';
-            
-            try {
-                const date = new Date(timestamp);
-                const options = {
-                    year: 'numeric',
-                    month: '2-digit', 
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    second: '2-digit',
-                    timeZone: 'Asia/Baghdad',
-                    hour12: false
-                };
-                return date.toLocaleString('ar-IQ', options);
-            } catch (error) {
-                console.error('Error formatting date:', error);
-                return 'تاريخ غير صالح';
-            }
-        }
-
-        function getTimeDifference(timestamp) {
-            if (!timestamp) return 'غير محدد';
-            
-            try {
-                const now = new Date();
-                const time = new Date(timestamp);
-                const diffInSeconds = Math.floor((now - time) / 1000);
-                
-                if (diffInSeconds < 30) {
-                    return 'الآن';
-                } else if (diffInSeconds < 60) {
-                    return 'منذ لحظات';
-                } else if (diffInSeconds < 3600) {
-                    const minutes = Math.floor(diffInSeconds / 60);
-                    return `منذ ${minutes} دقيقة`;
-                } else if (diffInSeconds < 86400) {
-                    const hours = Math.floor(diffInSeconds / 3600);
-                    return `منذ ${hours} ساعة`;
-                } else {
-                    const days = Math.floor(diffInSeconds / 86400);
-                    return `منذ ${days} يوم`;
-                }
-            } catch (error) {
-                console.error('Error calculating time difference:', error);
-                return 'غير محدد';
-            }
-        }
-
-        function getTodayDateStart() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            return today.toISOString();
-        }
-
         // Initialize Application
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Application starting...');
@@ -1224,7 +1145,7 @@
                     sessionData = {
                         isLoggedIn: true,
                         user: result.user,
-                        loginTime: getCurrentTimestamp()
+                        loginTime: new Date().toISOString()
                     };
                     
                     currentUser = result.user;
@@ -1721,13 +1642,12 @@
             }
         }
 
-        // تحديث: دالة تحميل السجلات مع التوقيت المُصحح
         async function loadLogs() {
             try {
                 let query = supabase
                     .from('logs')
                     .select(`*, employees (name), centers (name)`)
-                    .order('occurred_at', { ascending: false }) // ترتيب حسب occurred_at بدلاً من created_at
+                    .order('created_at', { ascending: false })
                     .limit(100);
 
                 // Filter logs for regular users
@@ -1746,18 +1666,12 @@
                     logs.forEach(log => {
                         const logDiv = document.createElement('div');
                         logDiv.className = `log-entry ${log.action}`;
-                        
-                        // استخدام occurred_at إذا كان متوفراً، وإلا created_at
-                        const logTime = log.occurred_at || log.created_at;
-                        const timeAgo = getTimeDifference(logTime);
-                        const fullTime = formatLocalDateTime(logTime);
-                        
+                        const date = new Date(log.created_at).toLocaleString('ar-EG');
                         logDiv.innerHTML = `
                             <strong>${log.employees?.name}</strong> - 
                             ${getActionText(log.action)} 
                             ${log.centers?.name || ''} 
-                            <br><small class="time-display">📅 ${fullTime}</small>
-                            <br><small class="time-ago real-time-update">${timeAgo}</small>
+                            <br><small>📅 ${date}</small>
                         `;
                         logsContainer.appendChild(logDiv);
                     });
@@ -1769,7 +1683,6 @@
             }
         }
 
-        // تحديث: دالة تحديث المواقع مع التوقيت المُصحح
         async function refreshEmployeeLocations() {
             try {
                 let employeeIds = [];
@@ -1795,7 +1708,7 @@
                     .in('employee_id', employeeIds)
                     .not('latitude', 'is', null)
                     .not('longitude', 'is', null)
-                    .order('occurred_at', { ascending: false }); // ترتيب حسب occurred_at
+                    .order('created_at', { ascending: false });
 
                 if (error) throw error;
 
@@ -1810,7 +1723,7 @@
                                 latitude: log.latitude,
                                 longitude: log.longitude,
                                 action: log.action,
-                                time: log.occurred_at || log.created_at // استخدام occurred_at أولاً
+                                time: log.created_at
                             }
                         };
                     }
@@ -1845,7 +1758,7 @@
                     <div class="item-info">
                         <strong>${empData.employee.name}</strong>
                         <small style="color: ${statusColor};">● ${statusText} • 📱 ${empData.employee.phone}</small><br>
-                        <small>آخر موقع: ${actionText} - <span class="time-ago">${timeDiff}</span></small><br>
+                        <small>آخر موقع: ${actionText} - ${timeDiff}</small><br>
                         <small>المركز: ${empData.center?.name || 'غير محدد'}</small>
                     </div>
                     <div>
@@ -1858,7 +1771,6 @@
             });
         }
 
-        // تحديث: دالة الإحصائيات مع التوقيت المُصحح
         async function updateStats() {
             try {
                 let employeesCount, activeCount, centersCount, logsCount;
@@ -1869,7 +1781,7 @@
                         supabase.from('employees').select('*', { count: 'exact', head: true }),
                         supabase.from('employees').select('*', { count: 'exact', head: true }).eq('status', 'active'),
                         supabase.from('centers').select('*', { count: 'exact', head: true }),
-                        supabase.from('logs').select('*', { count: 'exact', head: true }).gte('occurred_at', getTodayDateStart())
+                        supabase.from('logs').select('*', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().split('T')[0])
                     ]);
                     
                     employeesCount = empRes.count || 0;
@@ -1889,7 +1801,7 @@
                             .from('logs')
                             .select('*', { count: 'exact', head: true })
                             .in('employee_id', employeeIds)
-                            .gte('occurred_at', getTodayDateStart());
+                            .gte('created_at', new Date().toISOString().split('T')[0]);
                         logsCount = count || 0;
                     } else {
                         logsCount = 0;
@@ -2383,4 +2295,266 @@
                     .setHTML(`
                         <div style="direction: rtl; text-align: right; font-family: 'Segoe UI', Arial, sans-serif;">
                             <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 16px;">${properties.name}</h3>
-                            <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>📱 الهاتف:
+                            <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>📱 الهاتف:</strong> ${properties.phone}</p>
+                            <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>الحالة:</strong> ${properties.status === 'active' ? '🟢 نشط' : '🔴 غير نشط'}</p>
+                            <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>آخر نشاط:</strong> ${getActionText(properties.action)}</p>
+                            <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>التوقيت:</strong> ${timeDiff}</p>
+                            <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>المركز:</strong> ${properties.center}</p>
+                        </div>
+                    `)
+                    .addTo(map);
+            });
+
+            map.on('mouseenter', 'employees-layer', () => {
+                map.getCanvas().style.cursor = 'pointer';
+            });
+
+            map.on('mouseleave', 'employees-layer', () => {
+                map.getCanvas().style.cursor = '';
+            });
+        }
+
+        function focusOnEmployee(lat, lng, name) {
+            if (!map) {
+                showNotification('الخريطة غير محملة بعد', 'warning');
+                return;
+            }
+
+            map.flyTo({
+                center: [lng, lat],
+                zoom: 16,
+                duration: 2000
+            });
+            
+            showNotification(`تم التركيز على موقع ${name}`, 'info');
+        }
+
+        // User Management Functions
+        function toggleUserPermissions() {
+            const roleSelect = document.getElementById('newUserRole');
+            const permissionsSection = document.getElementById('userPermissionsSection');
+            const centersSection = document.getElementById('userCentersSection');
+
+            if (!roleSelect || !permissionsSection || !centersSection) return;
+
+            const role = roleSelect.value;
+
+            if (role === 'admin') {
+                permissionsSection.style.display = 'none';
+                centersSection.style.display = 'none';
+            } else {
+                permissionsSection.style.display = 'block';
+                centersSection.style.display = 'block';
+            }
+        }
+
+        function populateUserCenterCheckboxes() {
+            const container = document.getElementById('userCenterCheckboxes');
+            
+            if (!container) return;
+            
+            // Check if allCenters is loaded
+            if (!allCenters || allCenters.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 10px;">جاري تحميل المراكز...</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            allCenters.forEach(center => {
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.style.cssText = 'display: flex; align-items: center; gap: 8px; margin-bottom: 8px; padding: 5px; border-radius: 5px; background: var(--bg-color);';
+                checkboxDiv.innerHTML = `
+                    <input type="checkbox" id="user_center_${center.id}" value="${center.id}">
+                    <label for="user_center_${center.id}" style="margin: 0; font-weight: normal; cursor: pointer; flex: 1;">${center.name}</label>
+                `;
+                container.appendChild(checkboxDiv);
+            });
+        }
+
+        async function addUser() {
+            if (currentUser.role !== 'admin') {
+                showNotification('ليس لديك صلاحية لإضافة المستخدمين', 'warning');
+                return;
+            }
+
+            const username = document.getElementById('newUsername').value.trim();
+            const fullName = document.getElementById('newUserFullName').value.trim();
+            const password = document.getElementById('newUserPassword').value.trim();
+            const email = document.getElementById('newUserEmail').value.trim();
+            const phone = document.getElementById('newUserPhone').value.trim();
+            const role = document.getElementById('newUserRole').value;
+
+            // Validation
+            if (!username || !fullName || !password) {
+                showNotification('يرجى ملء الحقول المطلوبة (اسم المستخدم، الاسم الكامل، كلمة المرور)', 'warning');
+                return;
+            }
+
+            if (password.length < 6) {
+                showNotification('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'warning');
+                return;
+            }
+
+            // Get selected centers for regular users
+            const selectedCenters = [];
+            if (role === 'user') {
+                const centerCheckboxes = document.querySelectorAll('#userCenterCheckboxes input[type="checkbox"]:checked');
+                centerCheckboxes.forEach(checkbox => {
+                    selectedCenters.push(parseInt(checkbox.value));
+                });
+
+                if (selectedCenters.length === 0) {
+                    showNotification('يرجى اختيار مركز واحد على الأقل للمستخدم العادي', 'warning');
+                    return;
+                }
+            }
+
+            try {
+                const { data, error } = await supabase.rpc('add_user', {
+                    user_username: username,
+                    user_password: password,
+                    user_full_name: fullName,
+                    user_email: email || null,
+                    user_phone: phone || null,
+                    user_role: role,
+                    center_ids: selectedCenters.length > 0 ? selectedCenters : null
+                });
+
+                if (error) throw error;
+
+                const result = data;
+                if (result.success) {
+                    clearUserForm();
+                    showNotification(`✅ تم إضافة المستخدم "${fullName}" بنجاح!`, 'success');
+                } else {
+                    showNotification('❌ ' + result.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error adding user:', error);
+                showNotification('حدث خطأ في إضافة المستخدم: ' + error.message, 'error');
+            }
+        }
+
+        function clearUserForm() {
+            // Clear basic fields
+            const fields = ['newUsername', 'newUserFullName', 'newUserPassword', 'newUserEmail', 'newUserPhone'];
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) field.value = '';
+            });
+
+            // Reset role
+            const roleSelect = document.getElementById('newUserRole');
+            if (roleSelect) roleSelect.value = 'user';
+
+            // Clear center checkboxes
+            const checkboxes = document.querySelectorAll('#userCenterCheckboxes input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+
+            // Reset permissions checkboxes
+            const permissionCheckboxes = ['canAddCenters', 'canAddEmployees', 'canEditCenters', 'canEditEmployees'];
+            permissionCheckboxes.forEach(checkboxId => {
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox) checkbox.checked = true;
+            });
+
+            toggleUserPermissions();
+        }
+
+        // Helper Functions
+        function getTimeDifference(timestamp) {
+            const now = new Date();
+            const time = new Date(timestamp);
+            const diffInSeconds = Math.floor((now - time) / 1000);
+            
+            if (diffInSeconds < 60) {
+                return 'منذ لحظات';
+            } else if (diffInSeconds < 3600) {
+                const minutes = Math.floor(diffInSeconds / 60);
+                return `منذ ${minutes} دقيقة`;
+            } else if (diffInSeconds < 86400) {
+                const hours = Math.floor(diffInSeconds / 3600);
+                return `منذ ${hours} ساعة`;
+            } else {
+                const days = Math.floor(diffInSeconds / 86400);
+                return `منذ ${days} يوم`;
+            }
+        }
+
+        function getActionText(action) {
+            const actions = {
+                'in': '🟢 دخول',
+                'out': '🔴 خروج',
+                'move': '🟡 انتقال',
+                'out_of_range': '⚠️ خارج النطاق',
+                'auto_checkin': '🟢 دخول تلقائي',
+                'auto_checkout': '🔴 خروج تلقائي',
+                'location_update': '📍 تحديث موقع'
+            };
+            return actions[action] || action;
+        }
+
+        function showNotification(message, type = 'info') {
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(notif => notif.remove());
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.getElementById('notifications').appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Real-time Updates
+        function setupRealTimeUpdates() {
+            supabase
+                .channel('logs_channel')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, () => {
+                    loadLogs();
+                    updateStats();
+                    refreshEmployeeLocations();
+                })
+                .subscribe();
+
+            supabase
+                .channel('employees_channel')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'employees' }, () => {
+                    loadData();
+                })
+                .subscribe();
+
+            supabase
+                .channel('centers_channel')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'centers' }, () => {
+                    loadData();
+                })
+                .subscribe();
+        }
+
+        // Auto refresh
+        setInterval(() => {
+            if (sessionData.isLoggedIn) {
+                updateStats();
+                refreshEmployeeLocations();
+            }
+        }, 30000);
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        };
+    </script>
+</body>
+</html>
