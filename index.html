@@ -7,6 +7,9 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap');
         :root {
@@ -88,6 +91,53 @@
         .notification.warning { background: var(--warning-gradient); color: #856404; }
         .notification.info { background: var(--primary-gradient); }
         .notification.error { background: var(--alert-gradient); color: #721c24; }
+
+        /* Loading Bar */
+        .loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: var(--primary-gradient);
+            z-index: 3000;
+            transition: width 0.3s ease;
+            box-shadow: 0 2px 8px rgba(67, 206, 162, 0.3);
+        }
+
+        .loading-bar.active {
+            width: 100%;
+        }
+
+        /* Enhanced Tooltips */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-color);
+            color: var(--card-bg);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
 
         /* Enhanced Login Card */
         .login-card {
@@ -894,9 +944,137 @@
                 text-align: center;
             }
         }
+
+        /* Quick Links Sidebar */
+        .quick-links {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .quick-links h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .quick-link {
+            display: block;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background: var(--primary-gradient);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+
+        .quick-link:hover {
+            transform: translateX(-3px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        /* Enhanced Security - Hidden Phone Numbers */
+        .phone-masked {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .phone-masked.revealed {
+            user-select: text;
+        }
+
+        /* Enhanced Date Formatting */
+        .date-formatted {
+            font-family: 'Tajawal', sans-serif;
+            direction: ltr;
+            text-align: center;
+        }
+
+        /* Advanced Search Section */
+        .advanced-search {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .advanced-search h3 {
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .search-filters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .filter-group input,
+        .filter-group select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            font-size: 0.9em;
+        }
+
+        /* Export Buttons */
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .export-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .export-btn.pdf {
+            background: #dc3545;
+            color: white;
+        }
+
+        .export-btn.excel {
+            background: #28a745;
+            color: white;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
     </style>
 </head>
 <body data-theme="light">
+    <!-- Loading Bar -->
+    <div class="loading-bar" id="loadingBar"></div>
+
     <!-- Notifications Container -->
     <div class="notifications" id="notifications"></div>
 
@@ -984,14 +1162,26 @@
         <div class="search-section">
             <input type="text" class="search-input" id="searchEmployees" placeholder="🔍 البحث عن فرد..." oninput="filterEmployees()">
             <input type="text" class="search-input" id="searchCenters" placeholder="🔍 البحث عن مركز..." oninput="filterCenters()">
-            <button class="locate-btn" onclick="locateMe()" title="تحديد موقعي">📍 موقعي</button>
-            <button class="locate-btn" onclick="refreshAll()" title="تحديث جميع البيانات">🔄 تحديث</button>
+                            <button class="locate-btn tooltip" onclick="locateMe()" data-tooltip="تحديد موقعك الحالي على الخريطة">📍 موقعي</button>
+                <button class="locate-btn tooltip" onclick="refreshAll()" data-tooltip="تحديث جميع البيانات من قاعدة البيانات">🔄 تحديث</button>
         </div>
 
         <!-- Main Layout with Sidebar -->
         <div class="main-layout">
             <!-- Sidebar -->
             <div class="sidebar">
+                <!-- Quick Links -->
+                <div class="quick-links">
+                    <h3>🔗 روابط سريعة</h3>
+                    <a href="#employeesList" class="quick-link" onclick="scrollToSection('employeesList')">👥 قائمة الأفراد</a>
+                    <a href="#centersList" class="quick-link" onclick="scrollToSection('centersList')">🏢 المراكز</a>
+                    <a href="#employeeLocations" class="quick-link" onclick="scrollToSection('employeeLocations')">📍 المواقع المباشرة</a>
+                    <a href="#activityLogs" class="quick-link" onclick="scrollToSection('activityLogs')">📋 سجل الأنشطة</a>
+                </div>
+
+                <!-- Advanced Search -->
+                <!-- تم حذف البحث المتقدم هنا -->
+
                 <!-- Add Center Section -->
                 <div class="sidebar-section" id="addCenterSection">
                     <div class="section-header" onclick="toggleSection('centerSection')">
@@ -1110,10 +1300,10 @@
                     <div class="map-header">
                         <h2 style="color: var(--text-color); margin: 0;">🗺️ الخريطة التفاعلية</h2>
                         <div class="map-controls">
-                            <button class="map-btn" onclick="refreshMap()" title="تحديث الخريطة">🔄 تحديث</button>
-                            <button class="map-btn" onclick="fitAllMarkers()" title="عرض جميع المراكز">🏢 المراكز</button>
-                            <button class="map-btn" onclick="showAllEmployeesOnMap()" title="عرض جميع الأفراد">👥 الأفراد</button>
-                            <button class="map-btn style-toggle" onclick="toggleMapStyle()" title="تغيير نمط الخريطة">🗺️ النمط</button>
+                            <button class="map-btn tooltip" onclick="refreshMap()" data-tooltip="تحديث الخريطة والعلامات">🔄 تحديث</button>
+                            <button class="map-btn tooltip" onclick="fitAllMarkers()" data-tooltip="عرض جميع المراكز في نطاق الرؤية">🏢 المراكز</button>
+                            <button class="map-btn tooltip" onclick="showAllEmployeesOnMap()" data-tooltip="عرض جميع الأفراد على الخريطة">👥 الأفراد</button>
+                            <button class="map-btn style-toggle tooltip" onclick="toggleMapStyle()" data-tooltip="تغيير نمط الخريطة (شوارع/أقمار صناعية/فاتح/مظلم)">🗺️ النمط</button>
                         </div>
                     </div>
                     <div id="map"></div>
@@ -1169,14 +1359,14 @@
                 <!-- Enhanced Activity Logs with Color Coding and Search -->
                 <div class="data-section">
                     <div class="section-title">
-                        <span>📋 سجل الأنشطة والحركات الشامل</span>
+                        <span>📋 سجل الحركات </span>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                             <select id="logFilter" onchange="filterLogs()" style="padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color);">
                                 <option value="all">جميع الأنشطة</option>
                                 <option value="checkin">دخول فقط</option>
                                 <option value="checkout">خروج فقط</option>
                                 <option value="movement">حركات فقط</option>
-                                <option value="center_entry">دخول مراكز</option>
+                                <option value="center_entry">دخل مركز</option>
                             </select>
                             <button class="btn btn-small" onclick="refreshLogs()">🔄 تحديث</button>
                         </div>
@@ -1258,36 +1448,230 @@
     </div>
 
     <script>
-        // Global Variables
-        let supabase;
-        let map;
-        let currentUser = null;
-        let userPermissions = null;
-        let allowedCenters = [];
-        let allowedEmployees = [];
-        let allCenters = [];
-        let allEmployees = [];
-        let allLogs = [];
-        let centerStats = {};
-        let currentEditingEmployee = null;
-        let currentEditingCenter = null;
-        let myLocationMarker = null;
-        let currentMapStyle = 'streets-v12';
-        let autoRefreshInterval = null;
-
-        // Pagination states
-        let paginationState = {
-            employees: { currentPage: 1, pageSize: 50, totalPages: 1 },
-            locations: { currentPage: 1, pageSize: 20, totalPages: 1 },
-            logs: { currentPage: 1, pageSize: 50, totalPages: 1 }
+        // ===== ENHANCED GLOBAL STATE MANAGEMENT =====
+        const appState = {
+            // Database & Map
+            supabase: null,
+            map: null,
+            currentMapStyle: 'streets-v12',
+            myLocationMarker: null,
+            
+            // User & Permissions
+            currentUser: null,
+            userPermissions: null,
+            sessionData: {
+                isLoggedIn: false,
+                user: null,
+                loginTime: null,
+                lastActivity: Date.now()
+            },
+            
+            // Data Collections
+            allowedCenters: [],
+            allowedEmployees: [],
+            allCenters: [],
+            allEmployees: [],
+            allLogs: [],
+            centerStats: {},
+            
+            // Editing State
+            currentEditingEmployee: null,
+            currentEditingCenter: null,
+            
+            // Pagination
+            pagination: {
+                employees: { currentPage: 1, pageSize: 50, totalPages: 1 },
+                locations: { currentPage: 1, pageSize: 20, totalPages: 1 },
+                logs: { currentPage: 1, pageSize: 50, totalPages: 1 }
+            },
+            
+            // Auto Refresh
+            autoRefreshInterval: null,
+            sessionTimeout: null,
+            
+            // Search Filters
+            searchFilters: {
+                fromDate: null,
+                toDate: null,
+                center: null,
+                status: null
+            }
         };
 
-        // Session Management
-        let sessionData = {
-            isLoggedIn: false,
-            user: null,
-            loginTime: null
-        };
+        // ===== HELPER FUNCTIONS =====
+        
+        // Loading Bar Management
+        function showLoading() {
+            const loadingBar = document.getElementById('loadingBar');
+            if (loadingBar) {
+                loadingBar.classList.add('active');
+            }
+        }
+
+        function hideLoading() {
+            const loadingBar = document.getElementById('loadingBar');
+            if (loadingBar) {
+                loadingBar.classList.remove('active');
+            }
+        }
+
+        // Enhanced Error Handling
+        function showError(message, duration = 5000) {
+            showNotification(message, 'error', duration);
+        }
+
+        function showSuccess(message, duration = 3000) {
+            showNotification(message, 'success', duration);
+        }
+
+        function showInfo(message, duration = 4000) {
+            showNotification(message, 'info', duration);
+        }
+
+        // Enhanced Date Formatting
+        function formatDateEnhanced(date) {
+            if (!date) return 'غير محدد';
+            
+            try {
+                const d = new Date(date);
+                const options = {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    timeZone: 'Asia/Baghdad',
+                    hour12: true
+                };
+                
+                let formatted = d.toLocaleDateString('ar-EG', options);
+                formatted = formatted.replace(/AM/g, 'ص').replace(/PM/g, 'م');
+                return formatted;
+            } catch (error) {
+                console.error('Error formatting date:', error);
+                return 'تاريخ غير صالح';
+            }
+        }
+
+        // Phone Number Masking for Security
+        function maskPhoneNumber(phone) {
+            if (!phone) return '';
+            if (phone.length <= 4) return phone;
+            return '*'.repeat(phone.length - 4) + phone.slice(-4);
+        }
+
+        function togglePhoneVisibility(element) {
+            const phone = element.getAttribute('data-phone');
+            if (element.classList.contains('revealed')) {
+                element.textContent = maskPhoneNumber(phone);
+                element.classList.remove('revealed');
+            } else {
+                element.textContent = phone;
+                element.classList.add('revealed');
+            }
+        }
+
+        // Scroll to Section Helper
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                showInfo(`تم الانتقال إلى ${getSectionName(sectionId)}`, 2000);
+            }
+        }
+
+        function getSectionName(sectionId) {
+            const names = {
+                'employeesList': 'قائمة الأفراد',
+                'centersList': 'المراكز',
+                'employeeLocations': 'المواقع المباشرة',
+                'activityLogs': 'سجل الأنشطة'
+            };
+            return names[sectionId] || sectionId;
+        }
+
+        // Session Management Enhancement
+        function updateLastActivity() {
+            appState.sessionData.lastActivity = Date.now();
+        }
+
+        function startSessionTimeout() {
+            const timeoutMinutes = 30; // 30 minutes
+            const timeoutMs = timeoutMinutes * 60 * 1000;
+            
+            appState.sessionTimeout = setInterval(() => {
+                const now = Date.now();
+                const lastActivity = appState.sessionData.lastActivity;
+                
+                if (now - lastActivity > timeoutMs) {
+                    showInfo('انتهت صلاحية الجلسة. سيتم تسجيل الخروج تلقائياً.', 5000);
+                    setTimeout(() => logout(), 5000);
+                }
+            }, 60000); // Check every minute
+        }
+
+        // Advanced Search Functions
+        function applyAdvancedSearch() {}
+        function clearAdvancedSearch() {}
+
+        // Export Functions
+        function exportToPDF() {
+            showInfo('جاري إعداد ملف PDF...', 3000);
+            const employees = appState.currentUser.role === 'admin' ? appState.allEmployees : appState.allowedEmployees;
+            if (!employees.length) {
+                showError('لا توجد بيانات لتصديرها');
+                return;
+            }
+            try {
+                const doc = new window.jspdf.jsPDF({ orientation: 'landscape' });
+                doc.setFont('Arial', 'bold');
+                doc.text('قائمة الأفراد', 15, 15);
+                const headers = [['الاسم', 'الهاتف', 'المنصب', 'المركز', 'الحالة']];
+                const data = employees.map(emp => [
+                    emp.name || emp.employee_name || '',
+                    emp.phone || '',
+                    emp.position || emp.job_position || '',
+                    emp.centers?.name || emp.center_name || '',
+                    emp.status === 'active' ? 'نشط' : 'غير نشط'
+                ]);
+                doc.autoTable({ 
+                    head: headers, 
+                    body: data, 
+                    startY: 25, 
+                    styles: { font: 'Arial' },
+                    headStyles: { fillColor: [67, 206, 162] }
+                });
+                doc.save('employees.pdf');
+                showSuccess('تم تصدير البيانات إلى PDF بنجاح!', 3000);
+            } catch (error) {
+                console.error('PDF export error:', error);
+                showError('خطأ في تصدير PDF: ' + error.message);
+            }
+        }
+
+        function exportToExcel() {
+            showInfo('جاري إعداد ملف Excel...', 3000);
+            const employees = appState.currentUser.role === 'admin' ? appState.allEmployees : appState.allowedEmployees;
+            if (!employees.length) {
+                showError('لا توجد بيانات لتصديرها');
+                return;
+            }
+            const ws_data = [
+                ['الاسم', 'الهاتف', 'المنصب', 'المركز', 'الحالة'],
+                ...employees.map(emp => [
+                    emp.name || emp.employee_name,
+                    emp.phone,
+                    emp.position || emp.job_position || '',
+                    emp.centers?.name || emp.center_name || '',
+                    emp.status === 'active' ? 'نشط' : 'غير نشط'
+                ])
+            ];
+            const ws = window.XLSX.utils.aoa_to_sheet(ws_data);
+            const wb = window.XLSX.utils.book_new();
+            window.XLSX.utils.book_append_sheet(wb, ws, 'الموظفون');
+            window.XLSX.writeFile(wb, 'employees.xlsx');
+            showSuccess('تم تصدير البيانات إلى Excel بنجاح!', 3000);
+        }
 
         // Supabase Configuration
         const supabaseUrl = 'https://qcbcjyhqgxwuqutzkxrh.supabase.co';
@@ -1362,7 +1746,7 @@
 
         // Initialize Application
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('Enhanced application v2 starting...');
+            console.log('Enhanced application v3 starting...');
             
             // Initialize section states
             initializeSections();
@@ -1373,9 +1757,9 @@
                 try {
                     const parsed = JSON.parse(savedSession);
                     if (parsed.isLoggedIn && parsed.user) {
-                        sessionData = parsed;
-                        currentUser = parsed.user;
-                        userPermissions = parsed.user.permissions;
+                        appState.sessionData = parsed;
+                        appState.currentUser = parsed.user;
+                        appState.userPermissions = parsed.user.permissions;
                         showDashboard();
                     }
                 } catch(e) {}
@@ -1388,7 +1772,7 @@
             } catch (error) {
                 console.error('System loading error:', error);
                 updateConnectionStatus('خطأ اتصال', 'error');
-                showNotification('خطأ في تحميل النظام: ' + error.message, 'error');
+                showError('خطأ في تحميل النظام: ' + error.message);
             }
         });
 
@@ -1432,9 +1816,9 @@
                 function checkSupabase() {
                     attempts++;
                     if (window.supabase) {
-                        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                        appState.supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
                         console.log('Supabase initialized successfully');
-                        resolve(supabase);
+                        resolve(appState.supabase);
                     } else if (attempts < maxAttempts) {
                         setTimeout(checkSupabase, 200);
                     } else {
@@ -1493,12 +1877,15 @@
             const password = document.getElementById('loginPassword').value.trim();
 
             if (!username || !password) {
-                showNotification('يرجى إدخال اسم المستخدم وكلمة المرور', 'warning');
+                showError('يرجى إدخال اسم المستخدم وكلمة المرور');
                 return;
             }
 
+            showLoading();
+            
             try {
-                const { data, error } = await supabase.rpc('authenticate_user', {
+                // TODO: Add password hashing here for security
+                const { data, error } = await appState.supabase.rpc('authenticate_user', {
                     user_username: username,
                     user_password: password
                 });
@@ -1507,42 +1894,60 @@
 
                 const result = data;
                 if (result.success) {
-                    sessionData = {
+                    appState.sessionData = {
                         isLoggedIn: true,
                         user: result.user,
-                        loginTime: getCurrentTimestamp()
+                        loginTime: getCurrentTimestamp(),
+                        lastActivity: Date.now()
                     };
                     
-                    currentUser = result.user;
-                    userPermissions = result.user.permissions;
-                    localStorage.setItem('sessionData', JSON.stringify(sessionData));
+                    appState.currentUser = result.user;
+                    appState.userPermissions = result.user.permissions;
+                    localStorage.setItem('sessionData', JSON.stringify(appState.sessionData));
                     
-                    showNotification('تم تسجيل الدخول بنجاح! 🎉', 'success');
+                    showSuccess('تم تسجيل الدخول بنجاح! 🎉');
+                    
+                    // Start session timeout
+                    startSessionTimeout();
+                    
                     setTimeout(() => {
                         showDashboard();
                     }, 1000);
                 } else {
-                    showNotification('❌ ' + result.error, 'error');
+                    showError('❌ ' + result.error);
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showNotification('حدث خطأ في تسجيل الدخول', 'error');
+                showError('حدث خطأ في تسجيل الدخول');
+            } finally {
+                hideLoading();
             }
         }
 
         function logout() {
             if (confirm('هل أنت متأكد من تسجيل الخروج؟')) {
                 // Clear auto refresh
-                if (autoRefreshInterval) {
-                    clearInterval(autoRefreshInterval);
-                    autoRefreshInterval = null;
+                if (appState.autoRefreshInterval) {
+                    clearInterval(appState.autoRefreshInterval);
+                    appState.autoRefreshInterval = null;
                 }
 
-                sessionData = { isLoggedIn: false, user: null, loginTime: null };
-                currentUser = null;
-                userPermissions = null;
-                allowedCenters = [];
-                allowedEmployees = [];
+                // Clear session timeout
+                if (appState.sessionTimeout) {
+                    clearInterval(appState.sessionTimeout);
+                    appState.sessionTimeout = null;
+                }
+
+                appState.sessionData = { 
+                    isLoggedIn: false, 
+                    user: null, 
+                    loginTime: null,
+                    lastActivity: null
+                };
+                appState.currentUser = null;
+                appState.userPermissions = null;
+                appState.allowedCenters = [];
+                appState.allowedEmployees = [];
                 localStorage.removeItem('sessionData');
                 
                 document.getElementById('loginScreen').style.display = 'flex';
@@ -1551,7 +1956,7 @@
                 document.getElementById('loginUsername').value = '';
                 document.getElementById('loginPassword').value = '';
                 
-                showNotification('تم تسجيل الخروج بنجاح', 'info');
+                showInfo('تم تسجيل الخروج بنجاح');
             }
         }
 
@@ -1561,23 +1966,52 @@
             
             updateUIForUser();
             
+            // Populate search center dropdown
+            populateSearchCenterDropdown();
+            
+            // تهيئة الخريطة بعد إظهار الـ dashboard
             setTimeout(() => {
                 initializeMap();
+                // إصلاح مشكلة الخريطة البيضاء
+                setTimeout(() => {
+                    if (appState.map) {
+                        appState.map.resize();
+                        console.log('Map resized successfully');
+                    }
+                }, 1000);
+                
                 setTimeout(() => {
                     loadAllData();
                     setupRealTimeUpdates();
                     startAutoRefresh();
-                }, 1000);
+                }, 1500);
             }, 500);
+        }
+
+        function populateSearchCenterDropdown() {
+            const searchCenterSelect = document.getElementById('searchCenter');
+            if (!searchCenterSelect) return;
+            
+            searchCenterSelect.innerHTML = '<option value="">جميع المراكز</option>';
+            
+            const centersToShow = appState.currentUser.role === 'admin' ? 
+                appState.allCenters : appState.allowedCenters;
+            
+            centersToShow.forEach(center => {
+                const option = document.createElement('option');
+                option.value = center.id || center.center_id;
+                option.textContent = center.name || center.center_name;
+                searchCenterSelect.appendChild(option);
+            });
         }
 
         function updateUIForUser() {
             const welcomeMsg = document.getElementById('welcomeMessage');
             const userRoleBadge = document.getElementById('userRoleBadge');
             
-            welcomeMsg.textContent = `مرحباً، ${currentUser.full_name}`;
+            welcomeMsg.textContent = `مرحباً، ${appState.currentUser.full_name}`;
             
-            if (currentUser.role === 'admin') {
+            if (appState.currentUser.role === 'admin') {
                 userRoleBadge.textContent = '👨‍💼 مدير';
                 userRoleBadge.className = 'user-badge admin';
             } else {
@@ -1594,29 +2028,29 @@
             const addUserSection = document.getElementById('addUserSection');
             const employeePermissionWarning = document.getElementById('employeePermissionWarning');
             
-            if (!userPermissions.can_add_centers) {
+            if (!appState.userPermissions.can_add_centers) {
                 addCenterSection.style.display = 'none';
             }
             
-            if (!userPermissions.can_add_employees) {
+            if (!appState.userPermissions.can_add_employees) {
                 addEmployeeSection.style.display = 'none';
-            } else if (currentUser.role !== 'admin') {
+            } else if (appState.currentUser.role !== 'admin') {
                 employeePermissionWarning.style.display = 'block';
             }
 
-            if (currentUser.role === 'admin') {
+            if (appState.currentUser.role === 'admin') {
                 addUserSection.style.display = 'block';
             }
         }
 
         // Auto refresh every 30 seconds
         function startAutoRefresh() {
-            if (autoRefreshInterval) {
-                clearInterval(autoRefreshInterval);
+            if (appState.autoRefreshInterval) {
+                clearInterval(appState.autoRefreshInterval);
             }
 
-            autoRefreshInterval = setInterval(async () => {
-                if (sessionData.isLoggedIn) {
+            appState.autoRefreshInterval = setInterval(async () => {
+                if (appState.sessionData.isLoggedIn) {
                     try {
                         showRefreshIndicator();
                         await updateStats();
@@ -1640,56 +2074,91 @@
 
         // Enhanced Map Functions
         function initializeMap() {
-            mapboxgl.setRTLTextPlugin(
-                'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js',
-                null,
-                true
-            );
-
+            // حماية currentStyleIndex
+            if (typeof appState.currentStyleIndex !== 'number' || isNaN(appState.currentStyleIndex) || appState.currentStyleIndex < 0 || appState.currentStyleIndex >= mapStyles.length) {
+                appState.currentStyleIndex = 0;
+            }
             try {
-                map = new mapboxgl.Map({
+                // التحقق من وجود العنصر أولاً
+                const mapContainer = document.getElementById('map');
+                if (!mapContainer) {
+                    console.error('Map container not found');
+                    showError('لم يتم العثور على عنصر الخريطة في الصفحة');
+                    return;
+                }
+
+                // التحقق من أن Mapbox محمل
+                if (typeof mapboxgl === 'undefined') {
+                    console.error('Mapbox GL JS not loaded');
+                    showError('خطأ في تحميل مكتبة الخريطة');
+                    return;
+                }
+
+                // التحقق من وجود style صحيح
+                const style = mapStyles[appState.currentStyleIndex];
+                if (!style) {
+                    showError('لم يتم العثور على نمط الخريطة. يرجى تحديث الصفحة أو التواصل مع الدعم.');
+                    console.error('Map style is undefined! currentStyleIndex:', appState.currentStyleIndex, mapStyles);
+                    return;
+                }
+                console.log('Initializing map with style:', style);
+
+                // إعداد RTL للنص العربي
+                mapboxgl.setRTLTextPlugin(
+                    'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js',
+                    null,
+                    true
+                );
+
+                appState.map = new mapboxgl.Map({
                     container: 'map',
-                    style: mapStyles[currentStyleIndex],
+                    style: style,
                     center: [44.3661, 32.6155], // Karbala coordinates
                     zoom: 12,
                     locale: 'ar'
                 });
 
-                map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+                appState.map.addControl(new mapboxgl.NavigationControl(), 'top-left');
 
-                if (userPermissions && userPermissions.can_add_centers) {
-                    map.on('click', function(e) {
+                if (appState.userPermissions && appState.userPermissions.can_add_centers) {
+                    appState.map.on('click', function(e) {
                         const coordinates = e.lngLat;
                         document.getElementById('centerLng').value = coordinates.lng.toFixed(6);
                         document.getElementById('centerLat').value = coordinates.lat.toFixed(6);
                         
-                        showNotification(`تم تحديد الموقع: ${coordinates.lat.toFixed(4)}, ${coordinates.lng.toFixed(4)}`, 'success');
+                        showSuccess(`تم تحديد الموقع: ${coordinates.lat.toFixed(4)}, ${coordinates.lng.toFixed(4)}`);
                     });
                 }
 
-                map.on('load', function() {
+                appState.map.on('load', function() {
                     console.log('Enhanced map loaded successfully');
                     updateMapMarkers();
                 });
 
+                appState.map.on('error', function(e) {
+                    console.error('Map error:', e);
+                    showError('خطأ في تحميل الخريطة: ' + (e && e.error && e.error.message ? e.error.message : 'غير معروف'));
+                });
+
             } catch (error) {
                 console.error('Error initializing map:', error);
-                showNotification('خطأ في تحميل الخريطة', 'error');
+                showError('خطأ في تحميل الخريطة: ' + error.message);
             }
         }
 
         // Toggle map style
         function toggleMapStyle() {
-            if (!map) return;
-            
-            currentStyleIndex = (currentStyleIndex + 1) % mapStyles.length;
-            map.setStyle(mapStyles[currentStyleIndex]);
-            
+            if (!appState.map) return;
+            // حماية currentStyleIndex
+            if (typeof appState.currentStyleIndex !== 'number' || isNaN(appState.currentStyleIndex) || appState.currentStyleIndex < 0 || appState.currentStyleIndex >= mapStyles.length) {
+                appState.currentStyleIndex = 0;
+            }
+            appState.currentStyleIndex = (appState.currentStyleIndex + 1) % mapStyles.length;
+            appState.map.setStyle(mapStyles[appState.currentStyleIndex]);
             const styleNames = ['الشوارع', 'الأقمار الصناعية', 'فاتح', 'مظلم'];
-            showNotification(`تم تغيير نمط الخريطة إلى: ${styleNames[currentStyleIndex]}`, 'info', 2000);
-            
+            showInfo(`تم تغيير نمط الخريطة إلى: ${styleNames[appState.currentStyleIndex]}`, 2000);
             // Re-add markers after style change
-            map.once('styledata', () => {
+            appState.map.once('styledata', () => {
                 setTimeout(() => {
                     updateMapMarkers();
                     updateMapWithEmployees();
@@ -1699,27 +2168,27 @@
 
         // Show all employees on map
         async function showAllEmployeesOnMap() {
-            if (!map) {
-                showNotification('الخريطة غير محملة بعد', 'warning');
+            if (!appState.map) {
+                showError('الخريطة غير محملة بعد');
                 return;
             }
 
             try {
                 let employeeIds = [];
                 
-                if (currentUser.role === 'admin') {
-                    const { data: allEmps } = await supabase.from('employees').select('id');
+                if (appState.currentUser.role === 'admin') {
+                    const { data: allEmps } = await appState.supabase.from('employees').select('id');
                     employeeIds = allEmps ? allEmps.map(emp => emp.id) : [];
                 } else {
-                    employeeIds = allowedEmployees.map(emp => emp.employee_id || emp.id);
+                    employeeIds = appState.allowedEmployees.map(emp => emp.employee_id || emp.id);
                 }
 
                 if (employeeIds.length === 0) {
-                    showNotification('لا توجد أفراد لعرضهم', 'warning');
+                    showError('لا توجد أفراد لعرضهم');
                     return;
                 }
 
-                const { data: latestLogs, error } = await supabase
+                const { data: latestLogs, error } = await appState.supabase
                     .from('logs')
                     .select(`*, employees (id, name, status, phone)`)
                     .in('employee_id', employeeIds)
@@ -1753,44 +2222,44 @@
                     Object.values(employeeLocations).forEach(empData => {
                         bounds.extend([empData.location.longitude, empData.location.latitude]);
                     });
-                    map.fitBounds(bounds, { padding: 50 });
+                    appState.map.fitBounds(bounds, { padding: 50 });
                 }
 
-                showNotification(`تم عرض ${Object.keys(employeeLocations).length} فرد على الخريطة`, 'success');
+                showSuccess(`تم عرض ${Object.keys(employeeLocations).length} فرد على الخريطة`);
             } catch (error) {
                 console.error('Error showing employees on map:', error);
-                showNotification('خطأ في عرض الأفراد على الخريطة', 'error');
+                showError('خطأ في عرض الأفراد على الخريطة');
             }
         }
 
         // Locate Me Function - FIXED
         function locateMe() {
-            if (!map) {
-                showNotification('الخريطة غير محملة بعد. يرجى الانتظار قليلاً...', 'warning');
+            if (!appState.map) {
+                showError('الخريطة غير محملة بعد. يرجى الانتظار قليلاً...');
                 return;
             }
 
             if (navigator.geolocation) {
-                showNotification('جاري تحديد موقعك...', 'info');
+                showInfo('جاري تحديد موقعك...');
                 
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
                         const { latitude, longitude } = position.coords;
                         
                         // Remove previous marker if exists
-                        if (myLocationMarker) {
-                            myLocationMarker.remove();
+                        if (appState.myLocationMarker) {
+                            appState.myLocationMarker.remove();
                         }
                         
                         // Fly to location
-                        map.flyTo({
+                        appState.map.flyTo({
                             center: [longitude, latitude],
                             zoom: 16,
                             duration: 2000
                         });
 
                         // Add marker for my location
-                        myLocationMarker = new mapboxgl.Marker({ 
+                        appState.myLocationMarker = new mapboxgl.Marker({ 
                             color: '#ff6b6b',
                             scale: 1.2
                         })
@@ -1804,9 +2273,9 @@
                                     <small>دقة: ${Math.round(position.coords.accuracy)}م</small>
                                 </div>
                             `))
-                            .addTo(map);
+                            .addTo(appState.map);
 
-                        showNotification('تم تحديد موقعك بنجاح! 📍', 'success');
+                        showSuccess('تم تحديد موقعك بنجاح! 📍');
                     },
                     function(error) {
                         console.error('Geolocation error:', error);
@@ -1827,7 +2296,7 @@
                                 break;
                         }
                         
-                        showNotification(errorMessage, 'error');
+                        showError(errorMessage);
                     },
                     {
                         enableHighAccuracy: true,
@@ -1836,35 +2305,38 @@
                     }
                 );
             } else {
-                showNotification('خدمات الموقع غير مدعومة في هذا المتصفح', 'error');
+                showError('خدمات الموقع غير مدعومة في هذا المتصفح');
             }
         }
 
         // Map control functions
         function refreshMap() {
-            if (map) {
+            if (appState.map) {
                 updateMapMarkers();
-                showNotification('تم تحديث الخريطة', 'success', 2000);
+                showSuccess('تم تحديث الخريطة', 2000);
             }
         }
 
         function fitAllMarkers() {
-            if (map && allowedCenters.length > 0) {
+            if (appState.map && appState.allowedCenters.length > 0) {
                 const bounds = new mapboxgl.LngLatBounds();
-                allowedCenters.forEach(center => {
+                appState.allowedCenters.forEach(center => {
                     bounds.extend([center.longitude, center.latitude]);
                 });
-                map.fitBounds(bounds, { padding: 50 });
-                showNotification('تم عرض جميع المراكز', 'info', 2000);
+                appState.map.fitBounds(bounds, { padding: 50 });
+                showInfo(`تم عرض جميع المراكز (${appState.allowedCenters.length})`, 2000);
+            } else {
+                showError('لا توجد مراكز متاحة للعرض على الخريطة');
             }
         }
 
         // Data Loading Functions - ENHANCED
         async function loadAllData() {
             try {
+                showLoading();
                 updateConnectionStatus('جاري التحميل...', 'syncing');
                 
-                if (currentUser.role === 'admin') {
+                if (appState.currentUser.role === 'admin') {
                     await Promise.all([
                         loadCenters(),
                         loadEmployees(),
@@ -1874,8 +2346,8 @@
                         refreshEmployeeLocations()
                     ]);
                     
-                    allowedCenters = [...allCenters];
-                    allowedEmployees = [...allEmployees];
+                    appState.allowedCenters = [...appState.allCenters];
+                    appState.allowedEmployees = [...appState.allEmployees];
                 } else {
                     await Promise.all([
                         loadAllowedCenters(),
@@ -1887,7 +2359,7 @@
                     ]);
                 }
                 
-                if (map && map.isStyleLoaded()) {
+                if (appState.map && appState.map.isStyleLoaded()) {
                     updateMapMarkers();
                 }
                 
@@ -1896,7 +2368,9 @@
             } catch (error) {
                 console.error('Error loading data:', error);
                 updateConnectionStatus('خطأ تحميل', 'error');
-                showNotification('خطأ في تحميل البيانات', 'error');
+                showError('خطأ في تحميل البيانات');
+            } finally {
+                hideLoading();
             }
         }
 
@@ -1906,13 +2380,13 @@
                 const todayStart = getTodayDateStart();
                 
                 // Get checkin/checkout stats for each center
-                let query = supabase
+                let query = appState.supabase
                     .from('logs')
                     .select('center_id, action')
                     .gte('occurred_at', todayStart);
 
-                if (currentUser.role !== 'admin' && allowedEmployees.length > 0) {
-                    const employeeIds = allowedEmployees.map(emp => emp.employee_id || emp.id);
+                if (appState.currentUser.role !== 'admin' && appState.allowedEmployees.length > 0) {
+                    const employeeIds = appState.allowedEmployees.map(emp => emp.employee_id || emp.id);
                     query = query.in('employee_id', employeeIds);
                 }
 
@@ -1920,36 +2394,40 @@
                 if (error) throw error;
 
                 // Process statistics
-                centerStats = {};
+                appState.centerStats = {};
                 logs.forEach(log => {
-                    if (!centerStats[log.center_id]) {
-                        centerStats[log.center_id] = { checkins: 0, checkouts: 0 };
+                    if (!appState.centerStats[log.center_id]) {
+                        appState.centerStats[log.center_id] = { checkins: 0, checkouts: 0 };
                     }
                     
                     if (log.action.includes('checkin') || log.action === 'in' || log.action === 'center_entry') {
-                        centerStats[log.center_id].checkins++;
+                        appState.centerStats[log.center_id].checkins++;
                     } else if (log.action.includes('checkout') || log.action === 'out') {
-                        centerStats[log.center_id].checkouts++;
+                        appState.centerStats[log.center_id].checkouts++;
                     }
                 });
 
-                console.log('Center stats loaded:', centerStats);
+                console.log('Center stats loaded:', appState.centerStats);
             } catch (error) {
                 console.error('Error loading center stats:', error);
-                centerStats = {};
+                appState.centerStats = {};
             }
         }
 
         async function loadAllowedCenters() {
             try {
-                const { data: centers, error } = await supabase.rpc('get_user_allowed_centers', {
-                    input_user_id: currentUser.id
+                const { data: centers, error } = await appState.supabase.rpc('get_user_allowed_centers', {
+                    input_user_id: appState.currentUser.id
                 });
 
                 if (error) throw error;
 
-                allowedCenters = centers || [];
-                displayCenters(allowedCenters);
+                appState.allowedCenters = centers || [];
+                displayCenters(appState.allowedCenters);
+                // تحديث المراكز على الخريطة مباشرة بعد التحميل
+                if (appState.map && appState.map.isStyleLoaded()) {
+                    updateMapMarkers();
+                }
             } catch (error) {
                 console.error('Error loading allowed centers:', error);
             }
@@ -1957,14 +2435,14 @@
 
         async function loadAllowedEmployees() {
             try {
-                const { data: employees, error } = await supabase.rpc('get_user_allowed_employees', {
-                    input_user_id: currentUser.id
+                const { data: employees, error } = await appState.supabase.rpc('get_user_allowed_employees', {
+                    input_user_id: appState.currentUser.id
                 });
 
                 if (error) throw error;
 
-                allowedEmployees = employees || [];
-                displayEmployees(allowedEmployees);
+                appState.allowedEmployees = employees || [];
+                displayEmployees(appState.allowedEmployees);
             } catch (error) {
                 console.error('Error loading allowed employees:', error);
             }
@@ -1972,15 +2450,19 @@
 
         async function loadCenters() {
             try {
-                const { data: centers, error } = await supabase
+                const { data: centers, error } = await appState.supabase
                     .from('centers')
                     .select('*')
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
 
-                allCenters = centers || [];
-                displayCenters(allCenters);
+                appState.allCenters = centers || [];
+                displayCenters(appState.allCenters);
+                // تحديث المراكز على الخريطة مباشرة بعد التحميل
+                if (appState.map && appState.map.isStyleLoaded()) {
+                    updateMapMarkers();
+                }
             } catch (error) {
                 console.error('Error loading centers:', error);
             }
@@ -1988,15 +2470,15 @@
 
         async function loadEmployees() {
             try {
-                const { data: employees, error } = await supabase
+                const { data: employees, error } = await appState.supabase
                     .from('employees')
                     .select(`*, centers (name)`)
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
 
-                allEmployees = employees || [];
-                displayEmployees(allEmployees);
+                appState.allEmployees = employees || [];
+                displayEmployees(appState.allEmployees);
             } catch (error) {
                 console.error('Error loading employees:', error);
             }
@@ -2017,11 +2499,11 @@
                     centerDiv.className = 'item-card';
                     
                     let actionsHtml = '';
-                    if (userPermissions.can_edit_centers) {
-                        actionsHtml += `<button class="btn btn-success btn-small" onclick="editCenter(${center.id || center.center_id})">تعديل</button>`;
+                    if (appState.userPermissions.can_edit_centers) {
+                        actionsHtml += `<button class="btn btn-success btn-small tooltip" onclick="editCenter(${center.id || center.center_id})" data-tooltip="تعديل بيانات المركز">تعديل</button>`;
                     }
-                    if (userPermissions.can_delete_centers) {
-                        actionsHtml += `<button class="btn btn-danger btn-small" onclick="deleteCenter(${center.id || center.center_id})">حذف</button>`;
+                    if (appState.userPermissions.can_delete_centers) {
+                        actionsHtml += `<button class="btn btn-danger btn-small tooltip" onclick="deleteCenter(${center.id || center.center_id})" data-tooltip="حذف المركز نهائياً">حذف</button>`;
                     }
                     
                     const centerName = center.name || center.center_name;
@@ -2031,7 +2513,7 @@
                     const centerId = center.id || center.center_id;
                     
                     // Get stats for this center
-                    const stats = centerStats[centerId] || { checkins: 0, checkouts: 0 };
+                    const stats = appState.centerStats[centerId] || { checkins: 0, checkouts: 0 };
                     
                     centerDiv.innerHTML = `
                         <div class="item-info">
@@ -2059,7 +2541,7 @@
 
         function displayEmployees(employees) {
             const employeesList = document.getElementById('employeesList');
-            const pagination = paginationState.employees;
+            const pagination = appState.pagination.employees;
             
             // Calculate pagination
             pagination.totalPages = Math.ceil(employees.length / pagination.pageSize);
@@ -2080,11 +2562,11 @@
                         </span>
                     `;
                     
-                    if (userPermissions.can_edit_employees) {
-                        actionsHtml += `<button class="btn btn-success btn-small" onclick="editEmployee(${employee.id || employee.employee_id})">تعديل</button>`;
+                    if (appState.userPermissions.can_edit_employees) {
+                        actionsHtml += `<button class="btn btn-success btn-small tooltip" onclick="editEmployee(${employee.id || employee.employee_id})" data-tooltip="تعديل بيانات الفرد">تعديل</button>`;
                     }
-                    if (userPermissions.can_delete_employees) {
-                        actionsHtml += `<button class="btn btn-danger btn-small" onclick="deleteEmployee(${employee.id || employee.employee_id})">حذف</button>`;
+                    if (appState.userPermissions.can_delete_employees) {
+                        actionsHtml += `<button class="btn btn-danger btn-small tooltip" onclick="deleteEmployee(${employee.id || employee.employee_id})" data-tooltip="حذف الفرد نهائياً">حذف</button>`;
                     }
                     
                     const empName = employee.name || employee.employee_name;
@@ -2092,10 +2574,13 @@
                     const empPosition = employee.position || employee.job_position;
                     const empCenterName = employee.centers?.name || employee.center_name || 'غير محدد';
                     
+                    // Mask phone number for security
+                    const maskedPhone = maskPhoneNumber(empPhone);
+                    
                     employeeDiv.innerHTML = `
                         <div class="item-info">
                             <strong>${empName}</strong><br>
-                            <small>${empPosition || 'موظف'} • 📱 ${empPhone}</small><br>
+                            <small>${empPosition || 'موظف'} • 📱 <span class="phone-masked" data-phone="${empPhone}" onclick="togglePhoneVisibility(this)">${maskedPhone}</span></small><br>
                             <small>المركز: ${empCenterName}</small>
                         </div>
                         <div class="item-actions">
@@ -2124,11 +2609,11 @@
             try {
                 let employeeIds = [];
                 
-                if (currentUser.role === 'admin') {
-                    const { data: allEmps } = await supabase.from('employees').select('id');
+                if (appState.currentUser.role === 'admin') {
+                    const { data: allEmps } = await appState.supabase.from('employees').select('id');
                     employeeIds = allEmps ? allEmps.map(emp => emp.id) : [];
                 } else {
-                    employeeIds = allowedEmployees.map(emp => emp.employee_id || emp.id);
+                    employeeIds = appState.allowedEmployees.map(emp => emp.employee_id || emp.id);
                 }
 
                 if (employeeIds.length === 0) {
@@ -2137,7 +2622,7 @@
                     return;
                 }
 
-                const { data: latestLogs, error } = await supabase
+                const { data: latestLogs, error } = await appState.supabase
                     .from('logs')
                     .select(`*, employees (id, name, status, phone), centers (name)`)
                     .in('employee_id', employeeIds)
@@ -2184,7 +2669,7 @@
             );
             
             // Pagination
-            const pagination = paginationState.locations;
+            const pagination = appState.pagination.locations;
             pagination.totalPages = Math.ceil(filteredLocations.length / pagination.pageSize);
             const startIndex = (pagination.currentPage - 1) * pagination.pageSize;
             const endIndex = startIndex + pagination.pageSize;
@@ -2204,6 +2689,9 @@
                 const timeDiff = getTimeDifference(empData.location.time);
                 const actionText = getActionText(empData.location.action);
                 const statusText = empData.employee.status === 'active' ? 'نشط' : 'غير نشط';
+                
+                // Mask phone number for security
+                const maskedPhone = maskPhoneNumber(empData.employee.phone);
 
                 locationDiv.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -2215,13 +2703,13 @@
                                 </span>
                             </div>
                             <div style="font-size: 0.9em; margin-bottom: 3px;">
-                                📱 ${empData.employee.phone} • 📍 ${actionText}
+                                📱 <span class="phone-masked" data-phone="${empData.employee.phone}" onclick="togglePhoneVisibility(this)">${maskedPhone}</span> • 📍 ${actionText}
                             </div>
                             <div style="font-size: 0.8em; color: var(--text-secondary);">
                                 📍 ${empData.center?.name || 'غير محدد'} • 🕐 <span class="time-ago" data-timestamp="${empData.location.time}">${timeDiff}</span>
                             </div>
                         </div>
-                        <button class="btn btn-small" onclick="focusOnEmployee(${empData.location.latitude}, ${empData.location.longitude}, '${empData.employee.name}')">
+                        <button class="btn btn-small tooltip" onclick="focusOnEmployee(${empData.location.latitude}, ${empData.location.longitude}, '${empData.employee.name}')" data-tooltip="عرض موقع الفرد على الخريطة">
                             📍 عرض
                         </button>
                     </div>
@@ -2241,50 +2729,70 @@
         }
 
         function focusOnEmployee(lat, lng, name) {
-            if (!map) {
-                showNotification('الخريطة غير محملة بعد', 'warning');
+            if (!appState.map) {
+                showError('الخريطة غير محملة بعد');
                 return;
             }
 
-            map.flyTo({
+            appState.map.flyTo({
                 center: [lng, lat],
                 zoom: 16,
                 duration: 2000
             });
             
-            showNotification(`تم التركيز على موقع ${name}`, 'info');
+            showInfo(`تم التركيز على موقع ${name}`);
         }
 
         // Enhanced Logs Loading with Better Color Coding
         async function loadLogs() {
             try {
-                let query = supabase
+                let query = appState.supabase
                     .from('logs')
                     .select(`*, employees (name, phone), centers (name)`)
                     .order('occurred_at', { ascending: false })
                     .limit(200);
 
-                if (currentUser.role !== 'admin' && allowedEmployees.length > 0) {
-                    const employeeIds = allowedEmployees.map(emp => emp.employee_id || emp.id);
+                if (appState.currentUser.role !== 'admin' && appState.allowedEmployees.length > 0) {
+                    const employeeIds = appState.allowedEmployees.map(emp => emp.employee_id || emp.id);
                     query = query.in('employee_id', employeeIds);
                 }
 
                 const { data: logs, error } = await query;
                 if (error) throw error;
 
-                allLogs = logs || [];
-                displayLogs(allLogs);
+                appState.allLogs = logs || [];
+                displayLogs(appState.allLogs);
                 
             } catch (error) {
                 console.error('Error loading logs:', error);
             }
         }
 
+        // فلترة السجلات المتكررة لنفس الموظف (دخول/خروج متتالي)
+        function filterUniqueLogs(logs) {
+            // ترتيب السجلات من الأقدم للأحدث
+            logs.sort((a, b) => new Date(a.occurred_at || a.created_at) - new Date(b.occurred_at || b.created_at));
+            const uniqueLogs = [];
+            const lastActionByEmployee = {};
+            logs.forEach(log => {
+                const empId = log.employee_id;
+                const action = log.action;
+                if (lastActionByEmployee[empId] === action) {
+                    return;
+                }
+                uniqueLogs.push(log);
+                lastActionByEmployee[empId] = action;
+            });
+            return uniqueLogs;
+        }
+
         function displayLogs(logs) {
+            // فلترة التكرار
+            logs = filterUniqueLogs(logs);
             const logsContainer = document.getElementById('activityLogs');
             
             // Pagination
-            const pagination = paginationState.logs;
+            const pagination = appState.pagination.logs;
             pagination.totalPages = Math.ceil(logs.length / pagination.pageSize);
             const startIndex = (pagination.currentPage - 1) * pagination.pageSize;
             const endIndex = startIndex + pagination.pageSize;
@@ -2299,7 +2807,7 @@
                     
                     const logTime = log.occurred_at || log.created_at;
                     const timeAgo = getTimeDifference(logTime);
-                    const fullTime = formatLocalDateTime(logTime);
+                    const fullTime = formatDateEnhanced(logTime);
                     
                     const actionText = getActionText(log.action);
                     const actionIcon = getActionIcon(log.action);
@@ -2324,7 +2832,7 @@
                             </div>
                         </div>
                         <div class="log-meta">
-                            <span>📅 ${fullTime}</span>
+                            <span class="date-formatted">📅 ${fullTime}</span>
                             ${log.notes ? `<span>📝 ${log.notes}</span>` : ''}
                         </div>
                     `;
@@ -2350,12 +2858,12 @@
             try {
                 let employeesCount, activeCount, centersCount, logsCount, checkedInCount, checkedOutCount;
 
-                if (currentUser.role === 'admin') {
+                if (appState.currentUser.role === 'admin') {
                     const [empRes, activeRes, centerRes, logsRes] = await Promise.all([
-                        supabase.from('employees').select('*', { count: 'exact', head: true }),
-                        supabase.from('employees').select('*', { count: 'exact', head: true }).eq('status', 'active'),
-                        supabase.from('centers').select('*', { count: 'exact', head: true }),
-                        supabase.from('logs').select('*', { count: 'exact', head: true }).gte('occurred_at', getTodayDateStart())
+                        appState.supabase.from('employees').select('*', { count: 'exact', head: true }),
+                        appState.supabase.from('employees').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+                        appState.supabase.from('centers').select('*', { count: 'exact', head: true }),
+                        appState.supabase.from('logs').select('*', { count: 'exact', head: true }).gte('occurred_at', getTodayDateStart())
                     ]);
                     
                     employeesCount = empRes.count || 0;
@@ -2363,13 +2871,13 @@
                     centersCount = centerRes.count || 0;
                     logsCount = logsRes.count || 0;
                 } else {
-                    employeesCount = allowedEmployees.length;
-                    activeCount = allowedEmployees.filter(emp => emp.status === 'active').length;
-                    centersCount = allowedCenters.length;
+                    employeesCount = appState.allowedEmployees.length;
+                    activeCount = appState.allowedEmployees.filter(emp => emp.status === 'active').length;
+                    centersCount = appState.allowedCenters.length;
                     
-                    const employeeIds = allowedEmployees.map(emp => emp.employee_id || emp.id);
+                    const employeeIds = appState.allowedEmployees.map(emp => emp.employee_id || emp.id);
                     if (employeeIds.length > 0) {
-                        const { count } = await supabase
+                        const { count } = await appState.supabase
                             .from('logs')
                             .select('*', { count: 'exact', head: true })
                             .in('employee_id', employeeIds)
@@ -2381,20 +2889,20 @@
                 }
 
                 // Get checkin/checkout statistics for today
-                let checkinQuery = supabase
+                let checkinQuery = appState.supabase
                     .from('logs')
                     .select('employee_id', { count: 'exact', head: true })
                     .gte('occurred_at', getTodayDateStart())
                     .in('action', ['checkin', 'auto_checkin', 'in', 'center_entry']);
 
-                let checkoutQuery = supabase
+                let checkoutQuery = appState.supabase
                     .from('logs')
                     .select('employee_id', { count: 'exact', head: true })
                     .gte('occurred_at', getTodayDateStart())
                     .in('action', ['checkout', 'auto_checkout', 'out']);
 
-                if (currentUser.role !== 'admin' && allowedEmployees.length > 0) {
-                    const employeeIds = allowedEmployees.map(emp => emp.employee_id || emp.id);
+                if (appState.currentUser.role !== 'admin' && appState.allowedEmployees.length > 0) {
+                    const employeeIds = appState.allowedEmployees.map(emp => emp.employee_id || emp.id);
                     checkinQuery = checkinQuery.in('employee_id', employeeIds);
                     checkoutQuery = checkoutQuery.in('employee_id', employeeIds);
                 }
@@ -2416,7 +2924,7 @@
 
         // Enhanced Map Functions with Center Statistics
         async function updateMapMarkers() {
-            if (!map || !map.isStyleLoaded()) {
+            if (!appState.map || !appState.map.isStyleLoaded()) {
                 console.log('Map not ready yet...');
                 return;
             }
@@ -2424,18 +2932,18 @@
             try {
                 // Clear existing layers
                 ['centers-layer', 'center-labels'].forEach(layerId => {
-                    if (map.getLayer(layerId)) map.removeLayer(layerId);
+                    if (appState.map.getLayer(layerId)) appState.map.removeLayer(layerId);
                 });
-                if (map.getSource('centers')) map.removeSource('centers');
+                if (appState.map.getSource('centers')) appState.map.removeSource('centers');
 
-                const centersToShow = currentUser.role === 'admin' ? allCenters : allowedCenters;
+                const centersToShow = appState.currentUser.role === 'admin' ? appState.allCenters : appState.allowedCenters;
 
                 if (centersToShow && centersToShow.length > 0) {
                     const geojsonData = {
                         type: 'FeatureCollection',
                         features: centersToShow.map(center => {
                             const centerId = center.id || center.center_id;
-                            const stats = centerStats[centerId] || { checkins: 0, checkouts: 0 };
+                            const stats = appState.centerStats[centerId] || { checkins: 0, checkouts: 0 };
                             return {
                                 type: 'Feature',
                                 geometry: {
@@ -2453,25 +2961,25 @@
                         })
                     };
 
-                    map.addSource('centers', {
+                    appState.map.addSource('centers', {
                         type: 'geojson',
                         data: geojsonData
                     });
 
-                    map.addLayer({
+                    appState.map.addLayer({
                         id: 'centers-layer',
                         type: 'circle',
                         source: 'centers',
                         paint: {
                             'circle-radius': 20,
-                            'circle-color': currentUser.role === 'admin' ? '#667eea' : '#4facfe',
+                            'circle-color': appState.currentUser.role === 'admin' ? '#667eea' : '#4facfe',
                             'circle-stroke-width': 4,
                             'circle-stroke-color': '#ffffff',
                             'circle-opacity': 0.8
                         }
                     });
 
-                    map.addLayer({
+                    appState.map.addLayer({
                         id: 'center-labels',
                         type: 'symbol',
                         source: 'centers',
@@ -2491,7 +2999,7 @@
                         }
                     });
 
-                    map.on('click', 'centers-layer', (e) => {
+                    appState.map.on('click', 'centers-layer', (e) => {
                         const coordinates = e.features[0].geometry.coordinates.slice();
                         const { name, radius, checkins, checkouts } = e.features[0].properties;
 
@@ -2516,7 +3024,7 @@
                                     </div>
                                 </div>
                             `)
-                            .addTo(map);
+                            .addTo(appState.map);
                     });
 
                     if (centersToShow.length > 1) {
@@ -2524,7 +3032,7 @@
                         centersToShow.forEach(center => {
                             bounds.extend([center.longitude, center.latitude]);
                         });
-                        map.fitBounds(bounds, { padding: 50 });
+                        appState.map.fitBounds(bounds, { padding: 50 });
                     }
                 }
             } catch (error) {
@@ -2533,13 +3041,13 @@
         }
 
         function updateMapWithEmployees(employeeLocations) {
-            if (!map || !map.isStyleLoaded()) return;
+            if (!appState.map || !appState.map.isStyleLoaded()) return;
 
             // Clear existing employee layers
             ['employees-layer', 'employee-labels'].forEach(layerId => {
-                if (map.getLayer(layerId)) map.removeLayer(layerId);
+                if (appState.map.getLayer(layerId)) appState.map.removeLayer(layerId);
             });
-            if (map.getSource('employees')) map.removeSource('employees');
+            if (appState.map.getSource('employees')) appState.map.removeSource('employees');
 
             if (!employeeLocations || Object.keys(employeeLocations).length === 0) return;
 
@@ -2562,12 +3070,12 @@
                 }))
             };
 
-            map.addSource('employees', {
+            appState.map.addSource('employees', {
                 type: 'geojson',
                 data: employeesGeoJSON
             });
 
-            map.addLayer({
+            appState.map.addLayer({
                 id: 'employees-layer',
                 type: 'circle',
                 source: 'employees',
@@ -2584,7 +3092,7 @@
                 }
             });
 
-            map.addLayer({
+            appState.map.addLayer({
                 id: 'employee-labels',
                 type: 'symbol',
                 source: 'employees',
@@ -2604,10 +3112,13 @@
                 }
             });
 
-            map.on('click', 'employees-layer', (e) => {
+            appState.map.on('click', 'employees-layer', (e) => {
                 const coordinates = e.features[0].geometry.coordinates.slice();
                 const properties = e.features[0].properties;
                 const timeDiff = getTimeDifference(properties.time);
+                
+                // Mask phone number for security
+                const maskedPhone = maskPhoneNumber(properties.phone);
 
                 new mapboxgl.Popup({ 
                     closeOnClick: true,
@@ -2617,59 +3128,59 @@
                     .setHTML(`
                         <div class="marker-popup">
                             <h3 style="margin: 0 0 10px 0; color: #2c3e50; font-size: 16px;">${properties.name}</h3>
-                            <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>📱 الهاتف:</strong> ${properties.phone}</p>
+                            <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>📱 الهاتف:</strong> <span class="phone-masked" data-phone="${properties.phone}" onclick="togglePhoneVisibility(this)">${maskedPhone}</span></p>
                             <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>الحالة:</strong> ${properties.status === 'active' ? '🟢 نشط' : '🔴 غير نشط'}</p>
                             <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>آخر نشاط:</strong> ${getActionText(properties.action)}</p>
                             <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>التوقيت:</strong> ${timeDiff}</p>
                             <p style="margin: 5px 0; color: #666; font-size: 14px;"><strong>المركز:</strong> ${properties.center}</p>
                         </div>
                     `)
-                    .addTo(map);
+                    .addTo(appState.map);
             });
 
-            map.on('mouseenter', 'employees-layer', () => {
-                map.getCanvas().style.cursor = 'pointer';
+            appState.map.on('mouseenter', 'employees-layer', () => {
+                appState.map.getCanvas().style.cursor = 'pointer';
             });
 
-            map.on('mouseleave', 'employees-layer', () => {
-                map.getCanvas().style.cursor = '';
+            appState.map.on('mouseleave', 'employees-layer', () => {
+                appState.map.getCanvas().style.cursor = '';
             });
         }
 
         // Pagination Functions
         function nextPage(type) {
-            const pagination = paginationState[type];
+            const pagination = appState.pagination[type];
             if (pagination.currentPage < pagination.totalPages) {
                 pagination.currentPage++;
                 
                 switch(type) {
                     case 'employees':
-                        displayEmployees(currentUser.role === 'admin' ? allEmployees : allowedEmployees);
+                        displayEmployees(appState.currentUser.role === 'admin' ? appState.allEmployees : appState.allowedEmployees);
                         break;
                     case 'locations':
                         refreshEmployeeLocations();
                         break;
                     case 'logs':
-                        displayLogs(allLogs);
+                        displayLogs(appState.allLogs);
                         break;
                 }
             }
         }
 
         function previousPage(type) {
-            const pagination = paginationState[type];
+            const pagination = appState.pagination[type];
             if (pagination.currentPage > 1) {
                 pagination.currentPage--;
                 
                 switch(type) {
                     case 'employees':
-                        displayEmployees(currentUser.role === 'admin' ? allEmployees : allowedEmployees);
+                        displayEmployees(appState.currentUser.role === 'admin' ? appState.allEmployees : appState.allowedEmployees);
                         break;
                     case 'locations':
                         refreshEmployeeLocations();
                         break;
                     case 'logs':
-                        displayLogs(allLogs);
+                        displayLogs(appState.allLogs);
                         break;
                 }
             }
@@ -2678,15 +3189,29 @@
         // Search and Filter Functions
         function filterEmployees() {
             const searchTerm = document.getElementById('searchEmployees').value.toLowerCase();
-            const employees = currentUser.role === 'admin' ? allEmployees : allowedEmployees;
-            const filteredEmployees = employees.filter(emp => 
+            const employees = appState.currentUser.role === 'admin' ? appState.allEmployees : appState.allowedEmployees;
+            
+            let filteredEmployees = employees.filter(emp => 
                 (emp.name || emp.employee_name).toLowerCase().includes(searchTerm) ||
                 emp.phone.includes(searchTerm) ||
                 (emp.position || emp.job_position || '').toLowerCase().includes(searchTerm)
             );
             
+            // Apply advanced filters
+            if (appState.searchFilters.center) {
+                filteredEmployees = filteredEmployees.filter(emp => 
+                    (emp.center_id || emp.centers?.id) == appState.searchFilters.center
+                );
+            }
+            
+            if (appState.searchFilters.status) {
+                filteredEmployees = filteredEmployees.filter(emp => 
+                    emp.status === appState.searchFilters.status
+                );
+            }
+            
             // Reset pagination
-            paginationState.employees.currentPage = 1;
+            appState.pagination.employees.currentPage = 1;
             displayEmployees(filteredEmployees);
         }
 
@@ -2705,83 +3230,105 @@
         }
 
         function filterMovements() {
+            // Reset pagination for locations
+            appState.pagination.locations.currentPage = 1;
             // This will trigger refreshEmployeeLocations which handles the search
             refreshEmployeeLocations();
         }
 
         function clearMovementSearch() {
             document.getElementById('searchMovements').value = '';
+            // Reset pagination for locations
+            appState.pagination.locations.currentPage = 1;
             refreshEmployeeLocations();
         }
 
         function filterLogs(type = 'all') {
-            let filteredLogs = allLogs;
+            let filteredLogs = appState.allLogs;
             
             if (type !== 'all') {
                 if (type === 'checkin') {
-                    filteredLogs = allLogs.filter(log => 
+                    filteredLogs = appState.allLogs.filter(log => 
                         log.action.includes('checkin') || log.action === 'in' || log.action === 'center_entry'
                     );
                 } else if (type === 'checkout') {
-                    filteredLogs = allLogs.filter(log => 
+                    filteredLogs = appState.allLogs.filter(log => 
                         log.action.includes('checkout') || log.action === 'out'
                     );
                 } else if (type === 'movement') {
-                    filteredLogs = allLogs.filter(log => 
+                    filteredLogs = appState.allLogs.filter(log => 
                         log.action.includes('movement') || log.action.includes('nearby')
                     );
                 } else if (type === 'center_entry') {
-                    filteredLogs = allLogs.filter(log => log.action === 'center_entry');
+                    filteredLogs = appState.allLogs.filter(log => log.action === 'center_entry');
                 } else {
-                    filteredLogs = allLogs.filter(log => log.action === type);
+                    filteredLogs = appState.allLogs.filter(log => log.action === type);
                 }
             }
             
+            // Apply date filters
+            if (appState.searchFilters.fromDate) {
+                filteredLogs = filteredLogs.filter(log => {
+                    const logDate = new Date(log.occurred_at || log.created_at);
+                    const fromDate = new Date(appState.searchFilters.fromDate);
+                    return logDate >= fromDate;
+                });
+            }
+            
+            if (appState.searchFilters.toDate) {
+                filteredLogs = filteredLogs.filter(log => {
+                    const logDate = new Date(log.occurred_at || log.created_at);
+                    const toDate = new Date(appState.searchFilters.toDate);
+                    toDate.setHours(23, 59, 59); // End of day
+                    return logDate <= toDate;
+                });
+            }
+            
             // Reset pagination
-            paginationState.logs.currentPage = 1;
+            appState.pagination.logs.currentPage = 1;
             displayLogs(filteredLogs);
-            showNotification(`تم تصفية السجلات: ${filteredLogs.length} سجل`, 'info', 2000);
+            showInfo(`تم تصفية السجلات: ${filteredLogs.length} سجل`, 2000);
         }
 
         // Focus Functions for Stats
         function focusOnEmployees() {
             document.querySelector('#employeesList')?.scrollIntoView({ behavior: 'smooth' });
-            showNotification('عرض قائمة الأفراد', 'info', 2000);
+            showInfo('عرض قائمة الأفراد', 2000);
         }
 
         function focusOnActiveEmployees() {
             document.querySelector('#employeeLocations')?.scrollIntoView({ behavior: 'smooth' });
-            showNotification('عرض الأفراد النشطين', 'info', 2000);
+            showInfo('عرض الأفراد النشطين', 2000);
         }
 
         function focusOnCheckedIn() {
             document.querySelector('#activityLogs')?.scrollIntoView({ behavior: 'smooth' });
             document.getElementById('logFilter').value = 'checkin';
             filterLogs('checkin');
-            showNotification('عرض سجلات الدخول', 'success', 2000);
+            showSuccess('عرض سجلات الدخول', 2000);
         }
 
         function focusOnCheckedOut() {
             document.querySelector('#activityLogs')?.scrollIntoView({ behavior: 'smooth' });
             document.getElementById('logFilter').value = 'checkout';
             filterLogs('checkout');
-            showNotification('عرض سجلات الخروج', 'error', 2000);
+            showError('عرض سجلات الخروج', 2000);
         }
 
         function focusOnCenters() {
             document.querySelector('#centersList')?.scrollIntoView({ behavior: 'smooth' });
-            showNotification('عرض المراكز', 'info', 2000);
+            showInfo('عرض المراكز', 2000);
         }
 
         function focusOnLogs() {
             document.querySelector('#activityLogs')?.scrollIntoView({ behavior: 'smooth' });
-            showNotification('عرض سجل الأنشطة', 'info', 2000);
+            showInfo('عرض سجل الأنشطة', 2000);
         }
 
         // CRUD Functions - Same as before but enhanced
         async function addCenter() {
-            if (!userPermissions.can_add_centers) {
-                showNotification('ليس لديك صلاحية لإضافة المراكز', 'warning');
+            if (!appState.userPermissions.can_add_centers) {
+                showError('ليس لديك صلاحية لإضافة المراكز');
                 return;
             }
 
@@ -2791,12 +3338,12 @@
             const radius = parseInt(document.getElementById('centerRadius').value);
 
             if (!name || !lng || !lat || !radius) {
-                showNotification('يرجى ملء جميع الحقول واختيار موقع على الخريطة', 'warning');
+                showError('يرجى ملء جميع الحقول واختيار موقع على الخريطة');
                 return;
             }
 
             try {
-                const { data, error } = await supabase
+                const { data, error } = await appState.supabase
                     .from('centers')
                     .insert([{ name, longitude: lng, latitude: lat, radius }])
                     .select();
@@ -2804,11 +3351,11 @@
                 if (error) throw error;
 
                 // Add permission for this user to access the new center if regular user
-                if (currentUser.role !== 'admin' && data[0]) {
-                    await supabase
+                if (appState.currentUser.role !== 'admin' && data[0]) {
+                    await appState.supabase
                         .from('user_center_permissions')
                         .insert([{
-                            user_id: currentUser.id,
+                            user_id: appState.currentUser.id,
                             center_id: data[0].id,
                             can_view: true,
                             can_manage: true
@@ -2822,16 +3369,16 @@
                 document.getElementById('centerRadius').value = '100';
 
                 await loadAllData();
-                showNotification('تم إضافة المركز بنجاح ✅', 'success');
+                showSuccess('تم إضافة المركز بنجاح ✅');
             } catch (error) {
                 console.error('Error adding center:', error);
-                showNotification('حدث خطأ في إضافة المركز', 'error');
+                showError('حدث خطأ في إضافة المركز');
             }
         }
 
         async function addEmployee() {
-            if (!userPermissions.can_add_employees) {
-                showNotification('ليس لديك صلاحية لإضافة الأفراد', 'warning');
+            if (!appState.userPermissions.can_add_employees) {
+                showError('ليس لديك صلاحية لإضافة الأفراد');
                 return;
             }
 
@@ -2842,29 +3389,29 @@
             const centerId = document.getElementById('employeeCenter').value;
 
             if (!name || !phone || !password || !centerId) {
-                showNotification('يرجى ملء جميع الحقول المطلوبة', 'warning');
+                showError('يرجى ملء جميع الحقول المطلوبة');
                 return;
             }
 
             if (password.length < 6) {
-                showNotification('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'warning');
+                showError('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
                 return;
             }
 
             // Check if user has permission for this center
-            if (currentUser.role !== 'admin') {
-                const hasPermission = allowedCenters.some(center => 
+            if (appState.currentUser.role !== 'admin') {
+                const hasPermission = appState.allowedCenters.some(center => 
                     (center.center_id || center.id) == centerId && center.can_manage !== false
                 );
 
                 if (!hasPermission) {
-                    showNotification('ليس لديك صلاحية لإضافة أفراد في هذا المركز', 'warning');
+                    showError('ليس لديك صلاحية لإضافة أفراد في هذا المركز');
                     return;
                 }
             }
 
             try {
-                const { data, error } = await supabase.rpc('add_employee', {
+                const { data, error } = await appState.supabase.rpc('add_employee', {
                     employee_name: name,
                     employee_phone: phone,
                     employee_password: password,
@@ -2884,13 +3431,13 @@
                     document.getElementById('employeeCenter').value = '';
 
                     await loadAllData();
-                    showNotification(`✅ تم إضافة الفرد بنجاح!`, 'success');
+                    showSuccess(`✅ تم إضافة الفرد بنجاح!`);
                 } else {
-                    showNotification('❌ ' + result.error, 'error');
+                    showError('❌ ' + result.error);
                 }
             } catch (error) {
                 console.error('Error adding employee:', error);
-                showNotification('حدث خطأ في إضافة الفرد: ' + error.message, 'error');
+                showError('حدث خطأ في إضافة الفرد: ' + error.message);
             }
         }
 
@@ -2952,17 +3499,17 @@
 
         // Edit Functions - Same as before
         function editEmployee(employeeId) {
-            if (!userPermissions.can_edit_employees) {
-                showNotification('ليس لديك صلاحية لتعديل الأفراد', 'warning');
+            if (!appState.userPermissions.can_edit_employees) {
+                showError('ليس لديك صلاحية لتعديل الأفراد');
                 return;
             }
 
-            const employee = (currentUser.role === 'admin' ? allEmployees : allowedEmployees)
+            const employee = (appState.currentUser.role === 'admin' ? appState.allEmployees : appState.allowedEmployees)
                 .find(emp => (emp.id || emp.employee_id) === employeeId);
             
             if (!employee) return;
 
-            currentEditingEmployee = employee;
+            appState.currentEditingEmployee = employee;
 
             document.getElementById('editEmployeeName').value = employee.name || employee.employee_name;
             document.getElementById('editEmployeePhone').value = employee.phone;
@@ -2973,7 +3520,7 @@
             const centerSelect = document.getElementById('editEmployeeCenter');
             centerSelect.innerHTML = '<option value="">اختر المركز</option>';
             
-            const centersToShow = currentUser.role === 'admin' ? allCenters : allowedCenters;
+            const centersToShow = appState.currentUser.role === 'admin' ? appState.allCenters : appState.allowedCenters;
             centersToShow.forEach(center => {
                 const option = document.createElement('option');
                 option.value = center.id || center.center_id;
@@ -2988,17 +3535,17 @@
         }
 
         function editCenter(centerId) {
-            if (!userPermissions.can_edit_centers) {
-                showNotification('ليس لديك صلاحية لتعديل المراكز', 'warning');
+            if (!appState.userPermissions.can_edit_centers) {
+                showError('ليس لديك صلاحية لتعديل المراكز');
                 return;
             }
 
-            const center = (currentUser.role === 'admin' ? allCenters : allowedCenters)
+            const center = (appState.currentUser.role === 'admin' ? appState.allCenters : appState.allowedCenters)
                 .find(c => (c.id || c.center_id) === centerId);
             
             if (!center) return;
 
-            currentEditingCenter = center;
+            appState.currentEditingCenter = center;
 
             document.getElementById('editCenterName').value = center.name || center.center_name;
             document.getElementById('editCenterLng').value = center.longitude;
@@ -3009,7 +3556,7 @@
         }
 
         async function updateEmployee() {
-            if (!currentEditingEmployee || !userPermissions.can_edit_employees) return;
+            if (!appState.currentEditingEmployee || !appState.userPermissions.can_edit_employees) return;
 
             const name = document.getElementById('editEmployeeName').value.trim();
             const phone = document.getElementById('editEmployeePhone').value.trim();
@@ -3018,12 +3565,12 @@
             const centerId = document.getElementById('editEmployeeCenter').value;
 
             if (!name || !phone) {
-                showNotification('يرجى ملء الحقول المطلوبة', 'warning');
+                showError('يرجى ملء الحقول المطلوبة');
                 return;
             }
 
             try {
-                const { error } = await supabase
+                const { error } = await appState.supabase
                     .from('employees')
                     .update({
                         name: name,
@@ -3032,21 +3579,21 @@
                         status: status,
                         center_id: centerId || null
                     })
-                    .eq('id', currentEditingEmployee.id || currentEditingEmployee.employee_id);
+                    .eq('id', appState.currentEditingEmployee.id || appState.currentEditingEmployee.employee_id);
 
                 if (error) throw error;
 
                 closeModal('editEmployeeModal');
                 await loadAllData();
-                showNotification('تم تحديث بيانات الفرد بنجاح ✅', 'success');
+                showSuccess('تم تحديث بيانات الفرد بنجاح ✅');
             } catch (error) {
                 console.error('Error updating employee:', error);
-                showNotification('حدث خطأ في تحديث البيانات', 'error');
+                showError('حدث خطأ في تحديث البيانات');
             }
         }
 
         async function updateCenter() {
-            if (!currentEditingCenter || !userPermissions.can_edit_centers) return;
+            if (!appState.currentEditingCenter || !appState.userPermissions.can_edit_centers) return;
 
             const name = document.getElementById('editCenterName').value.trim();
             const lng = parseFloat(document.getElementById('editCenterLng').value);
@@ -3054,12 +3601,12 @@
             const radius = parseInt(document.getElementById('editCenterRadius').value);
 
             if (!name || !lng || !lat || !radius) {
-                showNotification('يرجى ملء جميع الحقول', 'warning');
+                showError('يرجى ملء جميع الحقول');
                 return;
             }
 
             try {
-                const { error } = await supabase
+                const { error } = await appState.supabase
                     .from('centers')
                     .update({
                         name: name,
@@ -3067,62 +3614,62 @@
                         latitude: lat,
                         radius: radius
                     })
-                    .eq('id', currentEditingCenter.id || currentEditingCenter.center_id);
+                    .eq('id', appState.currentEditingCenter.id || appState.currentEditingCenter.center_id);
 
                 if (error) throw error;
 
                 closeModal('editCenterModal');
                 await loadAllData();
-                showNotification('تم تحديث بيانات المركز بنجاح ✅', 'success');
+                showSuccess('تم تحديث بيانات المركز بنجاح ✅');
             } catch (error) {
                 console.error('Error updating center:', error);
-                showNotification('حدث خطأ في تحديث البيانات', 'error');
+                showError('حدث خطأ في تحديث البيانات');
             }
         }
 
         // Delete Functions - Same as before
         async function deleteCenter(centerId) {
-            if (!userPermissions.can_delete_centers) {
-                showNotification('ليس لديك صلاحية لحذف المراكز', 'warning');
+            if (!appState.userPermissions.can_delete_centers) {
+                showError('ليس لديك صلاحية لحذف المراكز');
                 return;
             }
 
             if (confirm('هل أنت متأكد من حذف هذا المركز؟ سيتم حذف جميع المرتبطين به.')) {
                 try {
-                    const { error } = await supabase
+                    const { error } = await appState.supabase
                         .from('centers')
                         .delete()
                         .eq('id', centerId);
 
                     if (error) throw error;
                     await loadAllData();
-                    showNotification('تم حذف المركز بنجاح ✅', 'success');
+                    showSuccess('تم حذف المركز بنجاح ✅');
                 } catch (error) {
                     console.error('Error deleting center:', error);
-                    showNotification('حدث خطأ في حذف المركز', 'error');
+                    showError('حدث خطأ في حذف المركز');
                 }
             }
         }
 
         async function deleteEmployee(employeeId) {
-            if (!userPermissions.can_delete_employees) {
-                showNotification('ليس لديك صلاحية لحذف الأفراد', 'warning');
+            if (!appState.userPermissions.can_delete_employees) {
+                showError('ليس لديك صلاحية لحذف الأفراد');
                 return;
             }
 
             if (confirm('هل أنت متأكد من الحذف؟')) {
                 try {
-                    const { error } = await supabase
+                    const { error } = await appState.supabase
                         .from('employees')
                         .delete()
                         .eq('id', employeeId);
 
                     if (error) throw error;
                     await loadAllData();
-                    showNotification('تم الحذف بنجاح ✅', 'success');
+                    showSuccess('تم الحذف بنجاح ✅');
                 } catch (error) {
                     console.error('Error deleting employee:', error);
-                    showNotification('حدث خطأ في الحذف', 'error');
+                    showError('حدث خطأ في الحذف');
                 }
             }
         }
@@ -3133,16 +3680,16 @@
                 updateConnectionStatus('جاري التحديث...', 'syncing');
                 showRefreshIndicator();
                 await loadAllData();
-                showNotification('تم تحديث جميع البيانات بنجاح 🔄', 'success');
+                showSuccess('تم تحديث جميع البيانات بنجاح 🔄');
             } catch (error) {
                 console.error('Error refreshing data:', error);
-                showNotification('خطأ في تحديث البيانات', 'error');
+                showError('خطأ في تحديث البيانات');
             }
         }
 
         function refreshLogs() {
             loadLogs();
-            showNotification('تم تحديث السجلات', 'info', 2000);
+            showInfo('تم تحديث السجلات', 2000);
         }
 
         // Helper Functions
@@ -3195,16 +3742,32 @@
             if (body.getAttribute('data-theme') === 'dark') {
                 body.setAttribute('data-theme', 'light');
                 themeToggle.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
             } else {
                 body.setAttribute('data-theme', 'dark');
                 themeToggle.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
             }
         }
+
+        // عند تحميل الصفحة، طبّق السمة المحفوظة
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            const body = document.body;
+            const themeToggle = document.querySelector('.theme-toggle');
+            if (savedTheme === 'dark') {
+                body.setAttribute('data-theme', 'dark');
+                if (themeToggle) themeToggle.textContent = '☀️';
+            } else {
+                body.setAttribute('data-theme', 'light');
+                if (themeToggle) themeToggle.textContent = '🌙';
+            }
+        });
 
         // Real-time Updates Setup
         function setupRealTimeUpdates() {
             // Subscribe to logs changes
-            supabase
+            appState.supabase
                 .channel('enhanced_logs_channel_v2')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'logs' }, (payload) => {
                     console.log('New log activity detected:', payload);
@@ -3216,13 +3779,13 @@
                     // Show notification for new activities
                     if (payload.eventType === 'INSERT' && payload.new) {
                         const actionText = getActionText(payload.new.action);
-                        showNotification(`نشاط جديد: ${actionText}`, 'info', 5000);
+                        showInfo(`نشاط جديد: ${actionText}`, 5000);
                     }
                 })
                 .subscribe();
 
             // Subscribe to employee changes
-            supabase
+            appState.supabase
                 .channel('enhanced_employees_channel_v2')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'employees' }, () => {
                     loadAllData();
@@ -3230,7 +3793,7 @@
                 .subscribe();
 
             // Subscribe to centers changes
-            supabase
+            appState.supabase
                 .channel('enhanced_centers_channel_v2')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'centers' }, () => {
                     loadAllData();
@@ -3250,7 +3813,7 @@
             }
         });
 
-        // Add Enter key support for login
+        // Add Enter key support for login and activity monitoring
         document.addEventListener('DOMContentLoaded', function() {
             const usernameInput = document.getElementById('loginUsername');
             const passwordInput = document.getElementById('loginPassword');
@@ -3261,6 +3824,11 @@
             
             passwordInput?.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') login();
+            });
+
+            // Monitor user activity for session timeout
+            ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+                document.addEventListener(event, updateLastActivity, true);
             });
         });
 
@@ -3312,6 +3880,14 @@
         window.focusOnEmployee = focusOnEmployee;
         window.nextPage = nextPage;
         window.previousPage = previousPage;
+        
+        // New enhanced functions
+        window.scrollToSection = scrollToSection;
+        window.applyAdvancedSearch = applyAdvancedSearch;
+        window.clearAdvancedSearch = clearAdvancedSearch;
+        window.exportToPDF = exportToPDF;
+        window.exportToExcel = exportToExcel;
+        window.togglePhoneVisibility = togglePhoneVisibility;
     </script>
 </body>
 </html>
