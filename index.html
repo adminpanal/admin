@@ -592,6 +592,24 @@
             color: var(--text-color);
         }
 
+        /* Time display styles */
+        .time-display {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .time-ago {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+
+        .real-time-update {
+            color: #27ae60;
+            font-size: 0.8em;
+        }
+
         /* Responsive Design */
         @media (max-width: 1200px) {
             .main-layout {
@@ -1048,6 +1066,67 @@
         // Mapbox Configuration
         mapboxgl.accessToken = 'pk.eyJ1IjoiYW1lZXI3ZWx3YXMiLCJhIjoiY21iODAxaTFyMGFsajJqc2J2dGtvY2pmdSJ9.MNY-7y2onlfAnM0PUhNt8g';
 
+        // تحديث: دوال التوقيت المُصححة لقاعدة البيانات
+        function getCurrentTimestamp() {
+            return new Date().toISOString();
+        }
+
+        function formatLocalDateTime(timestamp) {
+            if (!timestamp) return 'غير محدد';
+            
+            try {
+                const date = new Date(timestamp);
+                const options = {
+                    year: 'numeric',
+                    month: '2-digit', 
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    timeZone: 'Asia/Baghdad',
+                    hour12: false
+                };
+                return date.toLocaleString('ar-IQ', options);
+            } catch (error) {
+                console.error('Error formatting date:', error);
+                return 'تاريخ غير صالح';
+            }
+        }
+
+        function getTimeDifference(timestamp) {
+            if (!timestamp) return 'غير محدد';
+            
+            try {
+                const now = new Date();
+                const time = new Date(timestamp);
+                const diffInSeconds = Math.floor((now - time) / 1000);
+                
+                if (diffInSeconds < 30) {
+                    return 'الآن';
+                } else if (diffInSeconds < 60) {
+                    return 'منذ لحظات';
+                } else if (diffInSeconds < 3600) {
+                    const minutes = Math.floor(diffInSeconds / 60);
+                    return `منذ ${minutes} دقيقة`;
+                } else if (diffInSeconds < 86400) {
+                    const hours = Math.floor(diffInSeconds / 3600);
+                    return `منذ ${hours} ساعة`;
+                } else {
+                    const days = Math.floor(diffInSeconds / 86400);
+                    return `منذ ${days} يوم`;
+                }
+            } catch (error) {
+                console.error('Error calculating time difference:', error);
+                return 'غير محدد';
+            }
+        }
+
+        function getTodayDateStart() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return today.toISOString();
+        }
+
         // Initialize Application
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Application starting...');
@@ -1145,7 +1224,7 @@
                     sessionData = {
                         isLoggedIn: true,
                         user: result.user,
-                        loginTime: new Date().toISOString()
+                        loginTime: getCurrentTimestamp()
                     };
                     
                     currentUser = result.user;
@@ -1642,12 +1721,13 @@
             }
         }
 
+        // تحديث: دالة تحميل السجلات مع التوقيت المُصحح
         async function loadLogs() {
             try {
                 let query = supabase
                     .from('logs')
                     .select(`*, employees (name), centers (name)`)
-                    .order('created_at', { ascending: false })
+                    .order('occurred_at', { ascending: false }) // ترتيب حسب occurred_at بدلاً من created_at
                     .limit(100);
 
                 // Filter logs for regular users
@@ -1666,12 +1746,18 @@
                     logs.forEach(log => {
                         const logDiv = document.createElement('div');
                         logDiv.className = `log-entry ${log.action}`;
-                        const date = new Date(log.created_at).toLocaleString('ar-EG');
+                        
+                        // استخدام occurred_at إذا كان متوفراً، وإلا created_at
+                        const logTime = log.occurred_at || log.created_at;
+                        const timeAgo = getTimeDifference(logTime);
+                        const fullTime = formatLocalDateTime(logTime);
+                        
                         logDiv.innerHTML = `
                             <strong>${log.employees?.name}</strong> - 
                             ${getActionText(log.action)} 
                             ${log.centers?.name || ''} 
-                            <br><small>📅 ${date}</small>
+                            <br><small class="time-display">📅 ${fullTime}</small>
+                            <br><small class="time-ago real-time-update">${timeAgo}</small>
                         `;
                         logsContainer.appendChild(logDiv);
                     });
@@ -1683,6 +1769,7 @@
             }
         }
 
+        // تحديث: دالة تحديث المواقع مع التوقيت المُصحح
         async function refreshEmployeeLocations() {
             try {
                 let employeeIds = [];
@@ -1708,7 +1795,7 @@
                     .in('employee_id', employeeIds)
                     .not('latitude', 'is', null)
                     .not('longitude', 'is', null)
-                    .order('created_at', { ascending: false });
+                    .order('occurred_at', { ascending: false }); // ترتيب حسب occurred_at
 
                 if (error) throw error;
 
@@ -1723,7 +1810,7 @@
                                 latitude: log.latitude,
                                 longitude: log.longitude,
                                 action: log.action,
-                                time: log.created_at
+                                time: log.occurred_at || log.created_at // استخدام occurred_at أولاً
                             }
                         };
                     }
@@ -1758,7 +1845,7 @@
                     <div class="item-info">
                         <strong>${empData.employee.name}</strong>
                         <small style="color: ${statusColor};">● ${statusText} • 📱 ${empData.employee.phone}</small><br>
-                        <small>آخر موقع: ${actionText} - ${timeDiff}</small><br>
+                        <small>آخر موقع: ${actionText} - <span class="time-ago">${timeDiff}</span></small><br>
                         <small>المركز: ${empData.center?.name || 'غير محدد'}</small>
                     </div>
                     <div>
@@ -1771,6 +1858,7 @@
             });
         }
 
+        // تحديث: دالة الإحصائيات مع التوقيت المُصحح
         async function updateStats() {
             try {
                 let employeesCount, activeCount, centersCount, logsCount;
@@ -1781,7 +1869,7 @@
                         supabase.from('employees').select('*', { count: 'exact', head: true }),
                         supabase.from('employees').select('*', { count: 'exact', head: true }).eq('status', 'active'),
                         supabase.from('centers').select('*', { count: 'exact', head: true }),
-                        supabase.from('logs').select('*', { count: 'exact', head: true }).gte('created_at', new Date().toISOString().split('T')[0])
+                        supabase.from('logs').select('*', { count: 'exact', head: true }).gte('occurred_at', getTodayDateStart())
                     ]);
                     
                     employeesCount = empRes.count || 0;
@@ -1801,7 +1889,7 @@
                             .from('logs')
                             .select('*', { count: 'exact', head: true })
                             .in('employee_id', employeeIds)
-                            .gte('created_at', new Date().toISOString().split('T')[0]);
+                            .gte('occurred_at', getTodayDateStart());
                         logsCount = count || 0;
                     } else {
                         logsCount = 0;
@@ -2465,25 +2553,6 @@
         }
 
         // Helper Functions
-        function getTimeDifference(timestamp) {
-            const now = new Date();
-            const time = new Date(timestamp);
-            const diffInSeconds = Math.floor((now - time) / 1000);
-            
-            if (diffInSeconds < 60) {
-                return 'منذ لحظات';
-            } else if (diffInSeconds < 3600) {
-                const minutes = Math.floor(diffInSeconds / 60);
-                return `منذ ${minutes} دقيقة`;
-            } else if (diffInSeconds < 86400) {
-                const hours = Math.floor(diffInSeconds / 3600);
-                return `منذ ${hours} ساعة`;
-            } else {
-                const days = Math.floor(diffInSeconds / 86400);
-                return `منذ ${days} يوم`;
-            }
-        }
-
         function getActionText(action) {
             const actions = {
                 'in': '🟢 دخول',
@@ -2538,13 +2607,33 @@
                 .subscribe();
         }
 
-        // Auto refresh
+        // Auto refresh with real-time time updates
         setInterval(() => {
             if (sessionData.isLoggedIn) {
                 updateStats();
                 refreshEmployeeLocations();
+                
+                // Update time ago displays
+                document.querySelectorAll('.time-ago').forEach(element => {
+                    const timestamp = element.getAttribute('data-timestamp');
+                    if (timestamp) {
+                        element.textContent = getTimeDifference(timestamp);
+                    }
+                });
             }
         }, 30000);
+
+        // Update time ago displays every minute for better UX
+        setInterval(() => {
+            if (sessionData.isLoggedIn) {
+                document.querySelectorAll('.time-ago').forEach(element => {
+                    const timestamp = element.getAttribute('data-timestamp');
+                    if (timestamp) {
+                        element.textContent = getTimeDifference(timestamp);
+                    }
+                });
+            }
+        }, 60000);
 
         // Close modals when clicking outside
         window.onclick = function(event) {
@@ -2555,6 +2644,20 @@
                 }
             });
         };
+
+        // Add Enter key support for login
+        document.addEventListener('DOMContentLoaded', function() {
+            const usernameInput = document.getElementById('loginUsername');
+            const passwordInput = document.getElementById('loginPassword');
+            
+            usernameInput?.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') passwordInput?.focus();
+            });
+            
+            passwordInput?.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') login();
+            });
+        });
     </script>
 </body>
 </html>
