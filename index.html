@@ -1125,40 +1125,7 @@
             color: #fff;
         }
 
-        // === Draggable Modal ===
-        (function() {
-            const modal = document.getElementById('editUserPermissionsModal');
-            const header = modal?.querySelector('.modal-header');
-            let isDragging = false, startX, startY, startLeft, startTop;
-
-            if (header && modal) {
-                header.style.cursor = 'move';
-                header.onmousedown = function(e) {
-                    isDragging = true;
-                    startX = e.clientX;
-                    startY = e.clientY;
-                    const rect = modal.querySelector('.modal-content').getBoundingClientRect();
-                    startLeft = rect.left;
-                    startTop = rect.top;
-                    document.body.style.userSelect = 'none';
-                };
-                document.onmousemove = function(e) {
-                    if (!isDragging) return;
-                    const dx = e.clientX - startX;
-                    const dy = e.clientY - startY;
-                    const modalContent = modal.querySelector('.modal-content');
-                    modalContent.style.position = 'fixed';
-                    modalContent.style.left = (startLeft + dx) + 'px';
-                    modalContent.style.top = (startTop + dy) + 'px';
-                    modalContent.style.margin = '0';
-                };
-                document.onmouseup = function() {
-                    isDragging = false;
-                    document.body.style.userSelect = '';
-                };
-            }
-        })();
-
+        /* تخصيص ألوان Select2 للقوائم الداكنة */
         .section-header.section-header-center {
             background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
         }
@@ -1177,7 +1144,6 @@
         .section-header.section-header-userslist {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
-        /* تخصيص ألوان Select2 للقوائم الداكنة */
         .select2-container--default .select2-selection--multiple {
             background: var(--card-bg, #23272e);
             color: #fff;
@@ -1208,6 +1174,41 @@
             color: #fff;
         }
     </style>
+    <script>
+    // === Draggable Modal ===
+    (function() {
+        const modal = document.getElementById('editUserPermissionsModal');
+        const header = modal?.querySelector('.modal-header');
+        let isDragging = false, startX, startY, startLeft, startTop;
+
+        if (header && modal) {
+            header.style.cursor = 'move';
+            header.onmousedown = function(e) {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                const rect = modal.querySelector('.modal-content').getBoundingClientRect();
+                startLeft = rect.left;
+                startTop = rect.top;
+                document.body.style.userSelect = 'none';
+            };
+            document.onmousemove = function(e) {
+                if (!isDragging) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                const modalContent = modal.querySelector('.modal-content');
+                modalContent.style.position = 'fixed';
+                modalContent.style.left = (startLeft + dx) + 'px';
+                modalContent.style.top = (startTop + dy) + 'px';
+                modalContent.style.margin = '0';
+            };
+            document.onmouseup = function() {
+                isDragging = false;
+                document.body.style.userSelect = '';
+            };
+        }
+    })();
+    </script>
 </head>
 <body data-theme="light">
     <!-- Loading Bar -->
@@ -2655,28 +2656,27 @@
         }
 
         // Enhanced Map Functions
+        // ========== تحسين geolocation: طلب الموقع فقط عند الضغط على زر ==========
+        // إزالة أي استدعاء مباشر لـ navigator.geolocation.watchPosition خارج دوال مرتبطة بزر أو حدث المستخدم
+        // (تمت مراجعة الكود: طلب الموقع يتم فقط في locateMe أو startMovementTracking أو عند تتبع موظف، وهي كلها مرتبطة بأزرار)
+        // إذا أضفت زر جديد لطلب الموقع، اربطه دائماً بدالة مثل locateMe()
+        let rtlPluginSet = false;
         function initializeMap() {
-            // حماية currentStyleIndex
             if (typeof appState.currentStyleIndex !== 'number' || isNaN(appState.currentStyleIndex) || appState.currentStyleIndex < 0 || appState.currentStyleIndex >= mapStyles.length) {
                 appState.currentStyleIndex = 0;
             }
             try {
-                // التحقق من وجود العنصر أولاً
                 const mapContainer = document.getElementById('map');
                 if (!mapContainer) {
                     console.error('Map container not found');
                     showError('لم يتم العثور على عنصر الخريطة في الصفحة');
                     return;
                 }
-
-                // التحقق من أن Mapbox محمل
                 if (typeof mapboxgl === 'undefined') {
                     console.error('Mapbox GL JS not loaded');
                     showError('خطأ في تحميل مكتبة الخريطة');
                     return;
                 }
-
-                // التحقق من وجود style صحيح
                 const style = mapStyles[appState.currentStyleIndex];
                 if (!style) {
                     showError('لم يتم العثور على نمط الخريطة. يرجى تحديث الصفحة أو التواصل مع الدعم.');
@@ -2684,24 +2684,23 @@
                     return;
                 }
                 console.log('Initializing map with style:', style);
-
-                // إعداد RTL للنص العربي
-                mapboxgl.setRTLTextPlugin(
-                    'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js',
-                    null,
-                    true
-                );
-
+                // لا تستدعي setRTLTextPlugin إلا مرة واحدة
+                if (!rtlPluginSet && mapboxgl.setRTLTextPlugin) {
+                    mapboxgl.setRTLTextPlugin(
+                        'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js',
+                        null,
+                        true
+                    );
+                    rtlPluginSet = true;
+                }
                 appState.map = new mapboxgl.Map({
                     container: 'map',
                     style: style,
-                    center: [44.3661, 32.6155], // Karbala coordinates
+                    center: [44.3661, 32.6155],
                     zoom: 12,
                     locale: 'ar'
                 });
-
                 appState.map.addControl(new mapboxgl.NavigationControl(), 'top-left');
-
                 if (appState.userPermissions && appState.userPermissions.can_add_centers) {
                     appState.map.on('click', function(e) {
                         const coordinates = e.lngLat;
@@ -2709,17 +2708,14 @@
                         showSuccess(`تم تحديد الموقع: ${coordinates.lat.toFixed(4)}, ${coordinates.lng.toFixed(4)}`);
                     });
                 }
-
                 appState.map.on('load', function() {
                     console.log('Enhanced map loaded successfully');
                     updateMapMarkers();
                 });
-
                 appState.map.on('error', function(e) {
                     console.error('Map error:', e);
                     showError('خطأ في تحميل الخريطة: ' + (e && e.error && e.error.message ? e.error.message : 'غير معروف'));
                 });
-
             } catch (error) {
                 console.error('Error initializing map:', error);
                 showError('خطأ في تحميل الخريطة: ' + error.message);
@@ -4113,12 +4109,12 @@
         }
 
         async function addUser() {
-            // تعتمد هذه الدالة على دالة add_user في Supabase (وليس PATCH)
+            // حماية: فقط المدير يمكنه إضافة المستخدمين
             if (!appState.currentUser || appState.currentUser.role !== 'admin') {
                 showNotification('ليس لديك صلاحية لإضافة المستخدمين', 'warning');
                 return;
             }
-
+            // جلب القيم من الحقول
             const username = document.getElementById('newUsername').value.trim();
             const fullName = document.getElementById('newUserFullName').value.trim();
             const password = document.getElementById('newUserPassword').value.trim();
@@ -4128,16 +4124,21 @@
             const selectedCenters = window.$ && $('#newUserCenters').select2 ? $('#newUserCenters').val().map(Number) :
                 Array.from(document.getElementById('newUserCenters').selectedOptions).map(opt => parseInt(opt.value));
 
+            // تحقق من الحقول المطلوبة
             if (!username || !fullName || !password) {
                 showNotification('يرجى ملء الحقول المطلوبة (اسم المستخدم، الاسم الكامل، كلمة المرور)', 'warning');
                 return;
             }
-
             if (password.length < 6) {
                 showNotification('كلمة المرور يجب أن تكون 6 أحرف على الأقل', 'warning');
                 return;
             }
-
+            // منع التكرار في الواجهة (تحقق سريع)
+            if ((appState.allUsers || []).some(u => u.username === username)) {
+                showNotification('اسم المستخدم مستخدم مسبقاً', 'error');
+                return;
+            }
+            showLoading();
             try {
                 const { data, error } = await appState.supabase.rpc('add_user', {
                     user_username: username,
@@ -4148,12 +4149,10 @@
                     user_role: role,
                     center_ids: selectedCenters.length ? selectedCenters : null
                 });
-
                 if (error) throw error;
-
                 const result = data;
                 if (result.success) {
-                    // Clear form
+                    // تفريغ الحقول
                     document.getElementById('newUsername').value = '';
                     document.getElementById('newUserFullName').value = '';
                     document.getElementById('newUserPassword').value = '';
@@ -4163,15 +4162,29 @@
                     if (window.$ && $('#newUserCenters').select2) {
                         $('#newUserCenters').val(null).trigger('change');
                     }
-
                     showNotification(`✅ تم إضافة المستخدم "${fullName}" بنجاح!`, 'success');
-                    loadUsersList();
+                    // إعادة تحميل المستخدمين
+                    await loadUsersList();
+                    // تمييز المستخدم الجديد في القائمة
+                    setTimeout(() => {
+                        const container = document.getElementById('usersListContainer');
+                        if (container) {
+                            const cards = Array.from(container.getElementsByClassName('item-card'));
+                            const newCard = cards.find(card => card.innerHTML.includes(username));
+                            if (newCard) {
+                                newCard.style.background = '#d1ffd6';
+                                setTimeout(() => { newCard.style.background = ''; }, 2000);
+                            }
+                        }
+                    }, 500);
                 } else {
                     showNotification('❌ ' + result.error, 'error');
                 }
             } catch (error) {
                 console.error('Error adding user:', error);
-                showNotification('حدث خطأ في إضافة المستخدم: ' + error.message, 'error');
+                showNotification('حدث خطأ في إضافة المستخدم: ' + (error.message || error), 'error');
+            } finally {
+                hideLoading();
             }
         }
 
@@ -5628,14 +5641,14 @@
         // Display users in the sidebar
         function displayUsersList(users) {
             const container = document.getElementById('usersListContainer');
-            // فلترة المستخدمين لإظهار المستخدمين العاديين فقط
-            const filteredUsers = users.filter(user => user.role !== 'admin');
-            if (!filteredUsers.length) {
+            // إزالة الفلترة لعرض جميع المستخدمين بما فيهم الـ admin
+            // const filteredUsers = users.filter(user => user.role !== 'admin');
+            if (!users.length) {
                 container.innerHTML = '<div style="color: var(--text-secondary); text-align: center;">لا يوجد مستخدمون</div>';
                 return;
             }
             container.innerHTML = '';
-            filteredUsers.forEach(user => {
+            users.forEach(user => {
                 const div = document.createElement('div');
                 div.className = 'item-card';
                 let actionsHtml = '';
