@@ -1332,12 +1332,8 @@
                             <input type="text" id="centerName" placeholder="أدخل اسم المركز">
                         </div>
                         <div class="form-group">
-                            <label>خط الطول</label>
-                            <input type="number" id="centerLng" step="any" placeholder="سيتم ملؤه تلقائياً">
-                        </div>
-                        <div class="form-group">
-                            <label>خط العرض</label>
-                            <input type="number" id="centerLat" step="any" placeholder="سيتم ملؤه تلقائياً">
+                            <label>الإحداثيات</label>
+                            <input type="text" id="centerCoordinates" placeholder="مثال: 32.53843, 44.184436">
                         </div>
                         <div class="form-group">
                             <label>نطاق المركز (متر)</label>
@@ -1689,12 +1685,8 @@
                 <input type="text" id="editCenterName">
             </div>
             <div class="form-group">
-                <label>خط الطول</label>
-                <input type="number" id="editCenterLng" step="any">
-            </div>
-            <div class="form-group">
-                <label>خط العرض</label>
-                <input type="number" id="editCenterLat" step="any">
+                <label>الإحداثيات</label>
+                <input type="text" id="editCenterCoordinates" placeholder="مثال: 32.53843, 44.184436">
             </div>
             <div class="form-group">
                 <label>نطاق المركز (متر)</label>
@@ -2636,19 +2628,21 @@
             if (appState.autoRefreshInterval) {
                 clearInterval(appState.autoRefreshInterval);
             }
-
             appState.autoRefreshInterval = setInterval(async () => {
                 if (appState.sessionData.isLoggedIn) {
                     try {
                         showRefreshIndicator();
-                        await updateStats();
-                        await refreshEmployeeLocations();
+                        // استخدم البيانات المخزنة إذا كانت موجودة
+                        if (!appState.allCenters || appState.allCenters.length === 0) {
+                            await updateStats();
+                            await refreshEmployeeLocations();
+                        }
                         updateTimeDifferences();
                     } catch (error) {
                         console.error('Auto refresh error:', error);
                     }
                 }
-            }, 30000); // 30 seconds
+            }, 180000); // 3 دقائق
         }
 
         function updateTimeDifferences() {
@@ -2711,9 +2705,7 @@
                 if (appState.userPermissions && appState.userPermissions.can_add_centers) {
                     appState.map.on('click', function(e) {
                         const coordinates = e.lngLat;
-                        document.getElementById('centerLng').value = coordinates.lng.toFixed(6);
-                        document.getElementById('centerLat').value = coordinates.lat.toFixed(6);
-                        
+                        document.getElementById('centerCoordinates').value = `${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}`;
                         showSuccess(`تم تحديد الموقع: ${coordinates.lat.toFixed(4)}, ${coordinates.lng.toFixed(4)}`);
                     });
                 }
@@ -3178,16 +3170,25 @@
                     if (appState.userPermissions.can_delete_employees) {
                         actionsHtml += `<button class="btn btn-danger btn-small tooltip" onclick="deleteEmployee(${employee.id || employee.employee_id})" data-tooltip="حذف الفرد نهائياً">حذف</button>`;
                     }
-                    if (employee.center_id) {
-                        actionsHtml += `<button class="btn btn-info btn-small tooltip" onclick="checkEmployeeLocationWithAccuracy(${employee.id || employee.employee_id}, ${employee.center_id})" data-tooltip="فحص موقع الفرد بدقة عالية">📍 فحص</button>`;
+                
+                    // حالة تسجيل الدخول
+                    let loginText = employee.last_login_formatted || employee.last_login;
+                    if (loginText) {
+                        const date = new Date(loginText);
+                        loginText = date.toLocaleString('ar-IQ', { hour: '2-digit', minute: '2-digit', year: 'numeric', month: '2-digit', day: '2-digit', hour12: true, timeZone: 'Asia/Baghdad' });
                     }
-                    actionsHtml += `<button class="btn btn-warning btn-small tooltip" onclick="startTrackingForEmployee(${employee.id || employee.employee_id}, '${empName}')" data-tooltip="بدء تتبع حركة الفرد">🚶 تتبع</button>`;
-                    
+                    let loginStatus = '';
+                    if (!employee.last_login && !employee.last_login_formatted) {
+                        loginStatus = '<span style="color: var(--warning); font-size: 0.9em;">لم يتم تسجيل الدخول حتى الآن</span>';
+                    } else {
+                        loginStatus = `<span style=\"color: var(--success); font-size: 0.9em;\">آخر تسجيل دخول: ${loginText || ''}</span>`;
+                    }
                     employeeDiv.innerHTML = `
                         <div class="item-info">
                             <strong>${empName}</strong><br>
+                            ${loginStatus}<br>
                             <small>${employee.position || 'موظف'} • 📱 <span class="phone-masked" data-phone="${employee.phone}" onclick="togglePhoneVisibility(this)">${maskPhoneNumber(employee.phone)}</span></small><br>
-                            <small>المركز: ${employee.centers?.name || 'غير محدد'}</small>
+                            <small>المركز: ${employee.centers?.name || employee.center_name || 'غير محدد'}</small>
                         </div>
                         <div class="item-actions">
                             ${actionsHtml}
@@ -4013,43 +4014,31 @@
                 showError('ليس لديك صلاحية لإضافة المراكز');
                 return;
             }
-
             const name = document.getElementById('centerName').value.trim();
-            const lng = parseFloat(document.getElementById('centerLng').value);
-            const lat = parseFloat(document.getElementById('centerLat').value);
+            const coords = document.getElementById('centerCoordinates').value.trim();
             const radius = parseInt(document.getElementById('centerRadius').value);
-
+            let lat = '', lng = '';
+            if (coords) {
+                [lat, lng] = coords.split(',').map(x => parseFloat(x.trim()));
+            }
             if (!name || !lng || !lat || !radius) {
                 showError('يرجى ملء جميع الحقول واختيار موقع على الخريطة');
                 return;
             }
-
             try {
                 const { data, error } = await appState.supabase
                     .from('centers')
                     .insert([{ name, longitude: lng, latitude: lat, radius }])
                     .select();
-
                 if (error) throw error;
-
-                // Add permission for this user to access the new center if regular user
                 if (appState.currentUser.role !== 'admin' && data[0]) {
                     await appState.supabase
                         .from('user_center_permissions')
-                        .insert([{
-                            user_id: appState.currentUser.id,
-                            center_id: data[0].id,
-                            can_view: true,
-                            can_manage: true
-                        }]);
+                        .insert([{ user_id: appState.currentUser.id, center_id: data[0].id, can_view: true, can_manage: true }]);
                 }
-
-                // Clear form
                 document.getElementById('centerName').value = '';
-                document.getElementById('centerLng').value = '';
-                document.getElementById('centerLat').value = '';
+                document.getElementById('centerCoordinates').value = '';
                 document.getElementById('centerRadius').value = '100';
-
                 await loadAllData();
                 showSuccess('تم إضافة المركز بنجاح ✅');
             } catch (error) {
@@ -4237,8 +4226,7 @@
             appState.currentEditingCenter = center;
 
             document.getElementById('editCenterName').value = center.name || center.center_name;
-            document.getElementById('editCenterLng').value = center.longitude;
-            document.getElementById('editCenterLat').value = center.latitude;
+            document.getElementById('editCenterCoordinates').value = `${center.latitude}, ${center.longitude}`;
             document.getElementById('editCenterRadius').value = center.radius;
 
             showModal('editCenterModal');
@@ -4285,10 +4273,12 @@
             if (!appState.currentEditingCenter || !appState.userPermissions.can_edit_centers) return;
 
             const name = document.getElementById('editCenterName').value.trim();
-            const lng = parseFloat(document.getElementById('editCenterLng').value);
-            const lat = parseFloat(document.getElementById('editCenterLat').value);
+            const coords = document.getElementById('editCenterCoordinates').value.trim();
             const radius = parseInt(document.getElementById('editCenterRadius').value);
-
+            let lat = '', lng = '';
+            if (coords) {
+                [lat, lng] = coords.split(',').map(x => parseFloat(x.trim()));
+            }
             if (!name || !lng || !lat || !radius) {
                 showError('يرجى ملء جميع الحقول');
                 return;
@@ -4468,7 +4458,23 @@
                     // Show notification for new activities
                     if (payload.eventType === 'INSERT' && payload.new) {
                         const actionText = getActionText(payload.new.action);
-                        showInfo(`نشاط جديد: ${actionText}`, 5000);
+                        // إشعار دخول فرد جديد
+                        if (payload.new.action === 'auto_checkin' && payload.new.employee_id) {
+                            // جلب اسم الفرد والمركز من البيانات إذا متوفرة
+                            let empName = '';
+                            let centerName = '';
+                            if (appState.allEmployees) {
+                                const emp = appState.allEmployees.find(e => e.id === payload.new.employee_id);
+                                if (emp) empName = emp.name || emp.employee_name;
+                            }
+                            if (appState.allCenters) {
+                                const center = appState.allCenters.find(c => c.id === payload.new.center_id);
+                                if (center) centerName = center.name || center.center_name;
+                            }
+                            showSuccess(`✅ دخول جديد: ${empName ? empName : 'فرد'} دخل ${centerName ? centerName : 'مركز'}`);
+                        } else {
+                            showInfo(`نشاط جديد: ${actionText}`, 5000);
+                        }
                     }
                 })
                 .subscribe();
@@ -5638,10 +5644,18 @@
                     actionsHtml += `<button class="btn btn-success btn-small" onclick="editUser(${user.id})">✏️ تعديل</button>`;
                     actionsHtml += `<button class="btn btn-danger btn-small" onclick="deleteUser(${user.id})">🗑️ حذف</button>`;
                 }
+                // تحديد حالة تسجيل الدخول
+                let loginStatus = '';
+                if (!user.last_login) {
+                    loginStatus = '<span style="color: var(--warning); font-size: 0.9em;">لم يتم تسجيل الدخول حتى الآن</span>';
+                } else {
+                    loginStatus = `<span style="color: var(--success); font-size: 0.9em;">آخر تسجيل دخول: ${user.last_login}</span>`;
+                }
                 div.innerHTML = `
                     <div class="item-info">
                         <strong>${user.full_name}</strong> <span style="color: var(--accent); font-size: 0.9em;">@${user.username}</span><br>
-                        <small>النوع: ${user.role === 'admin' ? 'مدير' : 'مستخدم'}</small>
+                        <small>النوع: ${user.role === 'admin' ? 'مدير' : 'مستخدم'}</small><br>
+                        ${loginStatus}
                     </div>
                     <div class="item-actions">
                         ${actionsHtml}
@@ -5900,6 +5914,44 @@
         }
         // أزل الاستدعاء من حدث click
         // document.getElementById('addUserSection')?.addEventListener('click', populateNewUserCenters);
+
+        function exportFilteredLogs() {
+            // جلب السجلات الحالية (المفلترة أو الكاملة)
+            let logs = appState.allLogs || [];
+            if (!logs.length) {
+                showError('لا توجد سجلات للتصدير');
+                return;
+            }
+            // تجميع أول دخول وأول خروج لكل اسم
+            const uniqueLogs = {};
+            logs.forEach(log => {
+                const name = log.employees?.name || 'غير معروف';
+                const action = (log.action.includes('checkin') || log.action === 'in' || log.action === 'center_entry') ? 'دخول' : (log.action.includes('checkout') || log.action === 'out') ? 'خروج' : log.action;
+                if (!uniqueLogs[name]) uniqueLogs[name] = { entry: null, exit: null, phone: log.employees?.phone || '' };
+                if (action === 'دخول' && !uniqueLogs[name].entry) {
+                    uniqueLogs[name].entry = log.occurred_at || log.created_at;
+                }
+                if (action === 'خروج' && !uniqueLogs[name].exit) {
+                    uniqueLogs[name].exit = log.occurred_at || log.created_at;
+                }
+            });
+            // تجهيز البيانات
+            const ws_data = [
+                ['الاسم', 'رقم الهاتف', 'وقت الدخول', 'وقت الخروج'],
+                ...Object.entries(uniqueLogs).map(([name, data]) => [
+                    name,
+                    data.phone,
+                    data.entry ? new Date(data.entry).toLocaleString('ar-IQ', {timeZone: 'Asia/Baghdad'}) : '',
+                    data.exit ? new Date(data.exit).toLocaleString('ar-IQ', {timeZone: 'Asia/Baghdad'}) : ''
+                ])
+            ];
+            // إنشاء ملف Excel
+            const ws = window.XLSX.utils.aoa_to_sheet(ws_data);
+            const wb = window.XLSX.utils.book_new();
+            window.XLSX.utils.book_append_sheet(wb, ws, 'سجل الأنشطة');
+            window.XLSX.writeFile(wb, 'activity_logs.xlsx');
+            showSuccess('تم تصدير السجلات إلى Excel بنجاح!', 3000);
+        }
     </script>
     <script>
     // === Draggable Modal ===
@@ -5935,6 +5987,87 @@
             };
         }
     })();
+    </script>
+    <script>
+    // إعدادات المركز الجغرافي
+    const centerLat = 24.7136; // latitude للمركز (عدّلها حسب الحاجة)
+    const centerLng = 46.6753; // longitude للمركز (عدّلها حسب الحاجة)
+    const radius = 50; // نصف القطر بالمتر
+
+    let insideCenter = false;
+    let entryTime = null;
+    let exitTime = null;
+
+    function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
+        const R = 6371000; // نصف قطر الأرض بالمتر
+        const dLat = (lat2-lat1) * Math.PI/180;
+        const dLon = (lon2-lon1) * Math.PI/180;
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    function saveEventLocally(type, time) {
+        let events = JSON.parse(localStorage.getItem('centerEvents') || '[]');
+        events.push({ type, time });
+        localStorage.setItem('centerEvents', JSON.stringify(events));
+    }
+
+    function sendEventsToServer() {
+        let events = JSON.parse(localStorage.getItem('centerEvents') || '[]');
+        if (events.length === 0) return;
+        // عدل الرابط أدناه حسب سيرفرك
+        fetch('/log-events', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ events })
+        }).then(res => {
+            if (res.ok) {
+                localStorage.removeItem('centerEvents');
+                console.log('تم إرسال الأحداث للسيرفر بنجاح');
+            }
+        }).catch(err => {
+            console.log('تعذر إرسال الأحداث، سيتم المحاولة لاحقًا');
+        });
+    }
+
+    navigator.geolocation.watchPosition(function(position) {
+        const { latitude, longitude } = position.coords;
+        const distance = getDistanceFromLatLonInMeters(latitude, longitude, centerLat, centerLng);
+
+        if (distance <= radius && !insideCenter) {
+            insideCenter = true;
+            entryTime = new Date().toISOString();
+            console.log("دخل المركز في:", entryTime);
+            if (navigator.onLine) {
+                // إرسال مباشر
+                fetch('/log-entry', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({type: 'entry', time: entryTime})});
+            } else {
+                saveEventLocally('entry', entryTime);
+            }
+        } else if (distance > radius && insideCenter) {
+            insideCenter = false;
+            exitTime = new Date().toISOString();
+            console.log("خرج من المركز في:", exitTime);
+            if (navigator.onLine) {
+                fetch('/log-exit', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({type: 'exit', time: exitTime})});
+            } else {
+                saveEventLocally('exit', exitTime);
+            }
+        }
+    }, function(error) {
+        console.error("خطأ في تتبع الموقع:", error);
+    }, {
+        enableHighAccuracy: true,
+        maximumAge: 1000,
+        timeout: 5000
+    });
+
+    // عند عودة الإنترنت، أرسل الأحداث المخزنة
+    window.addEventListener('online', sendEventsToServer);
     </script>
 </body>
 </html>
