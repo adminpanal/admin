@@ -16,42 +16,42 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap');
         :root {
-            --primary-gradient: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
-            --admin-gradient: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
-            --user-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            --alert-gradient: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
-            --success-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --admin-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --user-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --alert-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
             --warning-gradient: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-            --dark-gradient: linear-gradient(135deg, #232526 0%, #414345 100%);
-            --bg-color: #f4f8fb;
-            --card-bg: #fff;
-            --text-color: #1a2236;
-            --text-secondary: #5a6a85;
-            --border-color: #cfd8dc;
-            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.13);
-            --hover-shadow: 0 16px 32px 0 rgba(67, 206, 162, 0.18);
-            --accent: #185a9d;
-            --success: #27ae60;
-            --danger: #e74c3c;
-            --warning: #f39c12;
-            --info: #17a2b8;
-            --checkin-color: #28a745;
-            --checkout-color: #dc3545;
+            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --accent: #6366f1;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --checkin-color: #10b981;
+            --checkout-color: #ef4444;
         }
 
         [data-theme="dark"] {
-            --bg-color: #0d1117;
-            --card-bg: #161b22;
-            --text-color: #f0f6fc;
-            --text-secondary: #8b949e;
-            --border-color: #30363d;
-            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-            --hover-shadow: 0 16px 32px 0 rgba(67, 206, 162, 0.3);
-            --accent: #58a6ff;
-            --success: #3fb950;
-            --danger: #f85149;
-            --warning: #d29922;
-            --info: #79c0ff;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            --hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            --accent: #8b5cf6;
+            --success: #22c55e;
+            --danger: #f87171;
+            --warning: #fbbf24;
+            --info: #60a5fa;
         }
 
         * {
@@ -90,10 +90,10 @@
             border-left: 5px solid rgba(255,255,255,0.3);
         }
 
-        .notification.success { background: var(--success-gradient); color: #155724; }
-        .notification.warning { background: var(--warning-gradient); color: #856404; }
-        .notification.info { background: var(--primary-gradient); }
-        .notification.error { background: var(--alert-gradient); color: #721c24; }
+        .notification.success { background: var(--success-gradient); color: #064e3b; font-weight: 600; }
+        .notification.warning { background: var(--warning-gradient); color: #92400e; font-weight: 600; }
+        .notification.info { background: var(--primary-gradient); color: #ffffff; font-weight: 600; }
+        .notification.error { background: var(--alert-gradient); color: #7f1d1d; font-weight: 600; }
 
         /* Loading Bar */
         .loading-bar {
@@ -180,14 +180,14 @@
             background: var(--card-bg);
             color: var(--text-color);
             transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(67, 206, 162, 0.07);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.07);
             font-size: 0.97em;
         }
 
         .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(67, 206, 162, 0.13);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.13);
             background: var(--card-bg);
         }
 
@@ -205,13 +205,14 @@
             text-decoration: none;
             display: inline-block;
             text-align: center;
-            box-shadow: 0 2px 8px rgba(67, 206, 162, 0.13);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.13);
         }
 
         .btn:hover {
             transform: translateY(-2px) scale(1.03);
             box-shadow: var(--hover-shadow);
             background: var(--accent);
+            color: white;
         }
 
         .btn-small {
@@ -221,11 +222,11 @@
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            background: linear-gradient(135deg, #ef4444, #dc2626);
         }
 
         .btn-success {
-            background: linear-gradient(135deg, #27ae60, #229954);
+            background: linear-gradient(135deg, #10b981, #059669);
         }
 
         .btn-admin {
@@ -274,7 +275,7 @@
             font-weight: bold;
             color: white;
             background: var(--accent);
-            box-shadow: 0 2px 8px rgba(67, 206, 162, 0.13);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.13);
         }
 
         .user-badge.admin {
@@ -295,12 +296,13 @@
             cursor: pointer;
             font-size: 1.1em;
             transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(67, 206, 162, 0.13);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.13);
         }
 
         .theme-toggle:hover {
             transform: scale(1.12);
             background: var(--accent);
+            color: white;
         }
 
         /* Enhanced Stats Grid with Center Statistics */
@@ -332,11 +334,11 @@
         }
 
         .stat-card.checkin-stat {
-            background: linear-gradient(135deg, #28a745, #20c997);
+            background: linear-gradient(135deg, #10b981, #059669);
         }
 
         .stat-card.checkout-stat {
-            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            background: linear-gradient(135deg, #ef4444, #dc2626);
         }
 
         .stat-number {
@@ -418,7 +420,7 @@
 
         .map-btn:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(67, 206, 162, 0.3);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
 
         .map-btn.style-toggle {
@@ -428,6 +430,65 @@
         #map {
             height: 550px;
             border-radius: 0 0 20px 20px;
+            position: relative;
+        }
+
+        /* Fullscreen Map Styles */
+        .map-fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999 !important;
+            border-radius: 0 !important;
+        }
+
+        .map-fullscreen .mapboxgl-control-container {
+            z-index: 10000 !important;
+        }
+
+        .fullscreen-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9998;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .fullscreen-controls {
+            position: absolute;
+            top: 5px;
+            left: 20px;
+            z-index: 10001;
+            display: flex;
+            gap: 10px;
+        }
+
+        .fullscreen-btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .fullscreen-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .fullscreen-btn.exit {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
         }
 
         /* Enhanced Data Sections */
@@ -1127,22 +1188,22 @@
 
         /* تخصيص ألوان Select2 للقوائم الداكنة */
         .section-header.section-header-center {
-            background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         .section-header.section-header-employee {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         }
         .section-header.section-header-location {
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
         }
         .section-header.section-header-connection {
-            background: linear-gradient(135deg, #fc466b 0%, #3f5efb 100%);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
         .section-header.section-header-user {
-            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
         }
         .section-header.section-header-userslist {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
         }
         .select2-container--default .select2-selection--multiple {
             background: var(--card-bg, #23272e);
@@ -1258,7 +1319,7 @@
         <div class="top-bar">
             <div class="logo-section">
                 <h1>🎛️ لوحة التحكم  </h1>
-                <p style="color: var(--text-secondary);"><span style="color: var(--success);">●</span>  تحديث تلقائي كل 30 ثانية</p>
+                <p style="color: var(--text-secondary);"><span style="color: var(--success);">●</span></p>
             </div>
             
             <div class="user-section">
@@ -1382,7 +1443,35 @@
                 </div>
 
                 <!-- Location Settings Section -->
-                <!-- تم حذف قسم إعدادات دقة الموقع بناءً على طلب المستخدم -->
+                <div class="sidebar-section" id="locationSettingsSection">
+                    <div class="section-header section-header-location" onclick="toggleSection('locationSettingsContent')">
+                        <span>⚙️ إعدادات دقة الموقع</span>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                    <div class="section-content collapsed" id="locationSettingsContent">
+                        <div class="form-group">
+                            <label for="minAccuracy">الحد الأدنى للدقة (متر)</label>
+                            <input type="number" id="minAccuracy" />
+                        </div>
+                        <div class="form-group">
+                            <label for="maxAccuracy">الحد الأقصى للدقة (متر)</label>
+                            <input type="number" id="maxAccuracy" />
+                        </div>
+                        <div class="form-group">
+                            <label for="locationTimeout">مهلة تحديد الموقع (ثواني)</label>
+                            <input type="number" id="locationTimeout" />
+                        </div>
+                        <div class="form-group">
+                            <label for="retryAttempts">عدد المحاولات</label>
+                            <input type="number" id="retryAttempts" />
+                        </div>
+                        <div class="form-group">
+                            <label for="accuracyBuffer">هامش الدقة (متر)</label>
+                            <input type="number" id="accuracyBuffer" />
+                        </div>
+                        <button class="btn" onclick="updateLocationSettings()">حفظ الإعدادات</button>
+                    </div>
+                </div>
 
                 <!-- Offline Status Section -->
                 <!-- تم حذف قسم حالة الاتصال والمزامنة بناءً على طلب المستخدم -->
@@ -1391,64 +1480,10 @@
                 <!-- تم حذف قسم تتبع حركة الأفراد هنا بالكامل بناءً على طلب المستخدم -->
 
                 <!-- Add User Section (Admin Only) -->
-                <div class="sidebar-section" id="addUserSection" style="display: none;">
-                    <div class="section-header section-header-user" onclick="toggleSection('userSection')">
-                        <span>👥 إضافة مستخدم جديد</span>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div class="section-content collapsed" id="userSection">
-                        <div class="section-tip">
-                            👨‍💼 إنشاء حسابات جديدة لإدارة النظام
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>اسم المستخدم</label>
-                            <input type="text" id="newUsername" placeholder="اسم مستخدم فريد">
-                        </div>
-                        <div class="form-group">
-                            <label>الاسم الكامل</label>
-                            <input type="text" id="newUserFullName" placeholder="الاسم الكامل">
-                        </div>
-                        <div class="form-group">
-                            <label>كلمة المرور</label>
-                            <input type="password" id="newUserPassword" placeholder="كلمة مرور قوية (6+ أحرف)">
-                        </div>
-                        <div class="form-group">
-                            <label>البريد الإلكتروني</label>
-                            <input type="email" id="newUserEmail" placeholder="البريد الإلكتروني (اختياري)">
-                        </div>
-                        <div class="form-group">
-                            <label>رقم الهاتف</label>
-                            <input type="text" id="newUserPhone" placeholder="رقم الهاتف (اختياري)">
-                        </div>
-                        <div class="form-group">
-                            <label>نوع المستخدم</label>
-                            <select id="newUserRole">
-                                <option value="user">مستخدم عادي</option>
-                                <option value="admin">مدير</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>المراكز المسموحة</label>
-                            <select id="newUserCenters" multiple style="width:100%" data-placeholder="اختر مركز أو أكثر..."></select>
-                        </div>
-                        <button class="btn" onclick="addUser()">إضافة مستخدم</button>
-                    </div>
-                </div>
+                <!-- تم حذف قسم إضافة مستخدم جديد بناءً على طلب المستخدم -->
 
                 <!-- Users List Section (Admins only) -->
-                <div class="sidebar-section" id="usersListSection" style="display: none;">
-                    <div class="section-header section-header-userslist" onclick="toggleSection('usersListSectionContent')">
-                        <span>👥 قائمة المستخدمين</span>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div class="section-content collapsed" id="usersListSectionContent">
-                        <div class="section-tip">يمكنك تعديل صلاحيات أي مستخدم من هنا</div>
-                        <div id="usersListContainer">
-                            <div class="loading">جاري تحميل المستخدمين...</div>
-                        </div>
-                    </div>
-                </div>
+                <!-- تم حذف قسم قائمة المستخدمين بناءً على طلب المستخدم -->
             </div>
 
             <!-- Content Area -->
@@ -1462,6 +1497,7 @@
                             <button class="map-btn tooltip" onclick="fitAllMarkers()" data-tooltip="عرض جميع المراكز في نطاق الرؤية">🏢 المراكز</button>
                             <button class="map-btn tooltip" onclick="showAllEmployeesOnMap()" data-tooltip="عرض جميع الأفراد على الخريطة">👥 الأفراد</button>
                             <button class="map-btn style-toggle tooltip" onclick="toggleMapStyle()" data-tooltip="تغيير نمط الخريطة (شوارع/أقمار صناعية/فاتح/مظلم)">🗺️ النمط</button>
+                            <button class="map-btn tooltip" onclick="toggleMapFullscreen()" data-tooltip="تكبير الخريطة لملء الشاشة">⛶ ملء الشاشة</button>
                         </div>
                     </div>
                     <div id="map"></div>
@@ -2513,24 +2549,24 @@
             const employeePermissionWarning = document.getElementById('employeePermissionWarning');
             const usersListSection = document.getElementById('usersListSection');
             
-            if (!appState.userPermissions.can_add_centers) {
+            if (!appState.userPermissions.can_add_centers && addCenterSection) {
                 addCenterSection.style.display = 'none';
             }
             
-            if (!appState.userPermissions.can_add_employees) {
+            if (!appState.userPermissions.can_add_employees && addEmployeeSection) {
                 addEmployeeSection.style.display = 'none';
-            } else if (appState.currentUser.role !== 'admin') {
+            } else if (appState.currentUser.role !== 'admin' && employeePermissionWarning) {
                 employeePermissionWarning.style.display = 'block';
             }
 
             if (appState.currentUser.role === 'admin') {
-                addUserSection.style.display = 'block';
+                if (addUserSection) addUserSection.style.display = 'block';
                 if (usersListSection) {
                     usersListSection.style.display = 'block';
                     loadUsersList();
                 }
             } else {
-                addUserSection.style.display = 'none';
+                if (addUserSection) addUserSection.style.display = 'none';
                 if (usersListSection) usersListSection.style.display = 'none';
             }
         }
@@ -2822,6 +2858,67 @@
                 showSuccess('تم تحديث الخريطة', 2000);
             }
         }
+
+        // Fullscreen Map Functions
+        function toggleMapFullscreen() {
+            const mapContainer = document.getElementById('map');
+            const mapParent = mapContainer.parentElement;
+            
+            if (!mapContainer.classList.contains('map-fullscreen')) {
+                // Enter fullscreen
+                mapContainer.classList.add('map-fullscreen');
+                mapParent.style.position = 'relative';
+                
+                // Add fullscreen controls
+                const controls = document.createElement('div');
+                controls.className = 'fullscreen-controls';
+                controls.innerHTML = `
+                    <button class="fullscreen-btn exit" onclick="toggleMapFullscreen()" title="خروج من ملء الشاشة">✕ خروج</button>
+                    <button class="fullscreen-btn" onclick="refreshMap()" title="تحديث الخريطة">🔄 تحديث</button>
+                    <button class="fullscreen-btn" onclick="fitAllMarkers()" title="عرض جميع المراكز">🏢 المراكز</button>
+                    <button class="fullscreen-btn" onclick="showAllEmployeesOnMap()" title="عرض جميع الأفراد">👥 الأفراد</button>
+                    <button class="fullscreen-btn" onclick="toggleMapStyle()" title="تغيير النمط">🗺️ النمط</button>
+                `;
+                mapParent.appendChild(controls);
+                
+                // Resize map
+                if (appState.map) {
+                    setTimeout(() => {
+                        appState.map.resize();
+                    }, 100);
+                }
+                
+                showSuccess('تم تكبير الخريطة لملء الشاشة', 2000);
+            } else {
+                // Exit fullscreen
+                mapContainer.classList.remove('map-fullscreen');
+                
+                // Remove fullscreen controls
+                const controls = mapParent.querySelector('.fullscreen-controls');
+                if (controls) {
+                    controls.remove();
+                }
+                
+                // Resize map
+                if (appState.map) {
+                    setTimeout(() => {
+                        appState.map.resize();
+                    }, 100);
+                }
+                
+                showInfo('تم الخروج من وضع ملء الشاشة', 2000);
+            }
+        }
+
+        // Keyboard shortcuts for fullscreen
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const mapContainer = document.getElementById('map');
+                if (mapContainer && mapContainer.classList.contains('map-fullscreen')) {
+                    toggleMapFullscreen();
+                }
+            }
+        });
 
         function fitAllMarkers() {
             if (appState.map && appState.allowedCenters.length > 0) {
