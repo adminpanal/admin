@@ -338,7 +338,7 @@
         }
 
         .stat-card.checkout-stat {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
         }
 
         .stat-number {
@@ -830,7 +830,7 @@
         }
 
         .stat-item.checkout-stat {
-            color: var(--checkout-color);
+            color: #3b82f6;
         }
 
         /* Connection Status */
@@ -1344,9 +1344,9 @@
                 <span class="stat-number" id="checkedInEmployees">0</span>
                 <div class="stat-label">مسجلي الحضور اليوم</div>
             </div>
-            <div class="stat-card checkout-stat" onclick="focusOnCheckedOut()" title="انقر لعرض المسجلين انصرافهم">
+            <div class="stat-card checkout-stat" onclick="focusOnCheckedOut()" title="انقر لعرض المسجلين دخولهم إلى الحساب">
                 <span class="stat-number" id="checkedOutEmployees">0</span>
-                <div class="stat-label">مسجلي الانصراف اليوم</div>
+                                  <div class="stat-label">مسجلي دخول الحساب اليوم</div>
             </div>
             <div class="stat-card" onclick="focusOnCenters()" title="انقر لعرض المراكز">
                 <span class="stat-number" id="totalCenters">0</span>
@@ -1558,7 +1558,7 @@
                             <select id="logFilter" onchange="filterLogs()" style="padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color);">
                                 <option value="all">جميع الأنشطة</option>
                                 <option value="checkin">دخول فقط</option>
-                                <option value="checkout">خروج فقط</option>
+                                <option value="checkout">تسجيل دخول الحساب فقط</option>
                                 <option value="movement">حركات فقط</option>
                                 <option value="center_entry">دخل مركز</option>
                             </select>
@@ -3126,7 +3126,7 @@
                             <strong>${centerName}</strong><br>
                             <small>نطاق: ${centerRadius} متر • إحداثيات: ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)}</small><br>
                             <small>الدخول اليوم: <span style="color: var(--checkin-color);">${stats.checkins}</span> • 
-                            الخروج اليوم: <span style="color: var(--checkout-color);">${stats.checkouts}</span></small>
+                            تسجيل دخول اليوم: <span style="color: #3b82f6;">${stats.checkouts}</span></small>
                         </div>
                         <div class="item-actions">
                             ${actionsHtml}
@@ -3428,7 +3428,7 @@
                     if (log.action.includes('checkin') || log.action === 'in' || log.action === 'center_entry') {
                         actionDisplay = `<span style="color: var(--checkin-color); font-weight: bold;">دخل ${log.centers?.name ? 'إلى ' + log.centers.name : ''} الساعة ${new Date(logTime).toLocaleTimeString('ar-IQ', {timeZone: 'Asia/Baghdad', hour12: true})}</span>`;
                     } else if (log.action.includes('checkout') || log.action === 'out') {
-                        actionDisplay = `<span style="color: var(--checkout-color); font-weight: bold;">خرج ${log.centers?.name ? 'من ' + log.centers.name : ''} الساعة ${new Date(logTime).toLocaleTimeString('ar-IQ', {timeZone: 'Asia/Baghdad', hour12: true})}</span>`;
+                        actionDisplay = `<span style="color: #3b82f6; font-weight: bold;">تسجيل الدخول إلى الحساب الساعة ${new Date(logTime).toLocaleTimeString('ar-IQ', {timeZone: 'Asia/Baghdad', hour12: true})}</span>`;
                     }
                     
                     logDiv.innerHTML = `
@@ -3618,8 +3618,8 @@
                                             <div style="font-size: 12px;">دخول اليوم</div>
                                         </div>
                                         <div class="stat-item checkout-stat">
-                                            <div style="font-weight: bold; font-size: 18px;">${checkouts}</div>
-                                            <div style="font-size: 12px;">خروج اليوم</div>
+                                            <div style="font-weight: bold; font-size: 18px; color: #3b82f6;">${checkouts}</div>
+                                            <div style="font-size: 12px; color: #3b82f6;">تسجيل دخول اليوم</div>
                                         </div>
                                     </div>
                                 </div>
@@ -3999,7 +3999,7 @@
             document.querySelector('#activityLogs')?.scrollIntoView({ behavior: 'smooth' });
             document.getElementById('logFilter').value = 'checkout';
             filterLogs('checkout');
-            showError('عرض سجلات الخروج', 2000);
+            showInfo('عرض سجلات تسجيل الدخول إلى الحساب', 2000);
         }
 
         function focusOnCenters() {
@@ -4396,15 +4396,15 @@
         function getActionText(action) {
             const actions = {
                 'auto_checkin': 'دخول تلقائي',
-                'auto_checkout': 'خروج تلقائي',
+                'auto_checkout': 'تسجيل الدخول إلى الحساب',
                 'center_entry': 'دخل مركز',
                 'center_nearby': 'اقترب من مركز',
                 'movement': 'حركة',
                 'location_update': 'تحديث موقع',
                 'checkin': 'دخول',
-                'checkout': 'خروج',
+                'checkout': 'تسجيل الدخول إلى الحساب',
                 'in': 'دخول',
-                'out': 'خروج'
+                'out': 'تسجيل الدخول إلى الحساب'
             };
             return actions[action] || action;
         }
@@ -4412,15 +4412,15 @@
         function getActionIcon(action) {
             const icons = {
                 'auto_checkin': '🟢',
-                'auto_checkout': '🔴',
+                'auto_checkout': '🔐',
                 'center_entry': '🏢',
                 'center_nearby': '📍',
                 'movement': '🚶',
                 'location_update': '📍',
                 'checkin': '✅',
-                'checkout': '❌',
+                'checkout': '🔐',
                 'in': '✅',
-                'out': '❌'
+                'out': '🔐'
             };
             return icons[action] || '📋';
         }
@@ -4493,6 +4493,14 @@
                                 if (center) centerName = center.name || center.center_name;
                             }
                             showSuccess(`✅ دخول جديد: ${empName ? empName : 'فرد'} دخل ${centerName ? centerName : 'مركز'}`);
+                        } else if (payload.new.action === 'auto_checkout' && payload.new.employee_id) {
+                            // إشعار تسجيل دخول إلى الحساب
+                            let empName = '';
+                            if (appState.allEmployees) {
+                                const emp = appState.allEmployees.find(e => e.id === payload.new.employee_id);
+                                if (emp) empName = emp.name || emp.employee_name;
+                            }
+                            showSuccess(`🔐 تسجيل دخول إلى الحساب: ${empName ? empName : 'فرد'}`, 5000);
                         } else {
                             showInfo(`نشاط جديد: ${actionText}`, 5000);
                         }
