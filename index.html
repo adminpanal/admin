@@ -3012,9 +3012,8 @@
                     if (appState.userPermissions.can_edit_centers) {
                         actionsHtml += `<button class="btn btn-success btn-small tooltip" onclick="editCenter(${center.id || center.center_id})" data-tooltip="تعديل بيانات المركز">تعديل</button>`;
                     }
-                    if (appState.userPermissions.can_delete_centers) {
-                        actionsHtml += `<button class="btn btn-danger btn-small tooltip" onclick="deleteCenter(${center.id || center.center_id})" data-tooltip="حذف المركز نهائياً">حذف</button>`;
-                    }
+                    // تم حذف زر حذف المركز بناءً على طلب المستخدم
+                    // ... existing code ...
                     
                     const centerName = center.name || center.center_name;
                     const centerLat = center.latitude;
@@ -3074,9 +3073,8 @@
                     if (appState.userPermissions.can_edit_employees) {
                         actionsHtml += `<button class="btn btn-success btn-small tooltip" onclick="editEmployee(${employee.id || employee.employee_id})" data-tooltip="تعديل بيانات الفرد">تعديل</button>`;
                     }
-                    if (appState.userPermissions.can_delete_employees) {
-                        actionsHtml += `<button class="btn btn-danger btn-small tooltip" onclick="deleteEmployee(${employee.id || employee.employee_id})" data-tooltip="حذف الفرد نهائياً">حذف</button>`;
-                    }
+                    actionsHtml += `<button class="btn btn-info btn-small tooltip" onclick="focusOnEmployeeFromList(${employee.latitude}, ${employee.longitude}, '${employee.name || employee.employee_name}')" data-tooltip="تتبع موقع الفرد">تتبع</button>`;
+                    
                 
                     // حالة تسجيل الدخول
                     let loginText = employee.last_login_formatted || employee.last_login;
