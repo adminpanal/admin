@@ -3073,7 +3073,9 @@
                     if (appState.userPermissions.can_edit_employees) {
                         actionsHtml += `<button class="btn btn-success btn-small tooltip" onclick="editEmployee(${employee.id || employee.employee_id})" data-tooltip="تعديل بيانات الفرد">تعديل</button>`;
                     }
-                    actionsHtml += `<button class="btn btn-info btn-small tooltip" onclick="focusOnEmployeeFromList(${employee.latitude}, ${employee.longitude}, '${employee.name || employee.employee_name}')" data-tooltip="تتبع موقع الفرد">تتبع</button>`;
+                    if (typeof employee.latitude === 'number' && typeof employee.longitude === 'number' && !isNaN(employee.latitude) && !isNaN(employee.longitude)) {
+                        actionsHtml += `<button class="btn btn-info btn-small tooltip" onclick="focusOnEmployeeFromList(${employee.latitude}, ${employee.longitude}, '${employee.name || employee.employee_name}')" data-tooltip="تتبع موقع الفرد">تتبع</button>`;
+                    }
                     
                 
                     // حالة تسجيل الدخول
@@ -5873,6 +5875,10 @@
             window.XLSX.utils.book_append_sheet(wb, ws, 'سجل الأنشطة');
             window.XLSX.writeFile(wb, 'activity_logs.xlsx');
             showSuccess('تم تصدير السجلات إلى Excel بنجاح!', 3000);
+        }
+
+        function focusOnEmployeeFromList(lat, lng, name) {
+            focusOnEmployee(lat, lng, name);
         }
     </script>
     <script>
