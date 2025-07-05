@@ -2981,11 +2981,10 @@
         async function loadCenterStats() {
             try {
                 const todayStart = getTodayDateStart();
-                
-                // Get checkin/checkout stats for each center
+                // جلب كل السجلات ذات العلاقة لهذا اليوم
                 let query = appState.supabase
                     .from('logs')
-                    .select('center_id, action')
+                    .select('center_id, action, employee_id')
                     .gte('occurred_at', todayStart);
 
                 if (appState.currentUser.role !== 'admin' && appState.allowedEmployees.length > 0) {
@@ -2996,20 +2995,30 @@
                 const { data: logs, error } = await query;
                 if (error) throw error;
 
-                // Process statistics
+                // حساب الأفراد الفريدين لكل مركز
                 appState.centerStats = {};
+                const checkinMap = {};
+                const checkoutMap = {};
                 logs.forEach(log => {
                     if (!appState.centerStats[log.center_id]) {
                         appState.centerStats[log.center_id] = { checkins: 0, checkouts: 0 };
                     }
-                    
+                    // الدخول
                     if (log.action.includes('checkin') || log.action === 'in' || log.action === 'center_entry') {
-                        appState.centerStats[log.center_id].checkins++;
-                    } else if (log.action.includes('checkout') || log.action === 'out') {
-                        appState.centerStats[log.center_id].checkouts++;
+                        if (!checkinMap[log.center_id]) checkinMap[log.center_id] = new Set();
+                        checkinMap[log.center_id].add(log.employee_id);
+                    }
+                    // الخروج
+                    if (log.action.includes('checkout') || log.action === 'out') {
+                        if (!checkoutMap[log.center_id]) checkoutMap[log.center_id] = new Set();
+                        checkoutMap[log.center_id].add(log.employee_id);
                     }
                 });
-
+                // عدّ الفريدين فقط
+                Object.keys(appState.centerStats).forEach(centerId => {
+                    appState.centerStats[centerId].checkins = checkinMap[centerId] ? checkinMap[centerId].size : 0;
+                    appState.centerStats[centerId].checkouts = checkoutMap[centerId] ? checkoutMap[centerId].size : 0;
+                });
                 console.log('Center stats loaded:', appState.centerStats);
             } catch (error) {
                 console.error('Error loading center stats:', error);
@@ -3108,6 +3117,7 @@
                     let actionsHtml = '';
                     if (appState.userPermissions && appState.userPermissions.can_edit_centers) {
                         actionsHtml += `<button class="btn btn-success btn-small tooltip" onclick="editCenter(${center.id || center.center_id})" data-tooltip="تعديل بيانات المركز">تعديل</button>`;
+                        actionsHtml += `<button class="btn btn-danger btn-small tooltip" onclick="deleteCenter(${center.id || center.center_id}, '${center.name || center.center_name}')" data-tooltip="حذف المركز">حذف</button>`;
                     }
                     // تم حذف زر حذف المركز بناءً على طلب المستخدم
                     // ... existing code ...
@@ -3169,6 +3179,7 @@
                     `;
                     if (appState.userPermissions && appState.userPermissions.can_edit_employees) {
                         actionsHtml += `<button class="btn btn-success btn-small tooltip" onclick="editEmployee(${employee.id || employee.employee_id})" data-tooltip="تعديل بيانات الفرد">تعديل</button>`;
+                        actionsHtml += `<button class="btn btn-danger btn-small tooltip" onclick="deleteEmployee(${employee.id || employee.employee_id}, '${empName}')" data-tooltip="حذف الفرد">حذف</button>`;
                     }
                     if (typeof employee.latitude === 'number' && typeof employee.longitude === 'number' && !isNaN(employee.latitude) && !isNaN(employee.longitude)) {
                         actionsHtml += `<button class="btn btn-info btn-small tooltip" onclick="focusOnEmployeeFromList(${employee.latitude}, ${employee.longitude}, '${employee.name || employee.employee_name}')" data-tooltip="تتبع موقع الفرد">تتبع</button>`;
