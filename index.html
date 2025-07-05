@@ -1344,9 +1344,9 @@
                 <span class="stat-number" id="checkedInEmployees">0</span>
                 <div class="stat-label">مسجلي الحضور اليوم</div>
             </div>
-            <div class="stat-card checkout-stat" onclick="focusOnCheckedOut()" title="انقر لعرض المسجلين دخولهم إلى الحساب">
+                        <div class="stat-card checkout-stat" onclick="focusOnCheckedOut()" title="انقر لعرض المسجلين خروجهم من المراكز">
                 <span class="stat-number" id="checkedOutEmployees">0</span>
-                                  <div class="stat-label">مسجلي دخول الحساب اليوم</div>
+                <div class="stat-label">تسجيل الخروج من المركز</div>
             </div>
             <div class="stat-card" onclick="focusOnCenters()" title="انقر لعرض المراكز">
                 <span class="stat-number" id="totalCenters">0</span>
@@ -2549,11 +2549,11 @@
             const employeePermissionWarning = document.getElementById('employeePermissionWarning');
             const usersListSection = document.getElementById('usersListSection');
             
-            if (!appState.userPermissions.can_add_centers && addCenterSection) {
+            if (appState.userPermissions && !appState.userPermissions.can_add_centers && addCenterSection) {
                 addCenterSection.style.display = 'none';
             }
             
-            if (!appState.userPermissions.can_add_employees && addEmployeeSection) {
+            if (appState.userPermissions && !appState.userPermissions.can_add_employees && addEmployeeSection) {
                 addEmployeeSection.style.display = 'none';
             } else if (appState.currentUser.role !== 'admin' && employeePermissionWarning) {
                 employeePermissionWarning.style.display = 'block';
@@ -3106,7 +3106,7 @@
                     centerDiv.className = 'item-card';
                     
                     let actionsHtml = '';
-                    if (appState.userPermissions.can_edit_centers) {
+                    if (appState.userPermissions && appState.userPermissions.can_edit_centers) {
                         actionsHtml += `<button class="btn btn-success btn-small tooltip" onclick="editCenter(${center.id || center.center_id})" data-tooltip="تعديل بيانات المركز">تعديل</button>`;
                     }
                     // تم حذف زر حذف المركز بناءً على طلب المستخدم
@@ -3125,8 +3125,8 @@
                         <div class="item-info">
                             <strong>${centerName}</strong><br>
                             <small>نطاق: ${centerRadius} متر • إحداثيات: ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)}</small><br>
-                            <small>الدخول اليوم: <span style="color: var(--checkin-color);">${stats.checkins}</span> • 
-                            تسجيل دخول اليوم: <span style="color: #3b82f6;">${stats.checkouts}</span></small>
+                                            <small>الدخول اليوم: <span style="color: var(--checkin-color);">${stats.checkins}</span> •
+                الخروج من المركز اليوم: <span style="color: #3b82f6;">${stats.checkouts}</span></small>
                         </div>
                         <div class="item-actions">
                             ${actionsHtml}
@@ -3167,7 +3167,7 @@
                             ${employee.status === 'active' ? '🟢 نشط' : '🔴 غير نشط'}
                         </span>
                     `;
-                    if (appState.userPermissions.can_edit_employees) {
+                    if (appState.userPermissions && appState.userPermissions.can_edit_employees) {
                         actionsHtml += `<button class="btn btn-success btn-small tooltip" onclick="editEmployee(${employee.id || employee.employee_id})" data-tooltip="تعديل بيانات الفرد">تعديل</button>`;
                     }
                     if (typeof employee.latitude === 'number' && typeof employee.longitude === 'number' && !isNaN(employee.latitude) && !isNaN(employee.longitude)) {
@@ -3183,14 +3183,41 @@
                     }
                     let loginStatus = '';
                     if (!employee.last_login && !employee.last_login_formatted) {
-                        loginStatus = '<span style="color: var(--warning); font-size: 0.9em;">لم يتم تسجيل الدخول حتى الآن</span>';
+                        loginStatus = '<span style="color: var(--warning); font-size: 0.9em;">لم يتم تسجيل الخروج من المركز حتى الآن</span>';
                     } else {
-                        loginStatus = `<span style=\"color: var(--success); font-size: 0.9em;\">آخر تسجيل دخول: ${loginText || ''}</span>`;
+                        loginStatus = `<span style=\"color: var(--success); font-size: 0.9em;\">آخر خروج من المركز: ${loginText || ''}</span>`;
                     }
+
+                    // تنسيق التاريخ والوقت لآخر نشاط
+                    function formatActivityDate(dateStr) {
+                        if (!dateStr) return '';
+                        const date = new Date(dateStr);
+                        return date.toLocaleString('ar-IQ', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Baghdad' });
+                    }
+
+                    let lastActivity = employee.last_activity_formatted || employee.last_login_formatted || employee.last_login;
+                    let lastActivityType = '';
+                    if (employee.last_activity_formatted) {
+                        lastActivityType = employee.last_activity_action ? getActionText(employee.last_activity_action) : 'نشاط';
+                    } else if (employee.last_login_formatted) {
+                        lastActivityType = 'تسجيل الدخول';
+                    }
+
+                    let isActive = employee.status === 'active';
+                    let statusText = isActive ? '🟢 نشط' : '🔴 غير نشط';
+                    let statusColor = isActive ? 'var(--success)' : 'var(--danger)';
+
+                    let activityHtml = '';
+                    if (lastActivity) {
+                        activityHtml = `<span style="color: ${statusColor}; font-size: 0.95em;">آخر نشاط: ${lastActivityType} - ${formatActivityDate(lastActivity)}</span>`;
+                    } else {
+                        activityHtml = '<span style="color: var(--warning); font-size: 0.95em;">لا يوجد نشاط مسجل بعد</span>';
+                    }
+
                     employeeDiv.innerHTML = `
                         <div class="item-info">
                             <strong>${empName}</strong><br>
-                            ${loginStatus}<br>
+                            ${activityHtml}<br>
                             <small>${employee.position || 'موظف'} • 📱 <span class="phone-masked" data-phone="${employee.phone}" onclick="togglePhoneVisibility(this)">${maskPhoneNumber(employee.phone)}</span></small><br>
                             <small>المركز: ${employee.centers?.name || employee.center_name || 'غير محدد'}</small>
                         </div>
@@ -3398,11 +3425,11 @@
         }
 
         function displayLogs(logs) {
-            // فلترة التكرار
+            // فلترة السجلات المتكررة
             logs = filterUniqueLogs(logs);
             const logsContainer = document.getElementById('activityLogs');
             
-            // Pagination
+            // تقسيم الصفحات
             const pagination = appState.pagination.logs;
             pagination.totalPages = Math.ceil(logs.length / pagination.pageSize);
             const startIndex = (pagination.currentPage - 1) * pagination.pageSize;
@@ -3412,6 +3439,7 @@
             logsContainer.innerHTML = '';
 
             if (paginatedLogs && paginatedLogs.length > 0) {
+                // عرض كل سجل في صفحة منفصلة
                 paginatedLogs.forEach(log => {
                     const logDiv = document.createElement('div');
                     logDiv.className = `log-entry ${log.action}`;
@@ -3423,12 +3451,13 @@
                     const actionText = getActionText(log.action);
                     const actionIcon = getActionIcon(log.action);
                     
-                    // Enhanced display for checkin/checkout
+                    // عرض محسن للدخول والخروج من المراكز
                     let actionDisplay = actionText;
                     if (log.action.includes('checkin') || log.action === 'in' || log.action === 'center_entry') {
                         actionDisplay = `<span style="color: var(--checkin-color); font-weight: bold;">دخل ${log.centers?.name ? 'إلى ' + log.centers.name : ''} الساعة ${new Date(logTime).toLocaleTimeString('ar-IQ', {timeZone: 'Asia/Baghdad', hour12: true})}</span>`;
                     } else if (log.action.includes('checkout') || log.action === 'out') {
-                        actionDisplay = `<span style="color: #3b82f6; font-weight: bold;">تسجيل الدخول إلى الحساب الساعة ${new Date(logTime).toLocaleTimeString('ar-IQ', {timeZone: 'Asia/Baghdad', hour12: true})}</span>`;
+                        const centerName = log.centers?.name ? ` من ${log.centers.name}` : '';
+                        actionDisplay = `<span style="color: #dc2626; font-weight: bold;">خرج ${centerName} الساعة ${new Date(logTime).toLocaleTimeString('ar-IQ', {timeZone: 'Asia/Baghdad', hour12: true})}</span>`;
                     }
                     
                     logDiv.innerHTML = `
@@ -3450,7 +3479,7 @@
                     logsContainer.appendChild(logDiv);
                 });
 
-                // Show pagination if needed
+                // عرض الصفحات إذا كانت مطلوبة
                 const paginationDiv = document.getElementById('logsPagination');
                 if (pagination.totalPages > 1) {
                     paginationDiv.style.display = 'flex';
@@ -3460,11 +3489,11 @@
                     paginationDiv.style.display = 'none';
                 }
             } else {
-                logsContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">لا توجد سجلات بعد</p>';
+                logsContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary);">لا توجد سجلات نشاط بعد</p>';
             }
         }
 
-        // Statistics Update - ENHANCED with Center Statistics
+        // تحديث الإحصائيات - محسن مع إحصائيات المراكز
         async function updateStats() {
             try {
                 let employeesCount, activeCount, centersCount, checkedInCount, checkedOutCount;
@@ -3484,14 +3513,14 @@
                     centersCount = appState.allowedCenters.length;
                 }
 
-                // عدّ الأفراد الفريدين الذين سجلوا حضور اليوم (in/checkin/auto_checkin/center_entry)
+                // عدّ الأفراد الفريدين الذين سجلوا دخول إلى المراكز اليوم (in/checkin/auto_checkin/center_entry)
                 let checkinQuery = appState.supabase
                     .from('logs')
                     .select('employee_id')
                     .gte('occurred_at', getTodayDateStart())
                     .in('action', ['in', 'checkin', 'auto_checkin', 'center_entry']);
 
-                // عدّ الأفراد الفريدين الذين سجلوا انصراف اليوم (out/checkout/auto_checkout)
+                // عدّ الأفراد الفريدين الذين سجلوا خروج من المراكز اليوم (out/checkout/auto_checkout)
                 let checkoutQuery = appState.supabase
                     .from('logs')
                     .select('employee_id')
@@ -3508,21 +3537,21 @@
                 // عدّ الفريدين فقط
                 const checkinIds = Array.isArray(checkinRes.data) ? [...new Set(checkinRes.data.map(l => l.employee_id))] : [];
                 const checkoutIds = Array.isArray(checkoutRes.data) ? [...new Set(checkoutRes.data.map(l => l.employee_id))] : [];
-                checkedInCount = checkinIds.length;
-                checkedOutCount = checkoutIds.length;
+                checkedInCount = checkinIds.length; // عدد الأفراد الذين دخلوا المراكز اليوم
+                checkedOutCount = checkoutIds.length; // عدد الأفراد الذين خرجوا من المراكز اليوم
 
                 document.getElementById('totalEmployees').textContent = employeesCount;
                 document.getElementById('activeEmployees').textContent = activeCount;
                 document.getElementById('checkedInEmployees').textContent = checkedInCount;
                 document.getElementById('checkedOutEmployees').textContent = checkedOutCount;
                 document.getElementById('totalCenters').textContent = centersCount;
-                // تم حذف todayLogs نهائياً
+                // تم حذف todayLogs نهائياً - تم استبداله بالإحصائيات المباشرة
             } catch (error) {
                 console.error('Error updating stats:', error);
             }
         }
 
-        // Enhanced Map Functions with Center Statistics
+        // دوال الخريطة المحسنة مع إحصائيات المراكز
         async function updateMapMarkers() {
             if (!appState.map || !appState.map.isStyleLoaded()) {
                 console.log('Map not ready yet...');
@@ -3530,7 +3559,7 @@
             }
 
             try {
-                // Clear existing layers
+                // مسح الطبقات الموجودة
                 ['centers-layer', 'center-labels'].forEach(layerId => {
                     if (appState.map.getLayer(layerId)) appState.map.removeLayer(layerId);
                 });
@@ -3539,6 +3568,7 @@
                 const centersToShow = appState.currentUser.role === 'admin' ? appState.allCenters : appState.allowedCenters;
 
                 if (centersToShow && centersToShow.length > 0) {
+                    // إضافة المراكز إلى الخريطة
                     const geojsonData = {
                         type: 'FeatureCollection',
                         features: centersToShow.map(center => {
@@ -3561,11 +3591,13 @@
                         })
                     };
 
+                    // إضافة مصدر البيانات للمراكز
                     appState.map.addSource('centers', {
                         type: 'geojson',
                         data: geojsonData
                     });
 
+                    // إضافة طبقة المراكز
                     appState.map.addLayer({
                         id: 'centers-layer',
                         type: 'circle',
@@ -3579,6 +3611,7 @@
                         }
                     });
 
+                    // إضافة تسميات المراكز
                     appState.map.addLayer({
                         id: 'center-labels',
                         type: 'symbol',
@@ -3599,6 +3632,7 @@
                         }
                     });
 
+                    // إضافة تفاعل النقر على المراكز
                     appState.map.on('click', 'centers-layer', (e) => {
                         const coordinates = e.features[0].geometry.coordinates.slice();
                         const { name, radius, checkins, checkouts } = e.features[0].properties;
@@ -3619,7 +3653,7 @@
                                         </div>
                                         <div class="stat-item checkout-stat">
                                             <div style="font-weight: bold; font-size: 18px; color: #3b82f6;">${checkouts}</div>
-                                            <div style="font-size: 12px; color: #3b82f6;">تسجيل دخول اليوم</div>
+                                            <div style="font-size: 12px; color: #3b82f6;">الخروج من المركز اليوم</div>
                                         </div>
                                     </div>
                                 </div>
@@ -3643,7 +3677,7 @@
         function updateMapWithEmployees(employeeLocations) {
             if (!appState.map || !appState.map.isStyleLoaded()) return;
 
-            // Clear existing employee layers
+            // مسح طبقات الأفراد الموجودة
             ['employees-layer', 'employee-labels'].forEach(layerId => {
                 if (appState.map.getLayer(layerId)) appState.map.removeLayer(layerId);
             });
@@ -3651,6 +3685,7 @@
 
             if (!employeeLocations || Object.keys(employeeLocations).length === 0) return;
 
+            // إضافة الأفراد إلى الخريطة
             const employeesGeoJSON = {
                 type: 'FeatureCollection',
                 features: Object.values(employeeLocations).map(empData => ({
@@ -3670,11 +3705,13 @@
                 }))
             };
 
+            // إضافة مصدر بيانات الأفراد
             appState.map.addSource('employees', {
                 type: 'geojson',
                 data: employeesGeoJSON
             });
 
+            // إضافة طبقة الأفراد
             appState.map.addLayer({
                 id: 'employees-layer',
                 type: 'circle',
@@ -3692,6 +3729,7 @@
                 }
             });
 
+            // إضافة تسميات الأفراد
             appState.map.addLayer({
                 id: 'employee-labels',
                 type: 'symbol',
@@ -3712,6 +3750,7 @@
                 }
             });
 
+            // إضافة تفاعل النقر على الأفراد
             appState.map.on('click', 'employees-layer', (e) => {
                 const coordinates = e.features[0].geometry.coordinates.slice();
                 const properties = e.features[0].properties;
@@ -3738,6 +3777,7 @@
                     .addTo(appState.map);
             });
 
+            // إضافة تفاعل الماوس للأفراد
             appState.map.on('mouseenter', 'employees-layer', () => {
                 appState.map.getCanvas().style.cursor = 'pointer';
             });
@@ -3747,7 +3787,7 @@
             });
         }
 
-        // Pagination Functions
+        // دوال الصفحات
         function nextPage(type) {
             const pagination = appState.pagination[type];
             if (pagination.currentPage < pagination.totalPages) {
@@ -3786,18 +3826,19 @@
             }
         }
 
-        // Search and Filter Functions
+        // دوال البحث والفلترة
         function filterEmployees() {
             const searchTerm = document.getElementById('searchEmployees').value.toLowerCase();
             const employees = appState.currentUser.role === 'admin' ? appState.allEmployees : appState.allowedEmployees;
             
+            // فلترة الأفراد حسب البحث
             let filteredEmployees = employees.filter(emp => 
                 (emp.name || emp.employee_name).toLowerCase().includes(searchTerm) ||
                 emp.phone.includes(searchTerm) ||
                 (emp.position || emp.job_position || '').toLowerCase().includes(searchTerm)
             );
             
-            // Apply advanced filters
+            // تطبيق الفلاتر المتقدمة
             if (appState.searchFilters.center) {
                 filteredEmployees = filteredEmployees.filter(emp => 
                     (emp.center_id || emp.centers?.id) == appState.searchFilters.center
@@ -3810,7 +3851,7 @@
                 );
             }
             
-            // Reset pagination
+            // إعادة تعيين الصفحات
             appState.pagination.employees.currentPage = 1;
             displayEmployees(filteredEmployees);
         }
@@ -3818,6 +3859,7 @@
         function filterCenters() {
             const searchTerm = document.getElementById('searchCenters').value.toLowerCase();
             const centerCards = document.querySelectorAll('#centersList .item-card');
+            // فلترة المراكز حسب البحث
             
             centerCards.forEach(card => {
                 const text = card.textContent.toLowerCase();
@@ -3830,15 +3872,15 @@
         }
 
         function filterMovements() {
-            // Reset pagination for locations
+            // إعادة تعيين الصفحات للمواقع
             appState.pagination.locations.currentPage = 1;
-            // This will trigger refreshEmployeeLocations which handles the search
+            // سيؤدي هذا إلى تشغيل refreshEmployeeLocations الذي يتعامل مع البحث
             refreshEmployeeLocations();
         }
 
         function clearMovementSearch() {
             document.getElementById('searchMovements').value = '';
-            // Reset pagination for locations
+            // إعادة تعيين الصفحات للمواقع
             appState.pagination.locations.currentPage = 1;
             refreshEmployeeLocations();
         }
@@ -3846,7 +3888,7 @@
         function clearLogSearch() {
             document.getElementById('searchLogs').value = '';
             document.getElementById('logFilter').value = 'all';
-            // Reset pagination for logs
+            // إعادة تعيين الصفحات للسجلات
             appState.pagination.logs.currentPage = 1;
             displayLogs(appState.allLogs);
             showInfo('تم مسح البحث في السجلات', 2000);
@@ -3861,25 +3903,30 @@
             // Apply action type filter
             if (type !== 'all') {
                 if (type === 'checkin') {
+                    // فلترة سجلات الدخول إلى المراكز
                     filteredLogs = appState.allLogs.filter(log => 
                         log.action.includes('checkin') || log.action === 'in' || log.action === 'center_entry'
                     );
                 } else if (type === 'checkout') {
+                    // فلترة سجلات الخروج من المراكز
                     filteredLogs = appState.allLogs.filter(log => 
                         log.action.includes('checkout') || log.action === 'out'
                     );
                 } else if (type === 'movement') {
+                    // فلترة سجلات الحركة والاقتراب من المراكز
                     filteredLogs = appState.allLogs.filter(log => 
                         log.action.includes('movement') || log.action.includes('nearby')
                     );
                 } else if (type === 'center_entry') {
+                    // فلترة سجلات دخول المركز
                     filteredLogs = appState.allLogs.filter(log => log.action === 'center_entry');
                 } else {
+                    // فلترة حسب النوع المحدد
                     filteredLogs = appState.allLogs.filter(log => log.action === type);
                 }
             }
             
-            // Apply search filter (name or phone)
+            // تطبيق فلتر البحث (اسم الفرد أو رقم الهاتف)
             if (searchTerm) {
                 filteredLogs = filteredLogs.filter(log => {
                     const employeeName = (log.employees?.name || '').toLowerCase();
@@ -3889,7 +3936,7 @@
                 });
             }
             
-            // Apply date filters
+            // تطبيق فلترة التاريخ
             if (appState.searchFilters.fromDate) {
                 filteredLogs = filteredLogs.filter(log => {
                     const logDate = new Date(log.occurred_at || log.created_at);
@@ -3902,23 +3949,23 @@
                 filteredLogs = filteredLogs.filter(log => {
                     const logDate = new Date(log.occurred_at || log.created_at);
                     const toDate = new Date(appState.searchFilters.toDate);
-                    toDate.setHours(23, 59, 59); // End of day
+                    toDate.setHours(23, 59, 59); // نهاية اليوم
                     return logDate <= toDate;
                 });
             }
             
-            // Reset pagination
+            // إعادة تعيين الصفحات
             appState.pagination.logs.currentPage = 1;
             displayLogs(filteredLogs);
             
-            // Show results count
+            // عرض عدد النتائج
             const searchMessage = searchTerm ? 
                 `تم العثور على ${filteredLogs.length} سجل لـ "${searchTerm}"` : 
                 `تم تصفية السجلات: ${filteredLogs.length} سجل`;
             showInfo(searchMessage, 3000);
         }
 
-        // Enhanced Distance Checking with Accuracy Consideration
+        // فحص المسافة المحسن مع مراعاة الدقة
         function calculateEffectiveDistance(employeeLat, employeeLng, centerLat, centerLng, accuracy) {
             const baseDistance = calculateDistance(employeeLat, employeeLng, centerLat, centerLng);
             
@@ -3952,6 +3999,7 @@
         
         // دالة مساعدة لعرض معلومات المسافة
         function displayDistanceInfo(distanceInfo, employeeName, centerName) {
+            // نصوص جودة الموقع
             const qualityTexts = {
                 'excellent': 'ممتازة',
                 'good': 'جيدة',
@@ -3962,18 +4010,21 @@
             
             const quality = getLocationQuality(distanceInfo.accuracy);
             
+            // بناء رسالة معلومات المسافة
             let message = `المسافة الفعلية: ${Math.round(distanceInfo.baseDistance)}م\n`;
             message += `المسافة الفعالة: ${Math.round(distanceInfo.effectiveDistance)}م\n`;
             message += `نطاق المركز: ${distanceInfo.centerRadius}م\n`;
             message += `دقة الموقع: ${qualityTexts[quality]} (${Math.round(distanceInfo.accuracy)}م)\n`;
             message += `هامش الأمان: ${Math.round(distanceInfo.accuracyBuffer)}م\n`;
             
+            // إضافة رسالة النتيجة
             if (distanceInfo.isInRange) {
                 message += `✅ ${employeeName} في نطاق ${centerName}`;
             } else {
                 message += `❌ ${employeeName} خارج نطاق ${centerName}`;
             }
             
+            // إرجاع الرسالة النهائية
             return message;
         }
 
@@ -3992,14 +4043,14 @@
             document.querySelector('#activityLogs')?.scrollIntoView({ behavior: 'smooth' });
             document.getElementById('logFilter').value = 'checkin';
             filterLogs('checkin');
-            showSuccess('عرض سجلات الدخول', 2000);
+            showSuccess('عرض سجلات الدخول إلى المراكز', 2000);
         }
 
         function focusOnCheckedOut() {
             document.querySelector('#activityLogs')?.scrollIntoView({ behavior: 'smooth' });
             document.getElementById('logFilter').value = 'checkout';
             filterLogs('checkout');
-            showInfo('عرض سجلات تسجيل الدخول إلى الحساب', 2000);
+            showInfo('عرض سجلات الخروج من المراكز', 2000);
         }
 
         function focusOnCenters() {
@@ -4014,7 +4065,7 @@
 
         // CRUD Functions - Same as before but enhanced
         async function addCenter() {
-            if (!appState.userPermissions.can_add_centers) {
+            if (!appState.userPermissions || !appState.userPermissions.can_add_centers) {
                 showError('ليس لديك صلاحية لإضافة المراكز');
                 return;
             }
@@ -4052,7 +4103,7 @@
         }
 
         async function addEmployee() {
-            if (!appState.userPermissions.can_add_employees) {
+            if (!appState.userPermissions || !appState.userPermissions.can_add_employees) {
                 showError('ليس لديك صلاحية لإضافة الأفراد');
                 return;
             }
@@ -4198,7 +4249,7 @@
 
         // Edit Functions - Same as before
         function editEmployee(employeeId) {
-            if (!appState.userPermissions.can_edit_employees) {
+            if (!appState.userPermissions || !appState.userPermissions.can_edit_employees) {
                 showError('ليس لديك صلاحية لتعديل الأفراد');
                 return;
             }
@@ -4234,7 +4285,7 @@
         }
 
         function editCenter(centerId) {
-            if (!appState.userPermissions.can_edit_centers) {
+            if (!appState.userPermissions || !appState.userPermissions.can_edit_centers) {
                 showError('ليس لديك صلاحية لتعديل المراكز');
                 return;
             }
@@ -4254,7 +4305,7 @@
         }
 
         async function updateEmployee() {
-            if (!appState.currentEditingEmployee || !appState.userPermissions.can_edit_employees) return;
+            if (!appState.currentEditingEmployee || !appState.userPermissions || !appState.userPermissions.can_edit_employees) return;
 
             const name = document.getElementById('editEmployeeName').value.trim();
             const phone = document.getElementById('editEmployeePhone').value.trim();
@@ -4291,7 +4342,7 @@
         }
 
         async function updateCenter() {
-            if (!appState.currentEditingCenter || !appState.userPermissions.can_edit_centers) return;
+            if (!appState.currentEditingCenter || !appState.userPermissions || !appState.userPermissions.can_edit_centers) return;
 
             const name = document.getElementById('editCenterName').value.trim();
             const coords = document.getElementById('editCenterCoordinates').value.trim();
@@ -4329,7 +4380,7 @@
 
         // Delete Functions - Same as before
         async function deleteCenter(centerId) {
-            if (!appState.userPermissions.can_delete_centers) {
+            if (!appState.userPermissions || !appState.userPermissions.can_delete_centers) {
                 showError('ليس لديك صلاحية لحذف المراكز');
                 return;
             }
@@ -4352,7 +4403,7 @@
         }
 
         async function deleteEmployee(employeeId) {
-            if (!appState.userPermissions.can_delete_employees) {
+            if (!appState.userPermissions || !appState.userPermissions.can_delete_employees) {
                 showError('ليس لديك صلاحية لحذف الأفراد');
                 return;
             }
@@ -4392,24 +4443,28 @@
             showInfo('تم تحديث السجلات', 2000);
         }
 
-        // Helper Functions
+        // دوال مساعدة
         function getActionText(action) {
+            // نصوص الأنشطة المختلفة
             const actions = {
                 'auto_checkin': 'دخول تلقائي',
-                'auto_checkout': 'تسجيل الدخول إلى الحساب',
+                'auto_checkout': 'خروج تلقائي من المركز المخصص له',
                 'center_entry': 'دخل مركز',
                 'center_nearby': 'اقترب من مركز',
                 'movement': 'حركة',
                 'location_update': 'تحديث موقع',
                 'checkin': 'دخول',
-                'checkout': 'تسجيل الدخول إلى الحساب',
+                'checkout': 'خروج من المركز',
                 'in': 'دخول',
-                'out': 'تسجيل الدخول إلى الحساب'
+                'out': 'خروج من المركز'
             };
+            // إرجاع النص المناسب أو النص الأصلي
+            // إرجاع النص المناسب أو النص الأصلي
             return actions[action] || action;
         }
 
         function getActionIcon(action) {
+            // أيقونات الأنشطة المختلفة
             const icons = {
                 'auto_checkin': '🟢',
                 'auto_checkout': '🔐',
@@ -4422,23 +4477,26 @@
                 'in': '✅',
                 'out': '🔐'
             };
+            // إرجاع الأيقونة المناسبة أو أيقونة افتراضية
             return icons[action] || '📋';
         }
 
-        // Modal Functions
+        // دوال النوافذ المنبثقة
         function showModal(modalId) {
             document.getElementById(modalId).style.display = 'block';
         }
 
         function closeModal(modalId) {
+            // إغلاق النافذة المنبثقة
             document.getElementById(modalId).style.display = 'none';
         }
 
-        // Theme toggle function
+        // دالة تبديل السمة
         function toggleTheme() {
             const body = document.body;
             const themeToggle = document.querySelector('.theme-toggle');
             
+            // تبديل بين السمة الفاتحة والداكنة
             if (body.getAttribute('data-theme') === 'dark') {
                 body.setAttribute('data-theme', 'light');
                 themeToggle.textContent = '🌙';
@@ -4450,11 +4508,12 @@
             }
         }
 
-        // عند تحميل الصفحة، طبّق السمة المحفوظة
+        // عند تحميل الصفحة، تطبيق السمة المحفوظة
         document.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem('theme');
             const body = document.body;
             const themeToggle = document.querySelector('.theme-toggle');
+            // تطبيق السمة المحفوظة
             if (savedTheme === 'dark') {
                 body.setAttribute('data-theme', 'dark');
                 if (themeToggle) themeToggle.textContent = '☀️';
@@ -4476,7 +4535,7 @@
                     loadCenterStats();
                     refreshEmployeeLocations();
                     
-                    // Show notification for new activities
+                    // عرض إشعار للأنشطة الجديدة
                     if (payload.eventType === 'INSERT' && payload.new) {
                         const actionText = getActionText(payload.new.action);
                         // إشعار دخول فرد جديد
@@ -4494,21 +4553,27 @@
                             }
                             showSuccess(`✅ دخول جديد: ${empName ? empName : 'فرد'} دخل ${centerName ? centerName : 'مركز'}`);
                         } else if (payload.new.action === 'auto_checkout' && payload.new.employee_id) {
-                            // إشعار تسجيل دخول إلى الحساب
+                            // إشعار خروج تلقائي من المركز المخصص له
                             let empName = '';
+                            let centerName = '';
                             if (appState.allEmployees) {
                                 const emp = appState.allEmployees.find(e => e.id === payload.new.employee_id);
                                 if (emp) empName = emp.name || emp.employee_name;
                             }
-                            showSuccess(`🔐 تسجيل دخول إلى الحساب: ${empName ? empName : 'فرد'}`, 5000);
+                            if (appState.allCenters) {
+                                const center = appState.allCenters.find(c => c.id === payload.new.center_id);
+                                if (center) centerName = center.name || center.center_name;
+                            }
+                            showSuccess(`🔐 خروج تلقائي من المركز المخصص له: ${empName ? empName : 'فرد'}${centerName ? ' من ' + centerName : ''}`, 5000);
                         } else {
+                            // إشعار النشاط العام
                             showInfo(`نشاط جديد: ${actionText}`, 5000);
                         }
                     }
                 })
                 .subscribe();
 
-            // Subscribe to employee changes
+            // الاشتراك في تغييرات الأفراد
             appState.supabase
                 .channel('enhanced_employees_channel_v2')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'employees' }, () => {
@@ -4516,7 +4581,7 @@
                 })
                 .subscribe();
 
-            // Subscribe to centers changes
+            // الاشتراك في تغييرات المراكز
             appState.supabase
                 .channel('enhanced_centers_channel_v2')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'centers' }, () => {
@@ -4525,7 +4590,7 @@
                 .subscribe();
         }
 
-        // Keyboard shortcuts
+        // اختصارات لوحة المفاتيح
         document.addEventListener('keydown', function(e) {
             if (e.ctrlKey || e.metaKey) {
                 switch(e.key) {
@@ -4537,7 +4602,7 @@
             }
         });
 
-        // Add Enter key support for login and activity monitoring
+        // إضافة دعم مفتاح Enter لتسجيل الدخول ومراقبة النشاط
         document.addEventListener('DOMContentLoaded', function() {
             const usernameInput = document.getElementById('loginUsername');
             const passwordInput = document.getElementById('loginPassword');
@@ -4550,13 +4615,13 @@
                 if (e.key === 'Enter') login();
             });
 
-            // Monitor user activity for session timeout
+            // مراقبة نشاط المستخدم لانتهاء مهلة الجلسة
             ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
                 document.addEventListener(event, updateLastActivity, true);
             });
         });
 
-        // Close modals when clicking outside
+        // إغلاق النوافذ المنبثقة عند النقر خارجها
         window.onclick = function(event) {
             const modals = document.querySelectorAll('.modal');
             modals.forEach(modal => {
@@ -4566,7 +4631,7 @@
             });
         };
 
-        // Location Settings Management Functions
+        // دوال إدارة إعدادات الموقع
         function updateLocationSettings() {
             const minAccuracy = parseInt(document.getElementById('minAccuracy').value);
             const maxAccuracy = parseInt(document.getElementById('maxAccuracy').value);
@@ -4574,20 +4639,20 @@
             const retryAttempts = parseInt(document.getElementById('retryAttempts').value);
             const accuracyBuffer = parseInt(document.getElementById('accuracyBuffer').value);
             
-            // التحقق من صحة القيم
+            // التحقق من صحة قيم الدقة
             if (minAccuracy >= maxAccuracy) {
                 showError('الحد الأدنى للدقة يجب أن يكون أقل من الحد الأقصى');
                 return;
             }
             
-            // تحديث الإعدادات
+            // تحديث إعدادات الموقع
             appState.locationSettings.minAccuracy = minAccuracy;
             appState.locationSettings.maxAccuracy = maxAccuracy;
             appState.locationSettings.locationTimeout = locationTimeout * 1000; // تحويل إلى ميلي ثانية
             appState.locationSettings.retryAttempts = retryAttempts;
             appState.locationSettings.accuracyBuffer = accuracyBuffer;
             
-            // حفظ الإعدادات في localStorage
+            // حفظ إعدادات الموقع في localStorage
             localStorage.setItem('locationSettings', JSON.stringify(appState.locationSettings));
             
             showSuccess('تم تحديث إعدادات الموقع بنجاح');
@@ -5673,12 +5738,12 @@
                     actionsHtml += `<button class="btn btn-success btn-small" onclick="editUser(${user.id})">✏️ تعديل</button>`;
                     actionsHtml += `<button class="btn btn-danger btn-small" onclick="deleteUser(${user.id})">🗑️ حذف</button>`;
                 }
-                // تحديد حالة تسجيل الدخول
+                // تحديد حالة الخروج من المركز
                 let loginStatus = '';
                 if (!user.last_login) {
-                    loginStatus = '<span style="color: var(--warning); font-size: 0.9em;">لم يتم تسجيل الدخول حتى الآن</span>';
+                    loginStatus = '<span style="color: var(--warning); font-size: 0.9em;">لم يتم تسجيل الخروج من المركز حتى الآن</span>';
                 } else {
-                    loginStatus = `<span style="color: var(--success); font-size: 0.9em;">آخر تسجيل دخول: ${user.last_login}</span>`;
+                    loginStatus = `<span style="color: var(--success); font-size: 0.9em;">آخر خروج من المركز: ${user.last_login}</span>`;
                 }
                 div.innerHTML = `
                     <div class="item-info">
