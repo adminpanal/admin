@@ -1382,99 +1382,10 @@
                 </div>
 
                 <!-- Location Settings Section -->
-                <div class="sidebar-section">
-                    <div class="section-header section-header-location" onclick="toggleSection('locationSettingsSection')">
-                        <span>⚙️ إعدادات دقة الموقع</span>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div class="section-content collapsed" id="locationSettingsSection">
-                        <div class="section-tip">
-                            🔧 تخصيص إعدادات دقة الموقع لتحسين تسجيل الدخول التلقائي
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>الحد الأدنى للدقة المطلوبة (متر)</label>
-                            <input type="number" id="minAccuracy" value="50" min="10" max="100" onchange="updateLocationSettings()">
-                            <small>كلما قل الرقم، زادت الدقة المطلوبة</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>الحد الأقصى للدقة المقبولة (متر)</label>
-                            <input type="number" id="maxAccuracy" value="200" min="50" max="500" onchange="updateLocationSettings()">
-                            <small>الحد الأقصى للدقة التي سيتم قبولها</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>مهلة الحصول على الموقع (ثانية)</label>
-                            <input type="number" id="locationTimeout" value="15" min="5" max="30" onchange="updateLocationSettings()">
-                            <small>الوقت المسموح للحصول على الموقع</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>عدد محاولات الحصول على الموقع</label>
-                            <input type="number" id="retryAttempts" value="3" min="1" max="5" onchange="updateLocationSettings()">
-                            <small>عدد المرات التي سيتم إعادة المحاولة</small>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label>هامش الأمان للمسافة (متر)</label>
-                            <input type="number" id="accuracyBuffer" value="25" min="10" max="100" onchange="updateLocationSettings()">
-                            <small>مساحة إضافية تضاف للمسافة لضمان الدقة</small>
-                        </div>
-                        
-                        <div style="margin-top: 15px; padding: 10px; background: var(--info); color: white; border-radius: 8px; font-size: 0.9em;">
-                            <strong>💡 نصائح لتحسين الدقة:</strong><br>
-                            • تأكد من تفعيل GPS<br>
-                            • اخرج إلى مكان مفتوح<br>
-                            • انتظر بضع ثوانٍ للحصول على دقة أفضل<br>
-                            • تجنب الأماكن المغلقة أو تحت الأرض
-                        </div>
-                        
-                        <button class="btn" onclick="testLocationAccuracy()" style="margin-top: 15px;">🧪 اختبار دقة الموقع</button>
-                    </div>
-                </div>
+                <!-- تم حذف قسم إعدادات دقة الموقع بناءً على طلب المستخدم -->
 
                 <!-- Offline Status Section -->
-                <div class="sidebar-section">
-                    <div class="section-header section-header-connection" onclick="toggleSection('offlineStatusSection')">
-                        <span>📱 حالة الاتصال والمزامنة</span>
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                    <div class="section-content collapsed" id="offlineStatusSection">
-                        <div class="section-tip">
-                            📊 مراقبة حالة الاتصال والإجراءات المعلقة
-                        </div>
-                        
-                        <div style="margin-bottom: 15px; padding: 10px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <strong>حالة الاتصال:</strong>
-                                <span id="connectionStatusText">جاري التحقق...</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <strong>الإجراءات المعلقة:</strong>
-                                <span id="pendingActionsCount">0</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <strong>آخر مزامنة:</strong>
-                                <span id="lastSyncTime">غير محدد</span>
-                            </div>
-                        </div>
-                        
-                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                            <button class="btn btn-small" onclick="checkConnectionStatus()">🔍 فحص الاتصال</button>
-                            <button class="btn btn-small" onclick="syncPendingActions()">🔄 مزامنة فورية</button>
-                            <button class="btn btn-small" onclick="showPendingActions()">📋 عرض المعلقة</button>
-                        </div>
-                        
-                        <div style="margin-top: 15px; padding: 10px; background: var(--warning); color: white; border-radius: 8px; font-size: 0.9em;">
-                            <strong>💡 معلومات الوضع الأوفلاين:</strong><br>
-                            • يمكن العمل بدون إنترنت<br>
-                            • البيانات تُحفظ محلياً<br>
-                            • المزامنة تلقائية عند عودة الاتصال<br>
-                            • يمكن المزامنة اليدوية
-                        </div>
-                    </div>
-                </div>
+                <!-- تم حذف قسم حالة الاتصال والمزامنة بناءً على طلب المستخدم -->
 
                 <!-- Movement Tracking Section -->
                 <!-- تم حذف قسم تتبع حركة الأفراد هنا بالكامل بناءً على طلب المستخدم -->
@@ -6079,7 +5990,6 @@
         timeout: 5000
     });
 
-    // عند عودة الإنترنت، أرسل الأحداث المخزنة
     window.addEventListener('online', sendEventsToServer);
     </script>
 </body>
