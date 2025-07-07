@@ -4382,7 +4382,7 @@
         function getActionText(action) {
             const actions = {
                 'auto_checkin': 'دخول تلقائي',
-                'auto_checkout': 'خروج تلقائي من المركز المخصص له',
+                'auto_checkout': 'خروج تلقائي',
                 'center_entry': 'دخل مركز',
                 'center_nearby': 'اقترب من مركز',
                 'movement': 'حركة',
@@ -4476,7 +4476,7 @@
                                 const center = appState.allCenters.find(c => c.id === payload.new.center_id);
                                 if (center) centerName = center.name || center.center_name;
                             }
-                            showSuccess(`🔐 خروج تلقائي من المركز المخصص له: ${empName ? empName : 'فرد'}${centerName ? ' من ' + centerName : ''}`, 5000);
+                            showSuccess(`🔐 خروج تلقائي: ${empName ? empName : 'فرد'}${centerName ? ' من ' + centerName : ''}`, 5000);
                         } else {
                             showInfo(`نشاط جديد: ${actionText}`, 5000);
                         }
