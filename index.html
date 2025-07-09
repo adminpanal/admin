@@ -16,25 +16,25 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap');
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --admin-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --user-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --primary-gradient: linear-gradient(135deg, #2196f3 0%, #1565c0 100%);
+            --admin-gradient: linear-gradient(135deg, #42a5f5 0%, #1e88e5 100%);
+            --user-gradient: linear-gradient(135deg, #64b5f6 0%, #1976d2 100%);
             --alert-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
             --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
             --warning-gradient: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
             --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            --bg-color: #f8fafc;
+            --bg-color: #f4faff;
             --card-bg: #ffffff;
-            --text-color: #1e293b;
-            --text-secondary: #64748b;
-            --border-color: #e2e8f0;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --accent: #6366f1;
+            --text-color: #0d223a;
+            --text-secondary: #1976d2;
+            --border-color: #2196f3;
+            --shadow: 0 10px 25px -5px rgba(33, 150, 243, 0.08), 0 10px 10px -5px rgba(33, 150, 243, 0.04);
+            --hover-shadow: 0 20px 25px -5px rgba(33, 150, 243, 0.13), 0 10px 10px -5px rgba(33, 150, 243, 0.07);
+            --accent: #1565c0;
             --success: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
-            --info: #3b82f6;
+            --info: #2196f3;
             --checkin-color: #10b981;
             --checkout-color: #ef4444;
         }
@@ -334,11 +334,35 @@
         }
 
         .stat-card.checkin-stat {
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, #e0f7fa 0%, #80deea 100%);
+            color: #004d40;
+            border: 2px solid #4dd0e1;
+            font-weight: bold;
+            text-shadow: 0 1px 2px #fff8, 0 0 2px #0002;
         }
 
         .stat-card.checkout-stat {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            background: linear-gradient(135deg, #fff3e0 0%, #ffb74d 100%);
+            color: #bf360c;
+            border: 2px solid #ffb74d;
+            font-weight: bold;
+            text-shadow: 0 1px 2px #fff8, 0 0 2px #0002;
+        }
+
+        .stat-card.centers-stat {
+            background: linear-gradient(135deg, #e8f5e9 0%, #a5d6a7 100%);
+            color: #1b5e20;
+            border: 2px solid #66bb6a;
+            font-weight: bold;
+            text-shadow: 0 1px 2px #fff8, 0 0 2px #0002;
+        }
+
+        .stat-card.active-users-stat {
+            background: linear-gradient(135deg, #f3e5f5 0%, #ce93d8 100%);
+            color: #4a148c;
+            border: 2px solid #ba68c8;
+            font-weight: bold;
+            text-shadow: 0 1px 2px #fff8, 0 0 2px #0002;
         }
 
         .stat-number {
@@ -1234,9 +1258,21 @@
         .select2-container--default .select2-search--inline .select2-search__field {
             color: #fff;
         }
+
+        [data-theme="dark"] .data-section,
+        [data-theme="dark"] .sidebar-section,
+        [data-theme="dark"] .map-container,
+        [data-theme="dark"] .location-card,
+        [data-theme="dark"] .logs-container,
+        [data-theme="dark"] .stat-card,
+        [data-theme="dark"] .login-card,
+        [data-theme="dark"] .top-bar,
+        [data-theme="dark"] .sidebar {
+            border: 3px solid #2196f3 !important;
+            box-shadow: 0 4px 24px 0 rgba(33, 150, 243, 0.18);
+        }
     </style>
     <script>
-    // === Draggable Modal ===
     (function() {
         const modal = document.getElementById('editUserPermissionsModal');
         const header = modal?.querySelector('.modal-header');
@@ -1342,24 +1378,26 @@
             </div>
             <div class="stat-card checkin-stat" onclick="focusOnCheckedIn()" title="انقر لعرض المسجلين حضورهم">
                 <span class="stat-number" id="checkedInEmployees">0</span>
-                <div class="stat-label">مسجلي الحضور اليوم</div>
+                <div class="stat-label"> تسجيل دخول</div>
             </div>
-                        <div class="stat-card checkout-stat" onclick="focusOnCheckedOut()" title="انقر لعرض المسجلين خروجهم من المراكز">
+            <div class="stat-card checkout-stat" onclick="focusOnCheckedOut()" title="انقر لعرض المسجلين خروجهم من المراكز">
                 <span class="stat-number" id="checkedOutEmployees">0</span>
-                <div class="stat-label">تسجيل الخروج من المركز</div>
+                <div class="stat-label">تسجيل الخروج </div>
             </div>
-            <div class="stat-card" onclick="focusOnCenters()" title="انقر لعرض المراكز">
-                <span class="stat-number" id="totalCenters">0</span>
-                <div class="stat-label">إجمالي المراكز</div>
+            <div class="stat-card centers-stat" onclick="focusOnCenters()" title="انقر لعرض المراكز">
+                <span class="stat-number" id="centersCount">0</span>
+                <div class="stat-label">عدد المراكز</div>
+            </div>
+            <div class="stat-card active-users-stat" title="الأفراد النشطين">
+                <span class="stat-number" id="activeUsers">0</span>
+                <div class="stat-label">الأفراد النشطين</div>
             </div>
         </div>
 
         <!-- Enhanced Search Section -->
         <div class="search-section">
-            <input type="text" class="search-input" id="searchEmployees" placeholder="🔍 البحث عن فرد..." oninput="filterEmployees()">
-            <input type="text" class="search-input" id="searchCenters" placeholder="🔍 البحث عن مركز..." oninput="filterCenters()">
-                            <button class="locate-btn tooltip" onclick="locateMe()" data-tooltip="تحديد موقعك الحالي على الخريطة">📍 موقعي</button>
-                <button class="locate-btn tooltip" onclick="refreshAll()" data-tooltip="تحديث جميع البيانات من قاعدة البيانات">🔄 تحديث</button>
+            <button class="locate-btn tooltip" onclick="locateMe()" data-tooltip="تحديد موقعك الحالي على الخريطة">📍 موقعي</button>
+            <button class="locate-btn tooltip" onclick="refreshAll()" data-tooltip="تحديث جميع البيانات من قاعدة البيانات">🔄 تحديث</button>
         </div>
 
         <!-- Main Layout with Sidebar -->
@@ -1425,8 +1463,8 @@
                             <input type="password" id="employeePassword" placeholder="كلمة مرور قوية">
                         </div>
                         <div class="form-group">
-                            <label>المنصب</label>
-                            <input type="text" id="employeePosition" placeholder="المنصب/الوظيفة">
+                            <label> المنصب</label>
+                            <input type="text" id="employeePosition" placeholder=": اختياري ...">
                         </div>
                         <div class="form-group">
                             <label>المركز المخصص</label>
@@ -1469,10 +1507,7 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Content Area -->
             <div class="content-area">
-                <!-- Enhanced Map Section with Center Statistics -->
                 <div class="map-container">
                     <div class="map-header">
                         <h2 style="color: var(--text-color); margin: 0;">🗺️ الخريطة التفاعلية</h2>
@@ -1520,10 +1555,12 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
                         <div>
                             <h3 style="color: var(--text-color); margin-bottom: 15px;">المراكز المتاحة</h3>
+                            <input type="text" class="search-input" id="searchCenters" placeholder="🔍 البحث عن مركز..." oninput="filterCenters()" style="margin-bottom: 12px;">
                             <div class="virtual-list" id="centersList"></div>
                         </div>
                         <div>
                             <h3 style="color: var(--text-color); margin-bottom: 15px;">قائمة الأفراد</h3>
+                            <input type="text" class="search-input" id="searchEmployees" placeholder="🔍 البحث عن فرد..." oninput="filterEmployees()" style="margin-bottom: 12px;">
                             <div class="virtual-list" id="employeesList"></div>
                             <div class="pagination" id="employeesPagination" style="display: none;">
                                 <button onclick="previousPage('employees')">← السابق</button>
@@ -1533,8 +1570,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Enhanced Activity Logs with Color Coding and Search -->
                 <div class="data-section">
                     <div class="section-title">
                         <span>📋 سجل الأنشطة والحركات </span>
@@ -1549,8 +1584,6 @@
                             <button class="btn btn-small" onclick="refreshLogs()">🔄 تحديث</button>
                         </div>
                     </div>
-                    
-                    <!-- Enhanced Search for Activity Logs -->
                     <div class="movement-search" style="margin-bottom: 20px;">
                         <input type="text" id="searchLogs" placeholder="🔍 البحث في السجلات بالاسم أو رقم الهاتف..." oninput="filterLogs()">
                         <button class="btn btn-small" onclick="clearLogSearch()">مسح البحث</button>
@@ -1566,6 +1599,16 @@
                         <span id="logsPageInfo">صفحة 1 من 1</span>
                         <button onclick="nextPage('logs')">التالي →</button>
                     </div>
+                </div>
+                <!-- قسم سجل العمليات الرئيسية -->
+                <div class="data-section">
+                  <div class="section-title">
+                    <span>📝 سجل العمليات الرئيسية</span>
+                    <button class="btn btn-small" onclick="loadMainLogs()">🔄 تحديث</button>
+                  </div>
+                  <div class="logs-container" id="mainLogsContainer">
+                    <div class="loading">جاري تحميل السجل...</div>
+                  </div>
                 </div>
             </div>
         </div>
@@ -1704,15 +1747,12 @@
     </div>
 
     <script>
-        // ===== ENHANCED GLOBAL STATE MANAGEMENT =====
         const appState = {
-            // Database & Map
             supabase: null,
             map: null,
             currentMapStyle: 'streets-v12',
             myLocationMarker: null,
             
-            // User & Permissions
             currentUser: null,
             userPermissions: null,
             sessionData: {
@@ -1722,7 +1762,6 @@
                 lastActivity: Date.now()
             },
             
-            // Data Collections
             allowedCenters: [],
             allowedEmployees: [],
             allCenters: [],
@@ -1730,22 +1769,18 @@
             allLogs: [],
             centerStats: {},
             
-            // Editing State
             currentEditingEmployee: null,
             currentEditingCenter: null,
             
-            // Pagination
             pagination: {
                 employees: { currentPage: 1, pageSize: 50, totalPages: 1 },
                 locations: { currentPage: 1, pageSize: 20, totalPages: 1 },
                 logs: { currentPage: 1, pageSize: 50, totalPages: 1 }
             },
             
-            // Auto Refresh
             autoRefreshInterval: null,
             sessionTimeout: null,
             
-            // Search Filters
             searchFilters: {
                 fromDate: null,
                 toDate: null,
@@ -1753,27 +1788,26 @@
                 status: null
             },
 
-            // Enhanced Location Management
             locationSettings: {
-                minAccuracy: 50, // دقة GPS المطلوبة (متر)
-                maxAccuracy: 200, // الحد الأقصى للدقة المقبولة
-                locationTimeout: 15000, // مهلة الحصول على الموقع (15 ثانية)
-                locationMaxAge: 30000, // أقصى عمر للموقع المخزن (30 ثانية)
-                retryAttempts: 3, // عدد محاولات الحصول على الموقع
-                accuracyBuffer: 25, // مساحة إضافية للدقة (متر)
-                locationHistory: [], // سجل المواقع السابقة للتحقق من الدقة
+                minAccuracy: 50, 
+                maxAccuracy: 200, 
+                locationTimeout: 15000, 
+                locationMaxAge: 30000, 
+                retryAttempts: 3, 
+                accuracyBuffer: 25, 
+                locationHistory: [],
                 lastLocationCheck: null,
-                locationQuality: 'unknown' // poor, fair, good, excellent
+                locationQuality: 'unknown' 
             },
 
-            // Offline Support
+
             offlineMode: {
                 isOnline: navigator.onLine,
                 pendingActions: [],
                 cachedData: {},
                 lastSync: null,
                 syncInterval: null,
-                // Enhanced tracking for offline movement
+       
                 movementTracking: {
                     isTracking: false,
                     trackingHistory: [],
@@ -1787,9 +1821,9 @@
             }
         };
 
-        // ===== ENHANCED LOCATION MANAGEMENT FUNCTIONS =====
+   
         
-        // تحسين دقة الموقع باستخدام متوسط متحرك
+  
         function calculateAverageLocation(locations) {
             if (!locations || locations.length === 0) return null;
             
@@ -1799,13 +1833,10 @@
             
             if (validLocations.length === 0) return null;
             
-            // ترتيب المواقع حسب الدقة (الأفضل أولاً)
             validLocations.sort((a, b) => a.accuracy - b.accuracy);
             
-            // أخذ أفضل 3 مواقع أو أقل
             const bestLocations = validLocations.slice(0, Math.min(3, validLocations.length));
             
-            // حساب المتوسط المرجح حسب الدقة
             let totalWeight = 0;
             let weightedLat = 0;
             let weightedLng = 0;
@@ -1828,7 +1859,6 @@
             };
         }
         
-        // تحديد جودة الموقع
         function getLocationQuality(accuracy) {
             if (accuracy <= 10) return 'excellent';
             if (accuracy <= 25) return 'good';
@@ -1837,11 +1867,9 @@
             return 'unreliable';
         }
         
-        // تحسين دقة الموقع باستخدام فلترة
         function enhanceLocationAccuracy(position) {
             const { latitude, longitude, accuracy } = position.coords;
             
-            // إضافة الموقع الحالي إلى السجل
             const currentLocation = {
                 latitude,
                 longitude,
@@ -1852,12 +1880,10 @@
             
             appState.locationSettings.locationHistory.push(currentLocation);
             
-            // الاحتفاظ بآخر 10 مواقع فقط
             if (appState.locationSettings.locationHistory.length > 10) {
                 appState.locationSettings.locationHistory.shift();
             }
             
-            // حساب الموقع المحسن
             const enhancedLocation = calculateAverageLocation(appState.locationSettings.locationHistory);
             
             if (enhancedLocation) {
@@ -1877,7 +1903,6 @@
             };
         }
         
-        // التحقق من استقرار الموقع
         function isLocationStable(locations, threshold = 50) {
             if (locations.length < 2) return true;
             
@@ -1898,7 +1923,6 @@
             return avgDistance <= threshold;
         }
         
-        // حساب المسافة بين نقطتين
         function calculateDistance(lat1, lng1, lat2, lng2) {
             const R = 6371000; // نصف قطر الأرض بالمتر
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -1910,7 +1934,6 @@
             return R * c;
         }
         
-        // الحصول على موقع محسن مع إعادة المحاولة
         function getEnhancedLocation(options = {}) {
             return new Promise((resolve, reject) => {
                 const settings = {
@@ -1935,14 +1958,13 @@
                         (position) => {
                             const enhancedLocation = enhanceLocationAccuracy(position);
                             
-                            // التحقق من جودة الموقع
                             if (enhancedLocation.quality === 'unreliable' && attempts < maxAttempts) {
                                 console.log(`محاولة ${attempts}: دقة الموقع ضعيفة (${enhancedLocation.accuracy}m)، إعادة المحاولة...`);
                                 setTimeout(attemptGetLocation, 2000);
                                 return;
                             }
                             
-                            // التحقق من استقرار الموقع
+                         
                             const isStable = isLocationStable(appState.locationSettings.locationHistory);
                             
                             if (!isStable && attempts < maxAttempts) {
@@ -1978,9 +2000,7 @@
             });
         }
 
-        // ===== HELPER FUNCTIONS =====
-        
-        // Loading Bar Management
+       
         function showLoading() {
             const loadingBar = document.getElementById('loadingBar');
             if (loadingBar) {
@@ -1995,7 +2015,6 @@
             }
         }
 
-        // Enhanced Error Handling
         function showError(message, duration = 5000) {
             showNotification(message, 'error', duration);
         }
@@ -2008,7 +2027,6 @@
             showNotification(message, 'info', duration);
         }
 
-        // Enhanced Date Formatting
         function formatDateEnhanced(date) {
             if (!date) return 'غير محدد';
             
@@ -2033,7 +2051,7 @@
             }
         }
 
-        // Phone Number Masking for Security
+
         function maskPhoneNumber(phone) {
             if (!phone) return '';
             if (phone.length <= 4) return phone;
@@ -2051,7 +2069,6 @@
             }
         }
 
-        // Scroll to Section Helper
         function scrollToSection(sectionId) {
             const element = document.getElementById(sectionId);
             if (element) {
@@ -2070,13 +2087,12 @@
             return names[sectionId] || sectionId;
         }
 
-        // Session Management Enhancement
         function updateLastActivity() {
             appState.sessionData.lastActivity = Date.now();
         }
 
         function startSessionTimeout() {
-            const timeoutMinutes = 30; // 30 minutes
+            const timeoutMinutes = 30;
             const timeoutMs = timeoutMinutes * 60 * 1000;
             
             appState.sessionTimeout = setInterval(() => {
@@ -2087,14 +2103,14 @@
                     showInfo('انتهت صلاحية الجلسة. سيتم تسجيل الخروج تلقائياً.', 5000);
                     setTimeout(() => logout(), 5000);
                 }
-            }, 60000); // Check every minute
+            }, 60000); 
         }
 
-        // Advanced Search Functions
+      
         function applyAdvancedSearch() {}
         function clearAdvancedSearch() {}
 
-        // Export Functions
+    
         function exportToPDF() {
             showInfo('جاري إعداد ملف PDF...', 3000);
             const employees = appState.currentUser.role === 'admin' ? appState.allEmployees : appState.allowedEmployees;
@@ -2153,14 +2169,11 @@
             showSuccess('تم تصدير البيانات إلى Excel بنجاح!', 3000);
         }
 
-        // Supabase Configuration
         const supabaseUrl = 'https://qcbcjyhqgxwuqutzkxrh.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjYmNqeWhxZ3h3dXF1dHpreHJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEyMDE3NjQsImV4cCI6MjA2Njc3Nzc2NH0.y-hQVa6nzBpCMpXL7XbcWPMGafATvnMez3lAmFvb2zY';
 
-        // Mapbox Configuration
         mapboxgl.accessToken = 'pk.eyJ1IjoiYW1lZXI3ZWx3YXMiLCJhIjoiY21iODAxaTFyMGFsajJqc2J2dGtvY2pmdSJ9.MNY-7y2onlfAnM0PUhNt8g';
 
-        // Map styles for toggle
         const mapStyles = [
             'mapbox://styles/mapbox/streets-v12',
             'mapbox://styles/mapbox/satellite-v9',
@@ -2169,7 +2182,6 @@
         ];
         let currentStyleIndex = 0;
 
-        // Timestamp Functions (Iraq timezone)
         function getCurrentTimestamp() {
             return new Date().toISOString();
         }
@@ -2219,31 +2231,27 @@
         }
 
         function getTodayDateStart() {
-            // بداية اليوم بتوقيت العراق (UTC+3)
+        
             const now = new Date();
-            // احسب الفارق بين توقيت الجهاز وUTC+3
-            const iraqOffset = 3 * 60; // دقائق
-            const localOffset = now.getTimezoneOffset(); // دقائق
-            // احسب بداية اليوم المحلي
+   
+            const iraqOffset = 3 * 60; 
+            const localOffset = now.getTimezoneOffset(); 
+         
             now.setHours(0, 0, 0, 0);
-            // عدّل التاريخ ليوافق بداية اليوم في بغداد
             const diffMinutes = iraqOffset + localOffset;
             now.setMinutes(now.getMinutes() - diffMinutes);
             return now.toISOString();
         }
 
-        // Initialize Application
+
         document.addEventListener('DOMContentLoaded', async function() {
             console.log('Enhanced application v3 starting...');
             
-            // Initialize section states
             initializeSections();
             
-            // Initialize offline support
             initializeOfflineSupport();
             loadPendingActions();
             
-            // Check saved session
             const savedSession = localStorage.getItem('sessionData');
             if (savedSession) {
                 try {
@@ -2586,11 +2594,6 @@
             });
         }
 
-        // Enhanced Map Functions
-        // ========== تحسين geolocation: طلب الموقع فقط عند الضغط على زر ==========
-        // إزالة أي استدعاء مباشر لـ navigator.geolocation.watchPosition خارج دوال مرتبطة بزر أو حدث المستخدم
-        // (تمت مراجعة الكود: طلب الموقع يتم فقط في locateMe أو startMovementTracking أو عند تتبع موظف، وهي كلها مرتبطة بأزرار)
-        // إذا أضفت زر جديد لطلب الموقع، اربطه دائماً بدالة مثل locateMe()
         let rtlPluginSet = false;
         function initializeMap() {
             if (typeof appState.currentStyleIndex !== 'number' || isNaN(appState.currentStyleIndex) || appState.currentStyleIndex < 0 || appState.currentStyleIndex >= mapStyles.length) {
@@ -2615,7 +2618,6 @@
                     return;
                 }
                 console.log('Initializing map with style:', style);
-                // لا تستدعي setRTLTextPlugin إلا مرة واحدة
                 if (!rtlPluginSet && mapboxgl.setRTLTextPlugin) {
                     mapboxgl.setRTLTextPlugin(
                         'https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-rtl-text/v0.2.3/mapbox-gl-rtl-text.js',
@@ -2653,10 +2655,9 @@
             }
         }
 
-        // Toggle map style
         function toggleMapStyle() {
             if (!appState.map) return;
-            // حماية currentStyleIndex
+
             if (typeof appState.currentStyleIndex !== 'number' || isNaN(appState.currentStyleIndex) || appState.currentStyleIndex < 0 || appState.currentStyleIndex >= mapStyles.length) {
                 appState.currentStyleIndex = 0;
             }
@@ -2664,7 +2665,6 @@
             appState.map.setStyle(mapStyles[appState.currentStyleIndex]);
             const styleNames = ['الشوارع', 'الأقمار الصناعية', 'فاتح', 'مظلم'];
             showInfo(`تم تغيير نمط الخريطة إلى: ${styleNames[appState.currentStyleIndex]}`, 2000);
-            // Re-add markers after style change
             appState.map.once('styledata', () => {
                 setTimeout(() => {
                     updateMapMarkers();
@@ -2673,7 +2673,6 @@
             });
         }
 
-        // Show all employees on map
         async function showAllEmployeesOnMap() {
             if (!appState.map) {
                 showError('الخريطة غير محملة بعد');
@@ -2705,7 +2704,6 @@
 
                 if (error) throw error;
 
-                // Group by employee and get latest location
                 const employeeLocations = {};
                 latestLogs.forEach(log => {
                     if (log.employees && !employeeLocations[log.employees.id]) {
@@ -2723,7 +2721,6 @@
 
                 updateMapWithEmployees(employeeLocations);
                 
-                // Fit map to show all employees
                 if (Object.keys(employeeLocations).length > 0) {
                     const bounds = new mapboxgl.LngLatBounds();
                     Object.values(employeeLocations).forEach(empData => {
@@ -2739,7 +2736,6 @@
             }
         }
 
-        // Enhanced Locate Me Function with Improved Accuracy
         async function locateMe() {
             if (!appState.map) {
                 showError('الخريطة غير محملة بعد. يرجى الانتظار قليلاً...');
@@ -2961,15 +2957,14 @@
             }
         }
 
-        // Load center statistics
+ 
         async function loadCenterStats() {
             try {
-                const todayStart = getTodayDateStart();
-                // جلب كل السجلات ذات العلاقة لهذا اليوم
+                // const todayStart = getTodayDateStart(); // لم يعد هناك حاجة لهذا السطر
+        
                 let query = appState.supabase
                     .from('logs')
-                    .select('center_id, action, employee_id')
-                    .gte('occurred_at', todayStart);
+                    .select('center_id, action, employee_id'); // أزلنا شرط .gte('occurred_at', todayStart)
 
                 if (appState.currentUser.role !== 'admin' && appState.allowedEmployees.length > 0) {
                     const employeeIds = appState.allowedEmployees.map(emp => emp.employee_id || emp.id);
@@ -2979,7 +2974,6 @@
                 const { data: logs, error } = await query;
                 if (error) throw error;
 
-                // حساب الأفراد الفريدين لكل مركز
                 appState.centerStats = {};
                 const checkinMap = {};
                 const checkoutMap = {};
@@ -2987,12 +2981,12 @@
                     if (!appState.centerStats[log.center_id]) {
                         appState.centerStats[log.center_id] = { checkins: 0, checkouts: 0 };
                     }
-                    // الدخول
+       
                     if (log.action.includes('checkin') || log.action === 'in' || log.action === 'center_entry') {
                         if (!checkinMap[log.center_id]) checkinMap[log.center_id] = new Set();
                         checkinMap[log.center_id].add(log.employee_id);
                     }
-                    // الخروج
+            
                     if (log.action.includes('checkout') || log.action === 'out') {
                         if (!checkoutMap[log.center_id]) checkoutMap[log.center_id] = new Set();
                         checkoutMap[log.center_id].add(log.employee_id);
@@ -3024,7 +3018,6 @@
                 if (appState.map && appState.map.isStyleLoaded()) {
                     updateMapMarkers();
                 }
-                // تعبئة قائمة المراكز في نموذج إضافة المستخدم تلقائياً
                 populateNewUserCenters();
             } catch (error) {
                 console.error('Error loading allowed centers:', error);
@@ -3057,11 +3050,9 @@
 
                 appState.allCenters = centers || [];
                 displayCenters(appState.allCenters);
-                // تحديث المراكز على الخريطة مباشرة بعد التحميل
                 if (appState.map && appState.map.isStyleLoaded()) {
                     updateMapMarkers();
                 }
-                // تعبئة قائمة المراكز في نموذج إضافة المستخدم تلقائياً
                 populateNewUserCenters();
             } catch (error) {
                 console.error('Error loading centers:', error);
@@ -3083,8 +3074,6 @@
                 console.error('Error loading employees:', error);
             }
         }
-
-        // Display Functions with Pagination - ENHANCED
         function displayCenters(centers) {
             const centersList = document.getElementById('centersList');
             const centerSelect = document.getElementById('employeeCenter');
@@ -3509,11 +3498,21 @@
                 checkedInCount = checkinIds.length; // عدد الأفراد الذين دخلوا المراكز اليوم
                 checkedOutCount = checkoutIds.length; // عدد الأفراد الذين خرجوا من المراكز اليوم
 
-                document.getElementById('totalEmployees').textContent = employeesCount;
-                document.getElementById('activeEmployees').textContent = activeCount;
-                document.getElementById('checkedInEmployees').textContent = checkedInCount;
-                document.getElementById('checkedOutEmployees').textContent = checkedOutCount;
-                document.getElementById('totalCenters').textContent = centersCount;
+                // تحديث الكاردات الإحصائية الصحيحة
+                if(document.getElementById('totalEmployees'))
+                    document.getElementById('totalEmployees').textContent = employeesCount;
+                if(document.getElementById('activeEmployees'))
+                    document.getElementById('activeEmployees').textContent = activeCount;
+                if(document.getElementById('checkedInEmployees'))
+                    document.getElementById('checkedInEmployees').textContent = checkedInCount;
+                if(document.getElementById('checkedOutEmployees'))
+                    document.getElementById('checkedOutEmployees').textContent = checkedOutCount;
+                if(document.getElementById('totalCenters'))
+                    document.getElementById('totalCenters').textContent = centersCount;
+                if(document.getElementById('centersCount'))
+                    document.getElementById('centersCount').textContent = centersCount;
+                if(document.getElementById('activeUsers'))
+                    document.getElementById('activeUsers').textContent = activeCount;
             } catch (error) {
                 console.error('Error updating stats:', error);
             }
@@ -4047,6 +4046,7 @@
                 document.getElementById('centerRadius').value = '100';
                 await loadAllData();
                 showSuccess('تم إضافة المركز بنجاح ✅');
+                await logMainAction('add', 'center', name);
             } catch (error) {
                 console.error('Error adding center:', error);
                 showError('حدث خطأ في إضافة المركز');
@@ -4086,13 +4086,19 @@
             }
 
             try {
-                const { data, error } = await appState.supabase.rpc('add_employee', {
+                const params = {
                     employee_name: name,
                     employee_phone: phone,
                     employee_password: password,
                     employee_position: position || 'فرد',
                     employee_center_id: parseInt(centerId)
-                });
+                };
+                // لا ترسل admin_user_id نهائياً
+                // if (appState.currentUser.role === 'admin') {
+                //     params.admin_user_id = appState.currentUser.id;
+                // }
+
+                const { data, error } = await appState.supabase.rpc('add_employee_simple', params);
 
                 if (error) throw error;
 
@@ -4107,6 +4113,7 @@
 
                     await loadAllData();
                     showSuccess(`✅ تم إضافة الفرد بنجاح!`);
+                    await logMainAction('add', 'employee', name);
                 } else {
                     showError('❌ ' + result.error);
                 }
@@ -4197,28 +4204,36 @@
             const employee = (appState.currentUser.role === 'admin' ? appState.allEmployees : appState.allowedEmployees)
                 .find(emp => (emp.id || emp.employee_id) === employeeId);
             
-            if (!employee) return;
+            if (!employee) {
+                showError('الموظف غير موجود أو تم حذفه!');
+                return;
+            }
 
             appState.currentEditingEmployee = employee;
 
-            document.getElementById('editEmployeeName').value = employee.name || employee.employee_name;
-            document.getElementById('editEmployeePhone').value = employee.phone;
-            document.getElementById('editEmployeePosition').value = employee.position || '';
-            document.getElementById('editEmployeeStatus').value = employee.status;
-            
+            const nameInput = document.getElementById('editEmployeeName');
+            const phoneInput = document.getElementById('editEmployeePhone');
+            const positionInput = document.getElementById('editEmployeePosition');
+            const statusInput = document.getElementById('editEmployeeStatus');
             const centerSelect = document.getElementById('editEmployeeCenter');
-            centerSelect.innerHTML = '<option value="">اختر المركز</option>';
-            
-            const centersToShow = appState.currentUser.role === 'admin' ? appState.allCenters : appState.allowedCenters;
-            centersToShow.forEach(center => {
-                const option = document.createElement('option');
-                option.value = center.id || center.center_id;
-                option.textContent = center.name || center.center_name;
-                if ((center.id || center.center_id) === employee.center_id) {
-                    option.selected = true;
-                }
-                centerSelect.appendChild(option);
-            });
+
+            if (nameInput) nameInput.value = employee.name || employee.employee_name;
+            if (phoneInput) phoneInput.value = employee.phone;
+            if (positionInput) positionInput.value = employee.position || '';
+            if (statusInput) statusInput.value = employee.status;
+            if (centerSelect) {
+                centerSelect.innerHTML = '<option value="">اختر المركز</option>';
+                const centersToShow = appState.currentUser.role === 'admin' ? appState.allCenters : appState.allowedCenters;
+                centersToShow.forEach(center => {
+                    const option = document.createElement('option');
+                    option.value = center.id || center.center_id;
+                    option.textContent = center.name || center.center_name;
+                    if ((center.id || center.center_id) === employee.center_id) {
+                        option.selected = true;
+                    }
+                    centerSelect.appendChild(option);
+                });
+            }
 
             showModal('editEmployeeModal');
         }
@@ -4246,11 +4261,22 @@
         async function updateEmployee() {
             if (!appState.currentEditingEmployee || !appState.userPermissions || !appState.userPermissions.can_edit_employees) return;
 
-            const name = document.getElementById('editEmployeeName').value.trim();
-            const phone = document.getElementById('editEmployeePhone').value.trim();
-            const position = document.getElementById('editEmployeePosition').value.trim();
-            const status = document.getElementById('editEmployeeStatus').value;
-            const centerId = document.getElementById('editEmployeeCenter').value;
+            const nameInput = document.getElementById('editEmployeeName');
+            const phoneInput = document.getElementById('editEmployeePhone');
+            const positionInput = document.getElementById('editEmployeePosition');
+            const statusInput = document.getElementById('editEmployeeStatus');
+            const centerInput = document.getElementById('editEmployeeCenter');
+
+            if (!nameInput || !phoneInput || !positionInput || !statusInput || !centerInput) {
+                showError('بعض الحقول غير موجودة في الصفحة!');
+                return;
+            }
+
+            const name = nameInput.value.trim();
+            const phone = phoneInput.value.trim();
+            const position = positionInput.value.trim();
+            const status = statusInput.value;
+            const centerId = centerInput.value;
 
             if (!name || !phone) {
                 showError('يرجى ملء الحقول المطلوبة');
@@ -4258,6 +4284,21 @@
             }
 
             try {
+                // جلب الاسم القديم قبل التعديل
+                let oldName = '';
+                const { data: oldData, error: oldError } = await appState.supabase
+                    .from('employees')
+                    .select('name')
+                    .eq('id', appState.currentEditingEmployee.id || appState.currentEditingEmployee.employee_id)
+                    .single();
+                if (!oldError && oldData && oldData.name) {
+                    oldName = oldData.name;
+                } else if (appState.currentEditingEmployee.name || appState.currentEditingEmployee.employee_name) {
+                    oldName = appState.currentEditingEmployee.name || appState.currentEditingEmployee.employee_name;
+                } else {
+                    oldName = name; // fallback: استخدم الاسم الجديد كاسم قديم إذا لم يوجد غيره
+                }
+
                 const { error } = await appState.supabase
                     .from('employees')
                     .update({
@@ -4274,6 +4315,7 @@
                 closeModal('editEmployeeModal');
                 await loadAllData();
                 showSuccess('تم تحديث بيانات الفرد بنجاح ✅');
+                await logMainAction('update', 'employee', name, { old_name: oldName });
             } catch (error) {
                 console.error('Error updating employee:', error);
                 showError('حدث خطأ في تحديث البيانات');
@@ -4296,6 +4338,17 @@
             }
 
             try {
+                // جلب الاسم القديم قبل التعديل
+                let oldName = '';
+                const { data: oldData, error: oldError } = await appState.supabase
+                    .from('centers')
+                    .select('name')
+                    .eq('id', appState.currentEditingCenter.id || appState.currentEditingCenter.center_id)
+                    .single();
+                if (!oldError && oldData) {
+                    oldName = oldData.name;
+                }
+
                 const { error } = await appState.supabase
                     .from('centers')
                     .update({
@@ -4311,6 +4364,7 @@
                 closeModal('editCenterModal');
                 await loadAllData();
                 showSuccess('تم تحديث بيانات المركز بنجاح ✅');
+                await logMainAction('update', 'center', name, { old_name: oldName });
             } catch (error) {
                 console.error('Error updating center:', error);
                 showError('حدث خطأ في تحديث البيانات');
@@ -4332,6 +4386,7 @@
                     if (error) throw error;
                     await loadAllData();
                     showSuccess('تم حذف المركز بنجاح ✅');
+                    await logMainAction('delete', 'center', centerId);
                 } catch (error) {
                     console.error('Error deleting center:', error);
                     showError('حدث خطأ في حذف المركز');
@@ -4355,6 +4410,7 @@
                     if (error) throw error;
                     await loadAllData();
                     showSuccess('تم الحذف بنجاح ✅');
+                    await logMainAction('delete', 'employee', employeeId);
                 } catch (error) {
                     console.error('Error deleting employee:', error);
                     showError('حدث خطأ في الحذف');
@@ -5635,6 +5691,17 @@
                 return;
             }
             try {
+                // جلب الاسم القديم قبل التعديل
+                let oldName = '';
+                const { data: oldData, error: oldError } = await appState.supabase
+                    .from('users')
+                    .select('full_name')
+                    .eq('id', appState.editingUser.id)
+                    .single();
+                if (!oldError && oldData) {
+                    oldName = oldData.full_name;
+                }
+
                 const { error } = await appState.supabase
                     .from('users')
                     .update({
@@ -5653,6 +5720,8 @@
                 closeModal('editUserModal');
                 showSuccess('تم تحديث بيانات المستخدم بنجاح');
                 loadUsersList();
+                // تسجيل السجل الرئيسي
+                await logMainAction('update', 'user', fullName, { old_name: oldName });
             } catch (error) {
                 showError('خطأ في تحديث بيانات المستخدم: ' + error.message);
             }
@@ -5720,7 +5789,7 @@
                 if (appState.map && appState.map.isStyleLoaded()) {
                     updateMapMarkers();
                 }
-                populateNewUserCenters(); // هنا
+                populateNewUserCenters();
             } catch (error) {
                 console.error('Error loading allowed centers:', error);
             }
@@ -5737,7 +5806,7 @@
                 if (appState.map && appState.map.isStyleLoaded()) {
                     updateMapMarkers();
                 }
-                populateNewUserCenters(); // هنا
+                populateNewUserCenters(); 
             } catch (error) {
                 console.error('Error loading centers:', error);
             }
@@ -5748,25 +5817,50 @@
                 showError('لا توجد سجلات للتصدير');
                 return;
             }
-            const uniqueLogs = {};
+            logs = logs.slice().sort((a, b) => {
+                const nameA = (a.employees?.name || '').localeCompare(b.employees?.name || '');
+                if (nameA !== 0) return nameA;
+                return new Date(a.occurred_at || a.created_at) - new Date(b.occurred_at || b.created_at);
+            });
+
+            const logsByName = {};
             logs.forEach(log => {
                 const name = log.employees?.name || 'غير معروف';
-                const action = (log.action.includes('checkin') || log.action === 'in' || log.action === 'center_entry') ? 'دخول' : (log.action.includes('checkout') || log.action === 'out') ? 'خروج' : log.action;
-                if (!uniqueLogs[name]) uniqueLogs[name] = { entry: null, exit: null, phone: log.employees?.phone || '' };
-                if (action === 'دخول' && !uniqueLogs[name].entry) {
-                    uniqueLogs[name].entry = log.occurred_at || log.created_at;
-                }
-                if (action === 'خروج' && !uniqueLogs[name].exit) {
-                    uniqueLogs[name].exit = log.occurred_at || log.created_at;
+                if (!logsByName[name]) logsByName[name] = [];
+                logsByName[name].push(log);
+            });
+            const rows = [];
+            Object.entries(logsByName).forEach(([name, personLogs]) => {
+                let lastEntry = null;
+                personLogs.forEach(log => {
+                    const action = (log.action.includes('checkin') || log.action === 'in' || log.action === 'center_entry') ? 'دخول' : (log.action.includes('checkout') || log.action === 'out') ? 'خروج' : log.action;
+                    const center = log.centers?.name || log.center_name || '';
+                    const phone = log.employees?.phone || '';
+                    const time = log.occurred_at || log.created_at;
+                    if (action === 'دخول') {
+
+                        if (lastEntry) {
+                            rows.push([name, phone, lastEntry.center, lastEntry.time, '']);
+                        }
+                        lastEntry = { time: time, center: center };
+                    } else if (action === 'خروج' && lastEntry) {
+
+                        rows.push([name, phone, lastEntry.center, lastEntry.time, time]);
+                        lastEntry = null;
+                    }
+                });
+                if (lastEntry) {
+                    rows.push([name, personLogs[0].employees?.phone || '', lastEntry.center, lastEntry.time, '']);
                 }
             });
             const ws_data = [
-                ['الاسم', 'رقم الهاتف', 'وقت الدخول', 'وقت الخروج'],
-                ...Object.entries(uniqueLogs).map(([name, data]) => [
-                    name,
-                    data.phone,
-                    data.entry ? new Date(data.entry).toLocaleString('ar-IQ', {timeZone: 'Asia/Baghdad'}) : '',
-                    data.exit ? new Date(data.exit).toLocaleString('ar-IQ', {timeZone: 'Asia/Baghdad'}) : ''
+                ['الاسم', 'رقم الهاتف', 'المركز', 'وقت الدخول', 'وقت الخروج'],
+                ...rows.map(row => [
+                    row[0],
+                    row[1],
+                    row[2],
+                    row[3] ? new Date(row[3]).toLocaleString('ar-IQ', {timeZone: 'Asia/Baghdad'}) : '',
+                    row[4] ? new Date(row[4]).toLocaleString('ar-IQ', {timeZone: 'Asia/Baghdad'}) : ''
                 ])
             ];
             const ws = window.XLSX.utils.aoa_to_sheet(ws_data);
@@ -5779,9 +5873,139 @@
         function focusOnEmployeeFromList(lat, lng, name) {
             focusOnEmployee(lat, lng, name);
         }
+
+
+        async function logMainAction(actionType, entityType, entityName, extra = {}) {
+            try {
+                let coords = { latitude: null, longitude: null };
+                if (navigator.geolocation) {
+                    await new Promise((resolve) => {
+                        navigator.geolocation.getCurrentPosition(
+                            (pos) => {
+                                coords.latitude = pos.coords.latitude;
+                                coords.longitude = pos.coords.longitude;
+                                resolve();
+                            },
+                            () => resolve(),
+                            { enableHighAccuracy: true, timeout: 5000 }
+                        );
+                    });
+                }
+                let userId = appState.currentUser?.id || null;
+                if (userId && !/^[0-9a-fA-F-]{36}$/.test(userId)) {
+                  userId = null;
+                }
+                const logData = {
+                  action: actionType,
+                  entity_type: entityType, 
+                  entity_name: entityName,
+                  latitude: coords.latitude,
+                  longitude: coords.longitude,
+                  user_id: userId,
+                  ...extra,
+                  occurred_at: new Date().toISOString()
+                };
+                await appState.supabase.from('main_logs').insert([logData]);
+            } catch (e) { 
+                console.error('logMainAction error', e); 
+            }
+        }
+
+     
+        async function loadMainLogs() {
+          const container = document.getElementById('mainLogsContainer');
+          container.innerHTML = '<div class="loading">جاري تحميل السجل...</div>';
+          try {
+
+            const { data: logs, error } = await appState.supabase
+              .from('main_logs')
+              .select('action,entity_type,entity_name,latitude,longitude,user_id,occurred_at')
+              .order('occurred_at', { ascending: false })
+              .limit(200);
+            if (error) throw error;
+            if (!logs || logs.length === 0) {
+              container.innerHTML = '<p style="text-align:center;color:var(--text-secondary);">لا توجد عمليات بعد</p>';
+              return;
+            }
+        
+            const userIds = [...new Set(logs.map(log => log.user_id).filter(Boolean))];
+            let usersMap = {};
+            if (userIds.length > 0) {
+              const { data: users, error: userError } = await appState.supabase
+                .from('users')
+                .select('id,full_name,username')
+                .in('id', userIds);
+              if (!userError && users) {
+                users.forEach(u => {
+                  usersMap[u.id] = u.full_name || u.username || u.id;
+                });
+              }
+            }
+            container.innerHTML = '';
+            logs.forEach(log => {
+              const time = log.occurred_at || log.created_at;
+              const hasCoords = typeof log.latitude === 'number' && typeof log.longitude === 'number' && !isNaN(log.latitude) && !isNaN(log.longitude);
+              const coords = hasCoords
+                ? `<div style='background:#e3f2fd;color:#0d47a1;padding:6px 12px;margin:8px 0 0 0;border-radius:8px;font-size:1.15em;font-weight:bold;display:inline-block;direction:ltr;'>📍 إحداثيات الموقع: [${log.latitude.toFixed(5)}, ${log.longitude.toFixed(5)}]</div>`
+                : `<div style='background:#fff3cd;color:#856404;padding:6px 12px;margin:8px 0 0 0;border-radius:8px;font-size:1em;font-weight:bold;display:inline-block;'>⚠️ لم يتم تحديد الموقع</div>`;
+              const userName = log.user_id ? (usersMap[log.user_id] || log.user_id) : '';
+              const user = userName ? `👤 المستخدم: ${userName}` : '';
+
+              // نص عربي واضح حسب نوع العملية
+              let actionText = '';
+              if (log.action === 'update') {
+                let oldNameDisplay = (log.old_name !== undefined && log.old_name !== null) ? log.old_name : '';
+                actionText = `تم تعديل ${log.entity_type === 'employee' ? 'فرد' : log.entity_type === 'center' ? 'مركز' : log.entity_type === 'user' ? 'مستخدم' : log.entity_type} من "${oldNameDisplay}" إلى "${log.entity_name}"`;
+              } else if (log.action === 'delete') {
+                actionText = `تم حذف ${log.entity_type === 'employee' ? 'فرد' : log.entity_type === 'center' ? 'مركز' : log.entity_type === 'user' ? 'مستخدم' : log.entity_type} باسم "${log.entity_name}"`;
+              } else if (log.action === 'add') {
+                actionText = `تم إضافة ${log.entity_type === 'employee' ? 'فرد' : log.entity_type === 'center' ? 'مركز' : log.entity_type === 'user' ? 'مستخدم' : log.entity_type} باسم "${log.entity_name}"`;
+              } else {
+                actionText = `${log.action} ${log.entity_type}: ${log.entity_name}`;
+              }
+
+              const row = document.createElement('div');
+              row.className = 'log-entry';
+              row.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                  <div>
+                    <strong>${actionText}</strong>
+                  </div>
+                  <div style="font-size:0.8em;color:var(--text-secondary);">
+                    ${new Date(time).toLocaleString('ar-IQ', {timeZone:'Asia/Baghdad'})}
+                  </div>
+                </div>
+                ${coords}
+                <div class="log-meta">${user}</div>
+              `;
+              container.appendChild(row);
+            });
+          } catch (e) {
+            container.innerHTML = '<p style="color:red;text-align:center;">خطأ في تحميل السجل</p>';
+          }
+        }
+        if (document.getElementById('mainLogsContainer')) loadMainLogs();
+
+        async function getLogs() {
+          if (!appState.supabase) {
+            console.warn('Supabase not initialized yet');
+            return;
+          }
+          const { data, error } = await appState.supabase
+            .from('main_logs')
+            .select('action,entity_type,entity_name,latitude,longitude,user_id,occurred_at')
+            .order('occurred_at', { ascending: false });
+
+          if (error) {
+            console.error('خطأ في القراءة:', error)
+          } else {
+            console.log('السجلات:', data)
+          }
+        }
+
+        getLogs()
     </script>
     <script>
-    // === Draggable Modal ===
     (function() {
         const modal = document.getElementById('editUserPermissionsModal');
         const header = modal?.querySelector('.modal-header');
@@ -5816,9 +6040,9 @@
     })();
     </script>
     <script>
-    const centerLat = 24.7136; // latitude للمركز (عدّلها حسب الحاجة)
-    const centerLng = 46.6753; // longitude للمركز (عدّلها حسب الحاجة)
-    const radius = 50; // نصف القطر بالمتر
+    const centerLat = 24.7136; 
+    const centerLng = 46.6753; 
+    const radius = 50; 
 
     let insideCenter = false;
     let entryTime = null;
@@ -5843,7 +6067,6 @@
     function sendEventsToServer() {
         let events = JSON.parse(localStorage.getItem('centerEvents') || '[]');
         if (events.length === 0) return;
-        // عدل الرابط أدناه حسب سيرفرك
         fetch('/log-events', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -5890,6 +6113,11 @@
     });
 
     window.addEventListener('online', sendEventsToServer);
+    </script>
+    <script>
+    window.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+    }, false);
     </script>
 </body>
 </html>
