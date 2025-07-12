@@ -144,20 +144,26 @@
 
         /* Enhanced Login Card */
         .login-card {
-            background: var(--card-bg);
+            background: linear-gradient(135deg, #2193b0 0%, #6dd5ed 100%) !important;
+            color: #fff !important;
+            border: 3px solid #1565c0 !important;
+            font-weight: bold !important;
+            font-size: 1.15em !important;
+            box-shadow: 0 8px 32px 0 rgba(33, 150, 243, 0.18) !important;
             padding: 48px 36px;
             border-radius: 24px;
             box-shadow: var(--shadow);
             width: 100%;
             max-width: 420px;
             text-align: center;
-            border: 2px solid var(--border-color);
         }
 
         .login-card h1 {
-            color: var(--accent);
+            color: #fff !important;
+            font-size: 2em !important;
+            font-weight: 900 !important;
+            text-shadow: 0 2px 8px #1565c033;
             margin-bottom: 32px;
-            font-size: 1.5em;
         }
 
         .form-group {
@@ -314,17 +320,27 @@
         }
 
         .stat-card {
-            background: var(--primary-gradient);
-            color: #fff;
+            background: linear-gradient(135deg, #8f94fb 0%, #4e54c8 100%) !important;
+            color: #fff !important;
+            border: 3px solid #4e54c8 !important;
+            font-weight: bold !important;
+            font-size: 1.2em !important;
+            box-shadow: 0 8px 32px 0 rgba(76, 81, 241, 0.18) !important;
             padding: 36px 28px;
             border-radius: 22px;
             text-align: center;
-            box-shadow: var(--shadow);
             cursor: pointer;
             transition: all 0.3s;
-            border: 2px solid var(--border-color);
             position: relative;
             overflow: hidden;
+        }
+        .stat-card .stat-number {
+            font-size: 2.2em !important;
+            font-weight: 900 !important;
+            color: #fff !important;
+            margin-bottom: 12px;
+            display: block;
+            letter-spacing: 1px;
         }
 
         .stat-card:hover {
@@ -363,15 +379,6 @@
             border: 2px solid #ba68c8;
             font-weight: bold;
             text-shadow: 0 1px 2px #fff8, 0 0 2px #0002;
-        }
-
-        .stat-number {
-            font-size: 1.7em;
-            font-weight: bold;
-            margin-bottom: 12px;
-            display: block;
-            letter-spacing: 1px;
-            color: #fff;
         }
 
         .stat-label {
@@ -623,19 +630,21 @@
 
         /* Enhanced Location Display for 10k+ employees */
         .location-card {
-            background: var(--card-bg);
-            border: 2px solid var(--border-color);
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%) !important;
+            color: #7f1d1d !important;
+            border: 3px solid #f59e0b !important;
+            font-weight: bold !important;
+            font-size: 1.1em !important;
+            box-shadow: 0 8px 32px 0 rgba(245, 158, 11, 0.18) !important;
             border-radius: 16px;
             padding: 16px;
             margin-bottom: 12px;
             transition: all 0.3s;
-            box-shadow: var(--shadow);
         }
-
-        .location-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--hover-shadow);
-            border-color: var(--accent);
+        .location-card strong {
+            color: #7f1d1d !important;
+            font-size: 1.2em !important;
+            font-weight: 900 !important;
         }
 
         .employee-status {
@@ -795,19 +804,20 @@
 
         /* Enhanced Item Cards for performance */
         .item-card {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%) !important;
+            color: #0d223a !important;
+            border: 3px solid #10b981 !important;
+            font-weight: bold !important;
+            font-size: 1.1em !important;
+            box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.18) !important;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--card-bg);
             padding: 16px 20px;
             margin-bottom: 10px;
             border-radius: 12px;
-            border-left: 5px solid var(--accent);
-            box-shadow: var(--shadow);
             transition: all 0.25s;
-            border: 1px solid var(--border-color);
         }
-
         .item-card:hover {
             transform: translateX(-4px) scale(1.01);
             box-shadow: var(--hover-shadow);
@@ -819,8 +829,9 @@
         }
 
         .item-info strong {
-            color: var(--accent);
-            font-size: 1.1em;
+            color: #0d223a !important;
+            font-size: 1.2em !important;
+            font-weight: 900 !important;
         }
 
         .item-actions {
@@ -1030,6 +1041,12 @@
                 flex-direction: column;
                 gap: 15px;
                 text-align: center;
+            }
+            .login-card, .stat-card, .item-card, .location-card {
+                font-size: 1em !important;
+            }
+            .stat-card .stat-number, .item-card strong, .location-card strong {
+                font-size: 1.1em !important;
             }
         }
 
@@ -1387,10 +1404,6 @@
             <div class="stat-card centers-stat" onclick="focusOnCenters()" title="انقر لعرض المراكز">
                 <span class="stat-number" id="centersCount">0</span>
                 <div class="stat-label">عدد المراكز</div>
-            </div>
-            <div class="stat-card active-users-stat" title="الأفراد النشطين">
-                <span class="stat-number" id="activeUsers">0</span>
-                <div class="stat-label">الأفراد النشطين</div>
             </div>
         </div>
 
@@ -4250,7 +4263,7 @@
             if (!center) return;
 
             appState.currentEditingCenter = center;
-
+            appState.editingOldCenterName = center.name || center.center_name || '';
             document.getElementById('editCenterName').value = center.name || center.center_name;
             document.getElementById('editCenterCoordinates').value = `${center.latitude}, ${center.longitude}`;
             document.getElementById('editCenterRadius').value = center.radius;
@@ -4259,46 +4272,14 @@
         }
 
         async function updateEmployee() {
-            if (!appState.currentEditingEmployee || !appState.userPermissions || !appState.userPermissions.can_edit_employees) return;
-
-            const nameInput = document.getElementById('editEmployeeName');
-            const phoneInput = document.getElementById('editEmployeePhone');
-            const positionInput = document.getElementById('editEmployeePosition');
-            const statusInput = document.getElementById('editEmployeeStatus');
-            const centerInput = document.getElementById('editEmployeeCenter');
-
-            if (!nameInput || !phoneInput || !positionInput || !statusInput || !centerInput) {
-                showError('بعض الحقول غير موجودة في الصفحة!');
-                return;
-            }
-
-            const name = nameInput.value.trim();
-            const phone = phoneInput.value.trim();
-            const position = positionInput.value.trim();
-            const status = statusInput.value;
-            const centerId = centerInput.value;
-
-            if (!name || !phone) {
-                showError('يرجى ملء الحقول المطلوبة');
-                return;
-            }
-
+            if (!appState.currentEditingEmployee) return;
+            const name = document.getElementById('editEmployeeName').value.trim();
+            const phone = document.getElementById('editEmployeePhone').value.trim();
+            const position = document.getElementById('editEmployeePosition').value.trim();
+            const status = document.getElementById('editEmployeeStatus').value;
+            const centerId = document.getElementById('editEmployeeCenter').value;
             try {
-                // جلب الاسم القديم قبل التعديل
-                let oldName = '';
-                const { data: oldData, error: oldError } = await appState.supabase
-                    .from('employees')
-                    .select('name')
-                    .eq('id', appState.currentEditingEmployee.id || appState.currentEditingEmployee.employee_id)
-                    .single();
-                if (!oldError && oldData && oldData.name) {
-                    oldName = oldData.name;
-                } else if (appState.currentEditingEmployee.name || appState.currentEditingEmployee.employee_name) {
-                    oldName = appState.currentEditingEmployee.name || appState.currentEditingEmployee.employee_name;
-                } else {
-                    oldName = name; // fallback: استخدم الاسم الجديد كاسم قديم إذا لم يوجد غيره
-                }
-
+                const oldName = appState.currentEditingEmployee.name || appState.currentEditingEmployee.employee_name;
                 const { error } = await appState.supabase
                     .from('employees')
                     .update({
@@ -4312,10 +4293,13 @@
 
                 if (error) throw error;
 
+                // سجل العملية في main_logs مع old_name و new_name
+                await logMainAction('update', 'employee', name, { old_name: oldName, new_name: name });
+
                 closeModal('editEmployeeModal');
                 await loadAllData();
                 showSuccess('تم تحديث بيانات الفرد بنجاح ✅');
-                await logMainAction('update', 'employee', name, { old_name: oldName });
+                appState.editingOldName = null;
             } catch (error) {
                 console.error('Error updating employee:', error);
                 showError('حدث خطأ في تحديث البيانات');
@@ -4324,7 +4308,6 @@
 
         async function updateCenter() {
             if (!appState.currentEditingCenter || !appState.userPermissions || !appState.userPermissions.can_edit_centers) return;
-
             const name = document.getElementById('editCenterName').value.trim();
             const coords = document.getElementById('editCenterCoordinates').value.trim();
             const radius = parseInt(document.getElementById('editCenterRadius').value);
@@ -4336,19 +4319,8 @@
                 showError('يرجى ملء جميع الحقول');
                 return;
             }
-
             try {
-                // جلب الاسم القديم قبل التعديل
-                let oldName = '';
-                const { data: oldData, error: oldError } = await appState.supabase
-                    .from('centers')
-                    .select('name')
-                    .eq('id', appState.currentEditingCenter.id || appState.currentEditingCenter.center_id)
-                    .single();
-                if (!oldError && oldData) {
-                    oldName = oldData.name;
-                }
-
+                const oldName = appState.currentEditingCenter.name || appState.currentEditingCenter.center_name;
                 const { error } = await appState.supabase
                     .from('centers')
                     .update({
@@ -4361,10 +4333,13 @@
 
                 if (error) throw error;
 
+                // سجل العملية في main_logs مع old_name و new_name
+                await logMainAction('update', 'center', name, { old_name: oldName, new_name: name });
+
                 closeModal('editCenterModal');
                 await loadAllData();
                 showSuccess('تم تحديث بيانات المركز بنجاح ✅');
-                await logMainAction('update', 'center', name, { old_name: oldName });
+                appState.editingOldCenterName = null;
             } catch (error) {
                 console.error('Error updating center:', error);
                 showError('حدث خطأ في تحديث البيانات');
@@ -4378,6 +4353,19 @@
 
             if (confirm('هل أنت متأكد من حذف هذا المركز؟ سيتم حذف جميع المرتبطين به.')) {
                 try {
+                    // جلب اسم المركز قبل الحذف
+                    let centerName = '';
+                    const { data: centerData, error: centerError } = await appState.supabase
+                        .from('centers')
+                        .select('name')
+                        .eq('id', centerId)
+                        .single();
+                    if (!centerError && centerData && centerData.name) {
+                        centerName = centerData.name;
+                    } else {
+                        centerName = centerId;
+                    }
+
                     const { error } = await appState.supabase
                         .from('centers')
                         .delete()
@@ -4386,7 +4374,7 @@
                     if (error) throw error;
                     await loadAllData();
                     showSuccess('تم حذف المركز بنجاح ✅');
-                    await logMainAction('delete', 'center', centerId);
+                    await logMainAction('delete', 'center', centerName);
                 } catch (error) {
                     console.error('Error deleting center:', error);
                     showError('حدث خطأ في حذف المركز');
@@ -4402,6 +4390,19 @@
 
             if (confirm('هل أنت متأكد من الحذف؟')) {
                 try {
+                    // جلب اسم الموظف قبل الحذف
+                    let employeeName = '';
+                    const { data: empData, error: empError } = await appState.supabase
+                        .from('employees')
+                        .select('name')
+                        .eq('id', employeeId)
+                        .single();
+                    if (!empError && empData && empData.name) {
+                        employeeName = empData.name;
+                    } else {
+                        employeeName = employeeId;
+                    }
+
                     const { error } = await appState.supabase
                         .from('employees')
                         .delete()
@@ -4410,7 +4411,7 @@
                     if (error) throw error;
                     await loadAllData();
                     showSuccess('تم الحذف بنجاح ✅');
-                    await logMainAction('delete', 'employee', employeeId);
+                    await logMainAction('delete', 'employee', employeeName);
                 } catch (error) {
                     console.error('Error deleting employee:', error);
                     showError('حدث خطأ في الحذف');
@@ -5678,40 +5679,37 @@
             showModal('editUserModal');
         }
         async function updateUser() {
-            if (!appState.editingUser || !appState.currentUser || appState.currentUser.role !== 'admin') return;
+            if (!appState.editingUser) return;
             const username = document.getElementById('editUserUsername').value.trim();
             const fullName = document.getElementById('editUserFullName').value.trim();
             const email = document.getElementById('editUserEmail').value.trim();
             const phone = document.getElementById('editUserPhone').value.trim();
             const role = document.getElementById('editUserRole').value;
-            const selectedCenters = window.$ && $('#editUserCenters').select2 ? $('#editUserCenters').val().map(Number) :
-                Array.from(document.getElementById('editUserCenters').selectedOptions).map(opt => parseInt(opt.value));
-            if (!username || !fullName) {
-                showError('يرجى ملء الحقول المطلوبة');
-                return;
-            }
+            const selectedCenters = Array.from(document.getElementById('editUserCenters').selectedOptions).map(opt => parseInt(opt.value));
             try {
-                // جلب الاسم القديم قبل التعديل
+                // جلب الاسم القديم من قاعدة البيانات مباشرة
                 let oldName = '';
                 const { data: oldData, error: oldError } = await appState.supabase
                     .from('users')
                     .select('full_name')
                     .eq('id', appState.editingUser.id)
                     .single();
-                if (!oldError && oldData) {
+                if (!oldError && oldData && oldData.full_name) {
                     oldName = oldData.full_name;
+                } else {
+                    oldName = fullName;
                 }
-
-                const { error } = await appState.supabase
-                    .from('users')
-                    .update({
-                        username: username,
-                        full_name: fullName,
-                        email: email,
-                        phone: phone,
-                        role: role
-                    })
-                    .eq('id', appState.editingUser.id);
+                const { data, error } = await appState.supabase.rpc('update_user', {
+                    user_id: appState.editingUser.id,
+                    user_username: username,
+                    user_full_name: fullName,
+                    user_email: email,
+                    user_phone: phone,
+                    user_role: role,
+                    center_ids: selectedCenters.length ? selectedCenters : null,
+                    admin_user_id: appState.currentUser?.id || null,
+                    old_name: oldName
+                });
                 if (error) throw error;
                 await appState.supabase.rpc('update_user_centers', {
                     user_id: appState.editingUser.id,
@@ -5919,7 +5917,7 @@
 
             const { data: logs, error } = await appState.supabase
               .from('main_logs')
-              .select('action,entity_type,entity_name,latitude,longitude,user_id,occurred_at')
+              .select('action,entity_type,entity_name,latitude,longitude,user_id,occurred_at,old_name,new_name')
               .order('occurred_at', { ascending: false })
               .limit(200);
             if (error) throw error;
@@ -5946,20 +5944,26 @@
               const time = log.occurred_at || log.created_at;
               const hasCoords = typeof log.latitude === 'number' && typeof log.longitude === 'number' && !isNaN(log.latitude) && !isNaN(log.longitude);
               const coords = hasCoords
-                ? `<div style='background:#e3f2fd;color:#0d47a1;padding:6px 12px;margin:8px 0 0 0;border-radius:8px;font-size:1.15em;font-weight:bold;display:inline-block;direction:ltr;'>📍 إحداثيات الموقع: [${log.latitude.toFixed(5)}, ${log.longitude.toFixed(5)}]</div>`
+                ? `<div style='background:#e3f2fd;color:#0d47a1;padding:6px 12px;margin:8px 0 0 0;border-radius:8px;font-size:1.15em;font-weight:bold;display:inline-block;direction:ltr;'>الموقع: [${log.latitude.toFixed(5)}, ${log.longitude.toFixed(5)}]</div>`
                 : `<div style='background:#fff3cd;color:#856404;padding:6px 12px;margin:8px 0 0 0;border-radius:8px;font-size:1em;font-weight:bold;display:inline-block;'>⚠️ لم يتم تحديد الموقع</div>`;
               const userName = log.user_id ? (usersMap[log.user_id] || log.user_id) : '';
               const user = userName ? `👤 المستخدم: ${userName}` : '';
 
-              // نص عربي واضح حسب نوع العملية
               let actionText = '';
               if (log.action === 'update') {
-                let oldNameDisplay = (log.old_name !== undefined && log.old_name !== null) ? log.old_name : '';
-                actionText = `تم تعديل ${log.entity_type === 'employee' ? 'فرد' : log.entity_type === 'center' ? 'مركز' : log.entity_type === 'user' ? 'مستخدم' : log.entity_type} من "${oldNameDisplay}" إلى "${log.entity_name}"`;
+                let oldNameDisplay = (log.old_name !== undefined && log.old_name !== null && log.old_name !== '') ? log.old_name : null;
+                let newNameDisplay = (log.new_name !== undefined && log.new_name !== null && log.new_name !== '') ? log.new_name : log.entity_name;
+                if (oldNameDisplay && newNameDisplay) {
+                  actionText = `تم تعديل ${log.entity_type === 'employee' ? 'الفرد' : log.entity_type === 'center' ? 'المركز' : log.entity_type === 'user' ? 'المستخدم' : log.entity_type} من <b style='color:#d32f2f;'>${oldNameDisplay}</b> إلى <b style='color:#388e3c;'>${newNameDisplay}</b>`;
+                } else if (newNameDisplay) {
+                  actionText = `تم تعديل ${log.entity_type === 'employee' ? 'الفرد' : log.entity_type === 'center' ? 'المركز' : log.entity_type === 'user' ? 'المستخدم' : log.entity_type} إلى <b style='color:#388e3c;'>${newNameDisplay}</b>`;
+                } else {
+                  actionText = `تم تعديل ${log.entity_type}`;
+                }
               } else if (log.action === 'delete') {
-                actionText = `تم حذف ${log.entity_type === 'employee' ? 'فرد' : log.entity_type === 'center' ? 'مركز' : log.entity_type === 'user' ? 'مستخدم' : log.entity_type} باسم "${log.entity_name}"`;
+                actionText = `تم حذف ${log.entity_type === 'employee' ? 'فرد' : log.entity_type === 'center' ? 'مركز' : log.entity_type === 'user' ? 'مستخدم' : log.entity_type} باسم ${log.entity_name}`;
               } else if (log.action === 'add') {
-                actionText = `تم إضافة ${log.entity_type === 'employee' ? 'فرد' : log.entity_type === 'center' ? 'مركز' : log.entity_type === 'user' ? 'مستخدم' : log.entity_type} باسم "${log.entity_name}"`;
+                actionText = `تم إضافة ${log.entity_type === 'employee' ? 'فرد' : log.entity_type === 'center' ? 'مركز' : log.entity_type === 'user' ? 'مستخدم' : log.entity_type} باسم ${log.entity_name}`;
               } else {
                 actionText = `${log.action} ${log.entity_type}: ${log.entity_name}`;
               }
@@ -5984,140 +5988,6 @@
             container.innerHTML = '<p style="color:red;text-align:center;">خطأ في تحميل السجل</p>';
           }
         }
-        if (document.getElementById('mainLogsContainer')) loadMainLogs();
-
-        async function getLogs() {
-          if (!appState.supabase) {
-            console.warn('Supabase not initialized yet');
-            return;
-          }
-          const { data, error } = await appState.supabase
-            .from('main_logs')
-            .select('action,entity_type,entity_name,latitude,longitude,user_id,occurred_at')
-            .order('occurred_at', { ascending: false });
-
-          if (error) {
-            console.error('خطأ في القراءة:', error)
-          } else {
-            console.log('السجلات:', data)
-          }
-        }
-
-        getLogs()
-    </script>
-    <script>
-    (function() {
-        const modal = document.getElementById('editUserPermissionsModal');
-        const header = modal?.querySelector('.modal-header');
-        let isDragging = false, startX, startY, startLeft, startTop;
-
-        if (header && modal) {
-            header.style.cursor = 'move';
-            header.onmousedown = function(e) {
-                isDragging = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                const rect = modal.querySelector('.modal-content').getBoundingClientRect();
-                startLeft = rect.left;
-                startTop = rect.top;
-                document.body.style.userSelect = 'none';
-            };
-            document.onmousemove = function(e) {
-                if (!isDragging) return;
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                const modalContent = modal.querySelector('.modal-content');
-                modalContent.style.position = 'fixed';
-                modalContent.style.left = (startLeft + dx) + 'px';
-                modalContent.style.top = (startTop + dy) + 'px';
-                modalContent.style.margin = '0';
-            };
-            document.onmouseup = function() {
-                isDragging = false;
-                document.body.style.userSelect = '';
-            };
-        }
-    })();
-    </script>
-    <script>
-    const centerLat = 24.7136; 
-    const centerLng = 46.6753; 
-    const radius = 50; 
-
-    let insideCenter = false;
-    let entryTime = null;
-    let exitTime = null;
-    function getDistanceFromLatLonInMeters(lat1, lon1, lat2, lon2) {
-        const R = 6371000; 
-        const dLat = (lat2-lat1) * Math.PI/180;
-        const dLon = (lon2-lon1) * Math.PI/180;
-        const a = 
-            Math.sin(dLat/2) * Math.sin(dLat/2) +
-            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) * 
-            Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
-    }
-
-    function saveEventLocally(type, time) {
-        let events = JSON.parse(localStorage.getItem('centerEvents') || '[]');
-        events.push({ type, time });
-        localStorage.setItem('centerEvents', JSON.stringify(events));
-    }
-    function sendEventsToServer() {
-        let events = JSON.parse(localStorage.getItem('centerEvents') || '[]');
-        if (events.length === 0) return;
-        fetch('/log-events', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ events })
-        }).then(res => {
-            if (res.ok) {
-                localStorage.removeItem('centerEvents');
-                console.log('تم إرسال الأحداث للسيرفر بنجاح');
-            }
-        }).catch(err => {
-            console.log('تعذر إرسال الأحداث، سيتم المحاولة لاحقًا');
-        });
-    }
-
-    navigator.geolocation.watchPosition(function(position) {
-        const { latitude, longitude } = position.coords;
-        const distance = getDistanceFromLatLonInMeters(latitude, longitude, centerLat, centerLng);
-
-        if (distance <= radius && !insideCenter) {
-            insideCenter = true;
-            entryTime = new Date().toISOString();
-            console.log("دخل المركز في:", entryTime);
-            if (navigator.onLine) {
-                fetch('/log-entry', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({type: 'entry', time: entryTime})});
-            } else {
-                saveEventLocally('entry', entryTime);
-            }
-        } else if (distance > radius && insideCenter) {
-            insideCenter = false;
-            exitTime = new Date().toISOString();
-            console.log("خرج من المركز في:", exitTime);
-            if (navigator.onLine) {
-                fetch('/log-exit', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({type: 'exit', time: exitTime})});
-            } else {
-                saveEventLocally('exit', exitTime);
-            }
-        }
-    }, function(error) {
-        console.error("خطأ في تتبع الموقع:", error);
-    }, {
-        enableHighAccuracy: true,
-        maximumAge: 1000,
-        timeout: 5000
-    });
-
-    window.addEventListener('online', sendEventsToServer);
-    </script>
-    <script>
-    window.addEventListener('contextmenu', function(e) {
-      e.preventDefault();
-    }, false);
     </script>
 </body>
 </html>
