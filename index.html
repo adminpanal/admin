@@ -2513,12 +2513,8 @@
             }, 500);
             loadMainLogs();
             const mainLogsSection = document.getElementById('mainLogsContainer');
-            if (mainLogsSection) {
-                if (appState.currentUser.role !== 'admin') {
-                    mainLogsSection.parentElement.style.display = 'none';
-                } else {
-                    mainLogsSection.parentElement.style.display = '';
-                }
+            if (mainLogsSection && appState.currentUser.role !== 'admin') {
+                mainLogsSection.parentElement.style.display = 'none';
             }
             const statsGrid = document.querySelector('.stats-grid');
             if (statsGrid && appState.currentUser.role !== 'admin') {
@@ -2957,13 +2953,15 @@
                     appState.allowedEmployees = [...appState.allEmployees];
                 } else {
                     await Promise.all([
-                        loadAllowedCenters(),
-                        loadAllowedEmployees(),
+                        loadCenters(),
+                        loadEmployees(),
                         loadLogs(),
                         loadCenterStats(),
                         updateStats(),
                         refreshEmployeeLocations()
                     ]);
+                    appState.allowedCenters = [...appState.allCenters];
+                    appState.allowedEmployees = [...appState.allEmployees];
                 }
                 
                 if (appState.map && appState.map.isStyleLoaded()) {
@@ -3107,7 +3105,7 @@
                     centerDiv.className = 'item-card';
                     
                     let actionsHtml = '';
-                    if (appState.userPermissions && appState.userPermissions.can_edit_centers) {
+                    if (appState.currentUser && appState.currentUser.role === 'admin' && appState.userPermissions && appState.userPermissions.can_edit_centers) {
                         actionsHtml += `<button class="btn btn-success btn-small tooltip" onclick="editCenter(${center.id || center.center_id})" data-tooltip="تعديل بيانات المركز">تعديل</button>`;
                         actionsHtml += `<button class="btn btn-danger btn-small tooltip" onclick="deleteCenter(${center.id || center.center_id}, '${center.name || center.center_name}')" data-tooltip="حذف المركز">حذف</button>`;
                     }
@@ -3158,12 +3156,8 @@
                     const empName = employee.name || employee.employee_name;
                     const employeeDiv = document.createElement('div');
                     employeeDiv.className = `item-card employee-card ${employee.status}`;
-                    let actionsHtml = `
-                        <span class="employee-status ${employee.status}">
-                            ${employee.status === 'active' ? '🟢 نشط' : '🔴 غير نشط'}
-                        </span>
-                    `;
-                    if (appState.userPermissions && appState.userPermissions.can_edit_employees) {
+                    let actionsHtml = `<span class="employee-status ${employee.status}">${employee.status === 'active' ? '🟢 نشط' : '🔴 غير نشط'}</span>`;
+                    if (appState.currentUser && appState.currentUser.role === 'admin' && appState.userPermissions && appState.userPermissions.can_edit_employees) {
                         actionsHtml += `<button class="btn btn-success btn-small tooltip" onclick="editEmployee(${employee.id || employee.employee_id})" data-tooltip="تعديل بيانات الفرد">تعديل</button>`;
                         actionsHtml += `<button class="btn btn-danger btn-small tooltip" onclick="deleteEmployee(${employee.id || employee.employee_id}, '${empName}')" data-tooltip="حذف الفرد">حذف</button>`;
                     }
@@ -4029,6 +4023,23 @@
                 await loadAllData();
                 showSuccess('تم إضافة المركز بنجاح ✅');
                 await logMainAction('add', 'center', name);
+                if (appState.currentUser.role === 'admin' && data && data[0]) {
+                    const { data: users } = await appState.supabase
+                        .from('users')
+                        .select('id')
+                        .eq('role', 'user')
+                        .eq('is_active', true);
+                    if (users && users.length) {
+                        const centerId = data[0].id;
+                        const permissions = users.map(u => ({
+                            user_id: u.id,
+                            center_id: centerId,
+                            can_view: true,
+                            can_manage: false
+                        }));
+                        await appState.supabase.from('user_center_permissions').insert(permissions);
+                    }
+                }
             } catch (error) {
                 console.error('Error adding center:', error);
                 showError('حدث خطأ في إضافة المركز');
