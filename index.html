@@ -1272,6 +1272,141 @@
         .section-header.section-header-userslist {
             background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
         }
+        .section-header.section-header-backup {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .backup-status {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .status-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .status-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .status-value {
+            color: var(--text-color);
+            font-weight: bold;
+        }
+
+        .backup-controls {
+            margin-bottom: 15px;
+        }
+
+        .backup-settings {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+        }
+
+        .backup-settings h4 {
+            margin-bottom: 10px;
+            color: var(--text-color);
+            font-size: 1em;
+        }
+
+        .backup-settings .form-group {
+            margin-bottom: 10px;
+        }
+
+        .backup-settings label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            color: var(--text-color);
+        }
+
+        .backup-settings input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .backup-settings input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .backup-list-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .backup-list-content {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .backup-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .backup-item.latest {
+            border-color: #28a745;
+            background: #f8fff8;
+        }
+
+        .backup-info h4 {
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+
+        .backup-info p {
+            margin: 0;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        .backup-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .backup-actions .btn {
+            padding: 5px 10px;
+            font-size: 0.8em;
+        }
         .select2-container--default .select2-selection--multiple {
             background: var(--card-bg, #23272e);
             color: #fff;
@@ -1514,6 +1649,72 @@
                         <button class="btn" onclick="addEmployee()">إضافة فرد</button>
                     </div>
                 </div>
+
+                        <!-- Backup System Section - Only for Admin -->
+                        <div class="sidebar-section" id="backupSystemSection" style="display: none;">
+                            <div class="section-header section-header-backup" onclick="toggleSection('backupSystemContent')">
+                                <span>💾 النسخ الاحتياطي (مدير فقط)</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="section-content collapsed" id="backupSystemContent">
+                                <div class="backup-status" id="backupStatus">
+                                    <div class="status-item">
+                                        <span class="status-label">الحالة:</span>
+                                        <span class="status-value" id="backupStatusValue">جاري التحميل...</span>
+                                    </div>
+                                    <div class="status-item">
+                                        <span class="status-label">آخر نسخة:</span>
+                                        <span class="status-value" id="lastBackupTime">--</span>
+                                    </div>
+                                    <div class="status-item">
+                                        <span class="status-label">عدد النسخ:</span>
+                                        <span class="status-value" id="totalBackups">0</span>
+                                    </div>
+                                </div>
+
+                                <div class="backup-controls">
+                                    <button class="btn btn-success" onclick="createManualBackup()" style="width: 100%; margin-bottom: 10px;">
+                                        🔄 إنشاء نسخة احتياطية
+                                    </button>
+
+                                    <button class="btn btn-warning" onclick="showBackupList()" style="width: 100%; margin-bottom: 10px;">
+                                        📋 عرض النسخ الاحتياطية
+                                    </button>
+
+                                    <button class="btn btn-info" onclick="toggleAutoBackup()" style="width: 100%; margin-bottom: 10px;">
+                                        ⚙️ تفعيل/إيقاف التلقائي
+                                    </button>
+
+                                    <button class="btn btn-danger" onclick="cleanOldBackups()" style="width: 100%;">
+                                        🧹 تنظيف النسخ القديمة
+                                    </button>
+
+                                    <button class="btn btn-warning" onclick="showClearLogsOptions()" style="width: 100%; margin-top: 10px;">
+                                        🗑️ تصفير السجلات
+                                    </button>
+                                </div>
+
+                                <div class="backup-settings">
+                                    <h4>⚙️ الإعدادات</h4>
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="autoSaveOnChange" checked>
+                                            حفظ تلقائي عند التغيير
+                                        </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>
+                                            <input type="checkbox" id="includeLogs" checked>
+                                            تضمين السجلات
+                                        </label>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>فترة النسخ التلقائي (ثواني):</label>
+                                        <input type="number" id="backupInterval" value="30" min="10" max="300">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                 <!-- Location Settings Section -->
                 <div class="sidebar-section" id="locationSettingsSection">
@@ -1817,6 +2018,24 @@
                 toDate: null,
                 center: null,
                 status: null
+            },
+
+            // Enhanced Auto Backup System
+            autoBackup: {
+                enabled: true,
+                interval: 30000, // 30 seconds
+                maxBackups: 20,
+                lastBackupTime: null,
+                backupInterval: null,
+                isBackingUp: false,
+                backups: [],
+                settings: {
+                    autoSaveOnChange: true,
+                    saveDelay: 2000, // 2 seconds delay after changes
+                    includeLogs: true,
+                    compressionEnabled: true,
+                    encryptionEnabled: false
+                }
             },
 
             locationSettings: {
@@ -2299,6 +2518,14 @@
             try {
                 await initializeSupabase();
                 updateConnectionStatus();
+                
+                // Initialize Auto Backup System (only for admin)
+                initializeAutoBackup();
+                if (appState.currentUser && appState.currentUser.role === 'admin') {
+                    initializeBackupSettings();
+                    updateBackupStatus();
+                }
+                
                 console.log('System loaded successfully');
             } catch (error) {
                 console.error('System loading error:', error);
@@ -2970,6 +3197,14 @@
                 
                 updateConnectionStatus('متصل', 'normal');
                 
+                // Update backup status after loading data (only for admin)
+                if (appState.currentUser && appState.currentUser.role === 'admin') {
+                    updateBackupStatus();
+                    
+                    // Start periodic backup status update
+                    setInterval(updateBackupStatus, 30000); // Update every 30 seconds
+                }
+                
             } catch (error) {
                 console.error('Error loading data:', error);
                 updateConnectionStatus('خطأ تحميل', 'error');
@@ -2979,6 +3214,1045 @@
             }
         }
 
+        // ===== ENHANCED AUTO BACKUP SYSTEM =====
+        
+        // Initialize Auto Backup System
+        function initializeAutoBackup() {
+            console.log('🔄 Initializing Auto Backup System...');
+            
+            // Show backup system only for admin users
+            if (appState.currentUser && appState.currentUser.role === 'admin') {
+                document.getElementById('backupSystemSection').style.display = 'block';
+                
+                // Load existing backups from localStorage
+                loadBackupsFromStorage();
+                
+                // Start auto backup interval
+                if (appState.autoBackup.enabled) {
+                    startAutoBackup();
+                }
+                
+                // Set up change detection
+                setupChangeDetection();
+                
+                console.log('✅ Auto Backup System initialized successfully for admin');
+            } else {
+                // Hide backup system for regular users
+                document.getElementById('backupSystemSection').style.display = 'none';
+                console.log('🔒 Backup system hidden for regular user');
+            }
+        }
+        
+        // Load backups from localStorage
+        function loadBackupsFromStorage() {
+            try {
+                const storedBackups = localStorage.getItem('systemBackups');
+                if (storedBackups) {
+                    appState.autoBackup.backups = JSON.parse(storedBackups);
+                    console.log(`📦 Loaded ${appState.autoBackup.backups.length} backups from storage`);
+                }
+            } catch (error) {
+                console.error('Error loading backups from storage:', error);
+                appState.autoBackup.backups = [];
+            }
+        }
+        
+        // Save backups to localStorage
+        function saveBackupsToStorage() {
+            try {
+                localStorage.setItem('systemBackups', JSON.stringify(appState.autoBackup.backups));
+                console.log('💾 Backups saved to storage');
+            } catch (error) {
+                console.error('Error saving backups to storage:', error);
+            }
+        }
+        
+        // Start auto backup interval
+        function startAutoBackup() {
+            if (appState.autoBackup.backupInterval) {
+                clearInterval(appState.autoBackup.backupInterval);
+            }
+            
+            appState.autoBackup.backupInterval = setInterval(() => {
+                if (!appState.autoBackup.isBackingUp) {
+                    createAutoBackup();
+                }
+            }, appState.autoBackup.interval);
+            
+            console.log(`🔄 Auto backup started - interval: ${appState.autoBackup.interval / 1000} seconds`);
+        }
+        
+        // Stop auto backup
+        function stopAutoBackup() {
+            if (appState.autoBackup.backupInterval) {
+                clearInterval(appState.autoBackup.backupInterval);
+                appState.autoBackup.backupInterval = null;
+                console.log('⏹️ Auto backup stopped');
+            }
+        }
+        
+        // Setup change detection for auto save
+        function setupChangeDetection() {
+            if (!appState.autoBackup.settings.autoSaveOnChange) return;
+            
+            let changeTimeout;
+            
+            // Monitor data changes
+            const originalLoadAllData = loadAllData;
+            loadAllData = async function() {
+                await originalLoadAllData.apply(this, arguments);
+                
+                // Clear existing timeout
+                if (changeTimeout) {
+                    clearTimeout(changeTimeout);
+                }
+                
+                // Set new timeout for auto backup
+                changeTimeout = setTimeout(() => {
+                    if (!appState.autoBackup.isBackingUp) {
+                        createAutoBackup('auto_change');
+                    }
+                }, appState.autoBackup.settings.saveDelay);
+            };
+        }
+        
+        // Create automatic backup
+        async function createAutoBackup(type = 'auto') {
+            if (appState.autoBackup.isBackingUp) {
+                console.log('⏳ Backup already in progress, skipping...');
+                return;
+            }
+            
+            try {
+                appState.autoBackup.isBackingUp = true;
+                
+                const backupData = await collectSystemData();
+                const backupId = `backup_${Date.now()}`;
+                const backup = {
+                    id: backupId,
+                    timestamp: new Date().toISOString(),
+                    type: type,
+                    data: backupData,
+                    size: JSON.stringify(backupData).length,
+                    description: `نسخة احتياطية ${type === 'auto' ? 'تلقائية' : 'تلقائية بعد تغيير'}`
+                };
+                
+                // Add to backups array
+                appState.autoBackup.backups.push(backup);
+                
+                // Limit number of backups
+                if (appState.autoBackup.backups.length > appState.autoBackup.maxBackups) {
+                    appState.autoBackup.backups.shift(); // Remove oldest
+                }
+                
+                // Save to storage
+                saveBackupsToStorage();
+                
+                appState.autoBackup.lastBackupTime = Date.now();
+                
+                // Show notification
+                showBackupNotification(`تم إنشاء نسخة احتياطية تلقائية ✅`, 'success');
+                
+                console.log(`✅ Auto backup created: ${backupId}`);
+                
+            } catch (error) {
+                console.error('Error creating auto backup:', error);
+                showBackupNotification(`خطأ في النسخ الاحتياطي التلقائي ❌`, 'error');
+            } finally {
+                appState.autoBackup.isBackingUp = false;
+            }
+        }
+        
+        // Create manual backup
+        async function createManualBackup() {
+            try {
+                showLoading();
+                
+                const backupData = await collectSystemData();
+                const backupId = `backup_manual_${Date.now()}`;
+                const backup = {
+                    id: backupId,
+                    timestamp: new Date().toISOString(),
+                    type: 'manual',
+                    data: backupData,
+                    size: JSON.stringify(backupData).length,
+                    description: 'نسخة احتياطية يدوية'
+                };
+                
+                // Add to backups array
+                appState.autoBackup.backups.push(backup);
+                
+                // Limit number of backups
+                if (appState.autoBackup.backups.length > appState.autoBackup.maxBackups) {
+                    appState.autoBackup.backups.shift(); // Remove oldest
+                }
+                
+                // Save to storage
+                saveBackupsToStorage();
+                
+                showSuccess(`تم إنشاء النسخة الاحتياطية بنجاح! 🎉`);
+                console.log(`✅ Manual backup created: ${backupId}`);
+                
+            } catch (error) {
+                console.error('Error creating manual backup:', error);
+                showError('خطأ في إنشاء النسخة الاحتياطية');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Collect all system data for backup
+        async function collectSystemData() {
+            // Load main logs for backup
+            let mainLogs = [];
+            try {
+                const { data: logs, error } = await appState.supabase
+                    .from('main_logs')
+                    .select('action,entity_type,entity_name,latitude,longitude,user_id,occurred_at,old_name,new_name')
+                    .order('occurred_at', { ascending: false })
+                    .limit(1000); // Last 1000 main logs
+                
+                if (!error && logs) {
+                    mainLogs = logs;
+                }
+            } catch (error) {
+                console.error('Error loading main logs for backup:', error);
+            }
+            
+            // Load movement logs (logs) for backup - ensure we get fresh data
+            let movementLogs = [];
+            if (appState.autoBackup.settings.includeLogs) {
+                try {
+                    let query = appState.supabase
+                        .from('logs')
+                        .select('id,employee_id,center_id,action,latitude,longitude,accuracy,device_info,notes,occurred_at,created_at')
+                        .order('occurred_at', { ascending: false })
+                        .limit(1000); // Last 1000 movement logs
+                    
+                    // Apply same permissions as loadLogs
+                    if (appState.currentUser.role !== 'admin' && appState.allowedEmployees.length > 0) {
+                        const employeeIds = appState.allowedEmployees.map(emp => emp.employee_id || emp.id);
+                        query = query.in('employee_id', employeeIds);
+                    }
+                    
+                    const { data: logs, error } = await query;
+                    if (!error && logs) {
+                        movementLogs = logs;
+                    }
+                } catch (error) {
+                    console.error('Error loading movement logs for backup:', error);
+                    // Fallback to appState.allLogs if database query fails
+                    movementLogs = appState.allLogs.slice(-1000);
+                }
+            }
+            
+            const data = {
+                timestamp: new Date().toISOString(),
+                version: '1.0.0',
+                user: appState.currentUser,
+                userPermissions: appState.userPermissions,
+                sessionData: appState.sessionData,
+                
+                // Core Data Collections
+                centers: appState.allCenters,
+                employees: appState.allEmployees,
+                logs: movementLogs, // Movement logs (سجل الحركات)
+                mainLogs: appState.autoBackup.settings.includeLogs ? mainLogs : [], // Main operations logs
+                
+                // Additional Data Collections
+                allowedCenters: appState.allowedCenters,
+                allowedEmployees: appState.allowedEmployees,
+                centerStats: appState.centerStats,
+                
+                // Current State
+                currentEditingEmployee: appState.currentEditingEmployee,
+                currentEditingCenter: appState.currentEditingCenter,
+                
+                // Pagination State
+                pagination: appState.pagination,
+                
+                // Search Filters
+                searchFilters: appState.searchFilters,
+                
+                // Settings
+                settings: {
+                    autoBackup: appState.autoBackup.settings,
+                    locationSettings: appState.locationSettings,
+                    searchFilters: appState.searchFilters
+                },
+                
+                // Statistics
+                stats: {
+                    totalCenters: appState.allCenters.length,
+                    totalEmployees: appState.allEmployees.length,
+                    totalLogs: movementLogs.length, // Movement logs count
+                    totalMainLogs: mainLogs.length, // Main operations logs count
+                    totalMovementLogs: movementLogs.length, // Explicit movement logs count
+                    totalAllowedCenters: appState.allowedCenters.length,
+                    totalAllowedEmployees: appState.allowedEmployees.length,
+                    lastBackupTime: appState.autoBackup.lastBackupTime,
+                    backupVersion: '1.0.0'
+                }
+            };
+            
+            return data;
+        }
+        
+        // Restore from backup
+        async function restoreFromBackup(backupId) {
+            try {
+                const backup = appState.autoBackup.backups.find(b => b.id === backupId);
+                if (!backup) {
+                    showError('النسخة الاحتياطية غير موجودة');
+                    return;
+                }
+                
+                if (!confirm(`هل أنت متأكد من استعادة النسخة الاحتياطية؟\nسيتم استبدال جميع البيانات الحالية!`)) {
+                    return;
+                }
+                
+                showLoading();
+                
+                const backupData = backup.data;
+                
+                // Restore centers
+                if (backupData.centers && backupData.centers.length > 0) {
+                    await restoreCenters(backupData.centers);
+                }
+                
+                // Restore employees
+                if (backupData.employees && backupData.employees.length > 0) {
+                    await restoreEmployees(backupData.employees);
+                }
+                
+                // Restore logs (if enabled)
+                if (backupData.logs && backupData.logs.length > 0 && appState.autoBackup.settings.includeLogs) {
+                    await restoreLogs(backupData.logs);
+                }
+                
+                // Restore main logs (if enabled)
+                if (backupData.mainLogs && backupData.mainLogs.length > 0 && appState.autoBackup.settings.includeLogs) {
+                    await restoreMainLogs(backupData.mainLogs);
+                }
+                
+                // Restore additional data collections
+                if (backupData.allowedCenters) {
+                    appState.allowedCenters = backupData.allowedCenters;
+                }
+                
+                if (backupData.allowedEmployees) {
+                    appState.allowedEmployees = backupData.allowedEmployees;
+                }
+                
+                if (backupData.centerStats) {
+                    appState.centerStats = backupData.centerStats;
+                }
+                
+                // Restore pagination state
+                if (backupData.pagination) {
+                    appState.pagination = backupData.pagination;
+                }
+                
+                // Restore search filters
+                if (backupData.searchFilters) {
+                    appState.searchFilters = backupData.searchFilters;
+                }
+                
+                // Reload all data
+                await loadAllData();
+                
+                showSuccess(`تم استعادة النسخة الاحتياطية بنجاح! 🎉\nتم استعادة ${backupData.stats?.totalCenters || 0} مركز و ${backupData.stats?.totalEmployees || 0} موظف\nوسجل الحركات: ${backupData.stats?.totalMovementLogs || backupData.stats?.totalLogs || 0} سجل\nوسجل العمليات الرئيسية: ${backupData.stats?.totalMainLogs || 0} سجل`);
+                console.log(`✅ Restored from backup: ${backupId}`);
+                
+            } catch (error) {
+                console.error('Error restoring backup:', error);
+                showError('خطأ في استعادة النسخة الاحتياطية');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Restore centers
+        async function restoreCenters(centers) {
+            for (const center of centers) {
+                try {
+                    const { error } = await appState.supabase
+                        .from('centers')
+                        .upsert({
+                            id: center.id,
+                            name: center.name,
+                            longitude: center.longitude,
+                            latitude: center.latitude,
+                            radius: center.radius,
+                            created_at: center.created_at,
+                            updated_at: new Date().toISOString()
+                        });
+                    
+                    if (error) throw error;
+                } catch (error) {
+                    console.error(`Error restoring center ${center.name}:`, error);
+                }
+            }
+        }
+        
+        // Restore employees
+        async function restoreEmployees(employees) {
+            for (const employee of employees) {
+                try {
+                    const { error } = await appState.supabase
+                        .from('employees')
+                        .upsert({
+                            id: employee.id,
+                            name: employee.name,
+                            phone: employee.phone,
+                            position: employee.position,
+                            center_id: employee.center_id,
+                            status: employee.status,
+                            is_active: employee.is_active,
+                            notes: employee.notes,
+                            created_at: employee.created_at,
+                            updated_at: new Date().toISOString()
+                        });
+                    
+                    if (error) throw error;
+                } catch (error) {
+                    console.error(`Error restoring employee ${employee.name}:`, error);
+                }
+            }
+        }
+        
+        // Restore logs
+        async function restoreLogs(logs) {
+            for (const log of logs) {
+                try {
+                    const { error } = await appState.supabase
+                        .from('logs')
+                        .upsert({
+                            id: log.id,
+                            employee_id: log.employee_id,
+                            center_id: log.center_id,
+                            action: log.action,
+                            latitude: log.latitude,
+                            longitude: log.longitude,
+                            accuracy: log.accuracy,
+                            device_info: log.device_info,
+                            notes: log.notes,
+                            occurred_at: log.occurred_at,
+                            created_at: log.created_at
+                        });
+                    
+                    if (error) throw error;
+                } catch (error) {
+                    console.error(`Error restoring log:`, error);
+                }
+            }
+        }
+        
+        // Restore main logs
+        async function restoreMainLogs(mainLogs) {
+            for (const log of mainLogs) {
+                try {
+                    const { error } = await appState.supabase
+                        .from('main_logs')
+                        .upsert({
+                            action: log.action,
+                            entity_type: log.entity_type,
+                            entity_name: log.entity_name,
+                            latitude: log.latitude,
+                            longitude: log.longitude,
+                            user_id: log.user_id,
+                            occurred_at: log.occurred_at,
+                            old_name: log.old_name,
+                            new_name: log.new_name
+                        });
+                    
+                    if (error) throw error;
+                } catch (error) {
+                    console.error(`Error restoring main log:`, error);
+                }
+            }
+        }
+        
+        // Show backup notification
+        function showBackupNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span>${message}</span>
+                    <small style="opacity: 0.8;">${new Date().toLocaleTimeString('ar-SA')}</small>
+                </div>
+            `;
+            
+            const container = document.querySelector('.notifications') || createNotificationContainer();
+            container.appendChild(notification);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 3000);
+        }
+        
+        // Create notification container if it doesn't exist
+        function createNotificationContainer() {
+            const container = document.createElement('div');
+            container.className = 'notifications';
+            document.body.appendChild(container);
+            return container;
+        }
+        
+        // Get backup list for UI
+        function getBackupList() {
+            return appState.autoBackup.backups
+                .slice()
+                .reverse() // Show newest first
+                .map(backup => ({
+                    id: backup.id,
+                    timestamp: backup.timestamp,
+                    type: backup.type,
+                    size: backup.size,
+                    description: backup.description,
+                    stats: backup.data.stats
+                }));
+        }
+        
+        // Delete backup
+        function deleteBackup(backupId) {
+            if (!confirm('هل أنت متأكد من حذف هذه النسخة الاحتياطية؟')) {
+                return;
+            }
+            
+            const index = appState.autoBackup.backups.findIndex(b => b.id === backupId);
+            if (index !== -1) {
+                appState.autoBackup.backups.splice(index, 1);
+                saveBackupsToStorage();
+                showSuccess('تم حذف النسخة الاحتياطية بنجاح');
+            }
+        }
+        
+        // Download backup
+        function downloadBackup(backupId) {
+            const backup = appState.autoBackup.backups.find(b => b.id === backupId);
+            if (!backup) {
+                showError('النسخة الاحتياطية غير موجودة');
+                return;
+            }
+            
+            const dataStr = JSON.stringify(backup.data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `backup_${backupId}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            showSuccess('تم تحميل النسخة الاحتياطية');
+        }
+        
+        // Clean old backups
+        function cleanOldBackups() {
+            const initialCount = appState.autoBackup.backups.length;
+            
+            // Keep only the latest 10 backups
+            if (appState.autoBackup.backups.length > 10) {
+                appState.autoBackup.backups = appState.autoBackup.backups
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                    .slice(0, 10);
+                
+                saveBackupsToStorage();
+                
+                const deletedCount = initialCount - appState.autoBackup.backups.length;
+                showSuccess(`تم حذف ${deletedCount} نسخة احتياطية قديمة`);
+            } else {
+                showInfo('لا توجد نسخ احتياطية قديمة للحذف');
+            }
+        }
+        
+        // Toggle auto backup
+        function toggleAutoBackup() {
+            appState.autoBackup.enabled = !appState.autoBackup.enabled;
+            
+            if (appState.autoBackup.enabled) {
+                startAutoBackup();
+                showSuccess('تم تفعيل النسخ الاحتياطي التلقائي ✅');
+            } else {
+                stopAutoBackup();
+                showInfo('تم إيقاف النسخ الاحتياطي التلقائي ⏹️');
+            }
+        }
+        
+        // Test backup content before restore
+        function testBackupContent(backupId) {
+            const backup = appState.autoBackup.backups.find(b => b.id === backupId);
+            if (!backup) {
+                showError('النسخة الاحتياطية غير موجودة');
+                return;
+            }
+            
+            const backupData = backup.data;
+            const stats = backupData.stats || {};
+            
+            let content = `
+                <h3>🔍 محتوى النسخة الاحتياطية: ${backup.description}</h3>
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 10px 0;">
+                    <strong>📊 إحصائيات النسخة:</strong><br>
+                    • المراكز: ${stats.totalCenters || 0}<br>
+                    • الموظفين: ${stats.totalEmployees || 0}<br>
+                    • سجل الحركات: ${stats.totalMovementLogs || stats.totalLogs || 0}<br>
+                    • سجل العمليات الرئيسية: ${stats.totalMainLogs || 0}<br>
+                    • المراكز المسموحة: ${stats.totalAllowedCenters || 0}<br>
+                    • الموظفين المسموحين: ${stats.totalAllowedEmployees || 0}<br>
+                    • تاريخ النسخة: ${new Date(backupData.timestamp).toLocaleString('ar-SA')}<br>
+                    • نوع النسخة: ${backup.type === 'manual' ? 'يدوي' : 'تلقائي'}<br>
+                    • إصدار النسخة: ${stats.backupVersion || 'غير محدد'}
+                </div>
+            `;
+            
+            if (backupData.centers && backupData.centers.length > 0) {
+                content += '<div style="margin: 10px 0;"><strong>🏢 المراكز:</strong><ul>';
+                backupData.centers.slice(0, 5).forEach(center => {
+                    content += `<li>${center.name} (${center.latitude}, ${center.longitude}) - نصف القطر: ${center.radius}m</li>`;
+                });
+                if (backupData.centers.length > 5) {
+                    content += `<li>... و ${backupData.centers.length - 5} مركز آخر</li>`;
+                }
+                content += '</ul></div>';
+            }
+            
+            if (backupData.employees && backupData.employees.length > 0) {
+                content += '<div style="margin: 10px 0;"><strong>👤 الموظفين:</strong><ul>';
+                backupData.employees.slice(0, 5).forEach(employee => {
+                    content += `<li>${employee.name} (${employee.phone}) - ${employee.position || 'غير محدد'}</li>`;
+                });
+                if (backupData.employees.length > 5) {
+                    content += `<li>... و ${backupData.employees.length - 5} موظف آخر</li>`;
+                }
+                content += '</ul></div>';
+            }
+            
+            if (backupData.logs && backupData.logs.length > 0) {
+                content += '<div style="margin: 10px 0;"><strong>📋 سجل الحركات:</strong><ul>';
+                backupData.logs.slice(0, 5).forEach(log => {
+                    const actionText = log.action === 'auto_checkin' ? 'دخول تلقائي' : 
+                                     log.action === 'auto_checkout' ? 'خروج تلقائي' : 
+                                     log.action === 'center_entry' ? 'دخول مركز' : 
+                                     log.action === 'movement' ? 'حركة' : 
+                                     log.action === 'location_update' ? 'تحديث موقع' : log.action;
+                    const employeeName = log.employees?.name || 'غير معروف';
+                    const centerName = log.centers?.name || 'غير محدد';
+                    content += `<li>${actionText}: ${employeeName} في ${centerName}</li>`;
+                });
+                if (backupData.logs.length > 5) {
+                    content += `<li>... و ${backupData.logs.length - 5} حركة أخرى</li>`;
+                }
+                content += '</ul></div>';
+            }
+            
+            if (backupData.mainLogs && backupData.mainLogs.length > 0) {
+                content += '<div style="margin: 10px 0;"><strong>📝 سجل العمليات الرئيسية:</strong><ul>';
+                backupData.mainLogs.slice(0, 5).forEach(log => {
+                    const actionText = log.action === 'create' ? 'إضافة' : 
+                                     log.action === 'update' ? 'تعديل' : 
+                                     log.action === 'delete' ? 'حذف' : log.action;
+                    content += `<li>${actionText} ${log.entity_type}: ${log.entity_name}</li>`;
+                });
+                if (backupData.mainLogs.length > 5) {
+                    content += `<li>... و ${backupData.mainLogs.length - 5} عملية أخرى</li>`;
+                }
+                content += '</ul></div>';
+            }
+            
+            // Show modal with content
+            const modal = document.createElement('div');
+            modal.className = 'backup-list-modal';
+            modal.innerHTML = `
+                <div class="backup-list-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>🔍 اختبار النسخة الاحتياطية</h2>
+                        <button class="btn" onclick="this.closest('.backup-list-modal').remove()" style="background: #dc3545; color: white;">✕ إغلاق</button>
+                    </div>
+                    
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        ${content}
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn btn-warning" onclick="restoreFromBackup('${backupId}'); this.closest('.backup-list-modal').remove();" style="margin: 5px;">
+                            🔄 استعادة هذه النسخة
+                        </button>
+                        <button class="btn btn-info" onclick="downloadBackup('${backupId}'); this.closest('.backup-list-modal').remove();" style="margin: 5px;">
+                            ⬇️ تحميل النسخة
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Clear main logs (سجل العمليات الرئيسية)
+        async function clearMainLogs() {
+            try {
+                // First, create a backup before clearing
+                if (confirm('هل تريد إنشاء نسخة احتياطية قبل تصفير سجل العمليات؟\nهذا سيضمن عدم فقدان البيانات المهمة.')) {
+                    await createManualBackup();
+                }
+                
+                // Confirm the action
+                if (!confirm('هل أنت متأكد من تصفير سجل العمليات الرئيسية؟\nهذا الإجراء لا يمكن التراجع عنه!')) {
+                    return;
+                }
+                
+                showLoading();
+                
+                // Get count of logs before deletion
+                const { count, error: countError } = await appState.supabase
+                    .from('main_logs')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (countError) {
+                    throw countError;
+                }
+                
+                // Delete all main logs
+                const { error } = await appState.supabase
+                    .from('main_logs')
+                    .delete()
+                    .neq('id', 0); // Delete all records
+                
+                if (error) throw error;
+                
+                // Reload main logs to update the display
+                await loadMainLogs();
+                
+                showSuccess(`تم تصفير سجل العمليات الرئيسية بنجاح! 🎉\nتم حذف ${count || 0} سجل`);
+                console.log(`✅ Cleared ${count || 0} main logs`);
+                
+            } catch (error) {
+                console.error('Error clearing main logs:', error);
+                showError('خطأ في تصفير سجل العمليات الرئيسية');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Clear regular logs (سجل الأنشطة العادية)
+        async function clearRegularLogs() {
+            try {
+                // First, create a backup before clearing
+                if (confirm('هل تريد إنشاء نسخة احتياطية قبل تصفير سجل الأنشطة؟\nهذا سيضمن عدم فقدان البيانات المهمة.')) {
+                    await createManualBackup();
+                }
+                
+                // Confirm the action
+                if (!confirm('هل أنت متأكد من تصفير سجل الأنشطة؟\nهذا الإجراء لا يمكن التراجع عنه!')) {
+                    return;
+                }
+                
+                showLoading();
+                
+                // Get count of logs before deletion
+                const { count, error: countError } = await appState.supabase
+                    .from('logs')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (countError) {
+                    throw countError;
+                }
+                
+                // Delete all logs
+                const { error } = await appState.supabase
+                    .from('logs')
+                    .delete()
+                    .neq('id', 0); // Delete all records
+                
+                if (error) throw error;
+                
+                // Reload logs to update the display
+                await loadLogs();
+                
+                showSuccess(`تم تصفير سجل الأنشطة بنجاح! 🎉\nتم حذف ${count || 0} سجل`);
+                console.log(`✅ Cleared ${count || 0} regular logs`);
+                
+            } catch (error) {
+                console.error('Error clearing regular logs:', error);
+                showError('خطأ في تصفير سجل الأنشطة');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Clear all logs (جميع السجلات)
+        async function clearAllLogs() {
+            try {
+                // First, create a backup before clearing
+                if (confirm('هل تريد إنشاء نسخة احتياطية قبل تصفير جميع السجلات؟\nهذا سيضمن عدم فقدان البيانات المهمة.')) {
+                    await createManualBackup();
+                }
+                
+                // Confirm the action
+                if (!confirm('هل أنت متأكد من تصفير جميع السجلات؟\nسيتم حذف سجل العمليات الرئيسية وسجل الأنشطة!\nهذا الإجراء لا يمكن التراجع عنه!')) {
+                    return;
+                }
+                
+                showLoading();
+                
+                // Get counts before deletion
+                const { count: mainLogsCount, error: mainCountError } = await appState.supabase
+                    .from('main_logs')
+                    .select('*', { count: 'exact', head: true });
+                
+                const { count: regularLogsCount, error: regularCountError } = await appState.supabase
+                    .from('logs')
+                    .select('*', { count: 'exact', head: true });
+                
+                if (mainCountError || regularCountError) {
+                    throw mainCountError || regularCountError;
+                }
+                
+                // Delete all main logs
+                const { error: mainError } = await appState.supabase
+                    .from('main_logs')
+                    .delete()
+                    .neq('id', 0);
+                
+                // Delete all regular logs
+                const { error: regularError } = await appState.supabase
+                    .from('logs')
+                    .delete()
+                    .neq('id', 0);
+                
+                if (mainError || regularError) {
+                    throw mainError || regularError;
+                }
+                
+                // Reload both logs to update the display
+                await Promise.all([loadMainLogs(), loadLogs()]);
+                
+                const totalDeleted = (mainLogsCount || 0) + (regularLogsCount || 0);
+                showSuccess(`تم تصفير جميع السجلات بنجاح! 🎉\nتم حذف ${totalDeleted} سجل إجمالي\n- سجل العمليات الرئيسية: ${mainLogsCount || 0}\n- سجل الأنشطة: ${regularLogsCount || 0}`);
+                console.log(`✅ Cleared all logs: ${totalDeleted} total`);
+                
+            } catch (error) {
+                console.error('Error clearing all logs:', error);
+                showError('خطأ في تصفير جميع السجلات');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Show clear logs options
+        function showClearLogsOptions() {
+            const modal = document.createElement('div');
+            modal.className = 'backup-list-modal';
+            modal.innerHTML = `
+                <div class="backup-list-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>🗑️ تصفير السجلات</h2>
+                        <button class="btn" onclick="this.closest('.backup-list-modal').remove()" style="background: #dc3545; color: white;">✕ إغلاق</button>
+                    </div>
+                    
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                            اختر نوع السجلات التي تريد تصفيرها:
+                        </p>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                        <button class="btn btn-warning" onclick="clearMainLogs(); this.closest('.backup-list-modal').remove();" style="padding: 15px;">
+                            📝 تصفير سجل العمليات الرئيسية<br>
+                            <small style="opacity: 0.8;">سجل إضافة وتعديل وحذف المراكز والموظفين</small>
+                        </button>
+                        
+                        <button class="btn btn-warning" onclick="clearRegularLogs(); this.closest('.backup-list-modal').remove();" style="padding: 15px;">
+                            📋 تصفير سجل الأنشطة<br>
+                            <small style="opacity: 0.8;">سجل الحضور والانصراف والحركات</small>
+                        </button>
+                        
+                        <button class="btn btn-danger" onclick="clearAllLogs(); this.closest('.backup-list-modal').remove();" style="padding: 15px;">
+                            🗑️ تصفير جميع السجلات<br>
+                            <small style="opacity: 0.8;">سجل العمليات الرئيسية + سجل الأنشطة</small>
+                        </button>
+                    </div>
+                    
+                    <div style="background: #fff3cd; color: #856404; padding: 15px; border-radius: 8px; margin-top: 20px;">
+                        <strong>⚠️ تحذير:</strong><br>
+                        • سيتم إنشاء نسخة احتياطية قبل التصفير<br>
+                        • هذا الإجراء لا يمكن التراجع عنه<br>
+                        • تأكد من اختيار النوع الصحيح من السجلات
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Get backup status
+        function getBackupStatus() {
+            return {
+                enabled: appState.autoBackup.enabled,
+                lastBackup: appState.autoBackup.lastBackupTime,
+                totalBackups: appState.autoBackup.backups.length,
+                isBackingUp: appState.autoBackup.isBackingUp,
+                nextBackup: appState.autoBackup.lastBackupTime ? 
+                    appState.autoBackup.lastBackupTime + appState.autoBackup.interval : null
+            };
+        }
+
+        // Show backup list modal
+        function showBackupList() {
+            const backups = getBackupList();
+            
+            const modal = document.createElement('div');
+            modal.className = 'backup-list-modal';
+            modal.innerHTML = `
+                <div class="backup-list-content">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>📋 النسخ الاحتياطية المتاحة</h2>
+                        <button class="btn" onclick="this.closest('.backup-list-modal').remove()" style="background: #dc3545; color: white;">✕ إغلاق</button>
+                    </div>
+                    
+                    <div id="backupListContainer">
+                        ${backups.length === 0 ? 
+                            '<p style="text-align: center; color: var(--text-secondary);">لا توجد نسخ احتياطية</p>' :
+                            backups.map((backup, index) => `
+                                <div class="backup-item ${index === 0 ? 'latest' : ''}">
+                                    <div class="backup-info">
+                                        <h4>${backup.description} ${index === 0 ? '<span style="color: #28a745; font-size: 0.8em;">(الأحدث)</span>' : ''}</h4>
+                                        <p>
+                                            📅 ${new Date(backup.timestamp).toLocaleString('ar-SA')} | 
+                                            📦 ${formatFileSize(backup.size)} | 
+                                            🔄 ${backup.type === 'manual' ? 'يدوي' : 'تلقائي'}
+                                        </p>
+                                        <p style="font-size: 0.8em; color: #6c757d;">
+                                            المراكز: ${backup.stats?.totalCenters || 0} | 
+                                            الموظفين: ${backup.stats?.totalEmployees || 0} | 
+                                            سجل الحركات: ${backup.stats?.totalMovementLogs || backup.stats?.totalLogs || 0} |
+                                            سجل العمليات الرئيسية: ${backup.stats?.totalMainLogs || 0}
+                                            ${backup.stats?.totalAllowedCenters ? ` | المراكز المسموحة: ${backup.stats.totalAllowedCenters}` : ''}
+                                            ${backup.stats?.totalAllowedEmployees ? ` | الموظفين المسموحين: ${backup.stats.totalAllowedEmployees}` : ''}
+                                        </p>
+                                    </div>
+                                    <div class="backup-actions">
+                                        <button class="btn btn-info" onclick="testBackupContent('${backup.id}')" title="اختبار">
+                                            🔍
+                                        </button>
+                                        <button class="btn btn-info" onclick="downloadBackup('${backup.id}')" title="تحميل">
+                                            ⬇️
+                                        </button>
+                                        <button class="btn btn-warning" onclick="restoreFromBackup('${backup.id}'); this.closest('.backup-list-modal').remove();" title="استعادة">
+                                            🔄
+                                        </button>
+                                        <button class="btn btn-danger" onclick="deleteBackup('${backup.id}'); this.closest('.backup-list-modal').remove();" title="حذف">
+                                            🗑️
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')
+                        }
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn btn-success" onclick="createManualBackup(); this.closest('.backup-list-modal').remove();">
+                            🔄 إنشاء نسخة جديدة
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Update backup status in UI
+        function updateBackupStatus() {
+            const status = getBackupStatus();
+            
+            // Update status values
+            const statusValue = document.getElementById('backupStatusValue');
+            const lastBackupTime = document.getElementById('lastBackupTime');
+            const totalBackups = document.getElementById('totalBackups');
+            
+            if (statusValue) {
+                statusValue.textContent = status.enabled ? 'مفعل ✅' : 'معطل ❌';
+                statusValue.style.color = status.enabled ? '#28a745' : '#dc3545';
+            }
+            
+            if (lastBackupTime) {
+                if (status.lastBackup) {
+                    const timeAgo = getTimeDifference(new Date(status.lastBackup).toISOString());
+                    lastBackupTime.textContent = timeAgo;
+                } else {
+                    lastBackupTime.textContent = 'لم يتم إنشاء نسخة بعد';
+                }
+            }
+            
+            if (totalBackups) {
+                totalBackups.textContent = status.totalBackups;
+            }
+        }
+        
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Get time difference
+        function getTimeDifference(timestamp) {
+            const now = new Date();
+            const time = new Date(timestamp);
+            const diff = now - time;
+            
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+            
+            if (days > 0) return `منذ ${days} يوم`;
+            if (hours > 0) return `منذ ${hours} ساعة`;
+            if (minutes > 0) return `منذ ${minutes} دقيقة`;
+            return 'الآن';
+        }
+        
+        // Initialize backup settings from UI
+        function initializeBackupSettings() {
+            const autoSaveCheckbox = document.getElementById('autoSaveOnChange');
+            const includeLogsCheckbox = document.getElementById('includeLogs');
+            const backupIntervalInput = document.getElementById('backupInterval');
+            
+            if (autoSaveCheckbox) {
+                autoSaveCheckbox.checked = appState.autoBackup.settings.autoSaveOnChange;
+                autoSaveCheckbox.addEventListener('change', function() {
+                    appState.autoBackup.settings.autoSaveOnChange = this.checked;
+                });
+            }
+            
+            if (includeLogsCheckbox) {
+                includeLogsCheckbox.checked = appState.autoBackup.settings.includeLogs;
+                includeLogsCheckbox.addEventListener('change', function() {
+                    appState.autoBackup.settings.includeLogs = this.checked;
+                });
+            }
+            
+            if (backupIntervalInput) {
+                backupIntervalInput.value = appState.autoBackup.interval / 1000;
+                backupIntervalInput.addEventListener('change', function() {
+                    const newInterval = parseInt(this.value) * 1000;
+                    if (newInterval >= 10000 && newInterval <= 300000) {
+                        appState.autoBackup.interval = newInterval;
+                        if (appState.autoBackup.enabled) {
+                            startAutoBackup();
+                        }
+                    }
+                });
+            }
+        }
  
         async function loadCenterStats() {
             try {
