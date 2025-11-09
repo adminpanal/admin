@@ -61,6 +61,87 @@
             font-family: 'Cairo', 'Tajawal', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
+        /* تصغير حجم الرموز التعبيرية في النظام - توفير مساحة أكبر */
+        h1, h2, h3 {
+            font-size: 1.2em !important;
+            line-height: 1.2;
+            margin-bottom: 8px !important;
+        }
+
+        .stat-card {
+            font-size: 0.9em !important;
+        }
+
+        .item-card, .location-card {
+            font-size: 0.85em;
+        }
+
+        .section-title, .section-header {
+            font-size: 1em;
+            margin-bottom: 12px !important;
+        }
+
+        button, .btn, .quick-link {
+            font-size: 0.85em;
+            padding: 8px 12px !important;
+        }
+
+        .log-entry {
+            font-size: 0.9em;
+            padding: 10px !important;
+        }
+
+        /* تقليل المسافات العامة */
+        * {
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+        /* تقليل المسافات في البطاقات */
+        .stat-card, .item-card, .location-card {
+            margin-bottom: 12px !important;
+        }
+
+        /* تقليل المسافات في الأقسام */
+        .section {
+            padding: 16px 20px !important;
+            margin-bottom: 16px !important;
+        }
+
+        /* تقليل المسافات في الحاويات */
+        .dashboard-container {
+            padding: 12px 16px !important;
+        }
+
+        /* تقليل المسافات في الشريط العلوي */
+        .top-bar {
+            padding: 12px 18px !important;
+            margin-bottom: 14px !important;
+        }
+
+        /* تقليل المسافات في النماذج */
+        .form-group {
+            margin-bottom: 14px !important;
+        }
+
+        /* تقليل المسافات في القوائم */
+        .item-card {
+            padding: 14px 16px !important;
+            margin-bottom: 10px !important;
+        }
+
+        /* تقليل المسافات في الأزرار */
+        .btn {
+            padding: 8px 14px !important;
+            margin: 4px !important;
+        }
+
+        /* تقليل المسافات في الإشعارات */
+        .notification {
+            padding: 12px 16px !important;
+            margin-bottom: 8px !important;
+        }
+
         body {
             background: var(--bg-color);
             color: var(--text-color);
@@ -81,7 +162,7 @@
 
         .notification {
             color: white;
-            padding: 18px 24px;
+            padding: 12px 16px;
             border-radius: 12px;
             margin-bottom: 12px;
             animation: slideIn 0.3s ease;
@@ -150,7 +231,7 @@
             font-weight: bold !important;
             font-size: 1.15em !important;
             box-shadow: 0 8px 32px 0 rgba(33, 150, 243, 0.18) !important;
-            padding: 48px 36px;
+            padding: 32px 24px;
             border-radius: 24px;
             box-shadow: var(--shadow);
             width: 100%;
@@ -160,7 +241,7 @@
 
         .login-card h1 {
             color: #fff !important;
-            font-size: 2em !important;
+            font-size: 1.5em !important;
             font-weight: 900 !important;
             text-shadow: 0 2px 8px #1565c033;
             margin-bottom: 32px;
@@ -247,12 +328,12 @@
         .dashboard-container {
             max-width: 1700px;
             margin: 0 auto;
-            padding: 24px 18px;
+            padding: 16px 12px;
         }
 
         .top-bar {
             background: var(--card-bg);
-            padding: 24px 36px;
+            padding: 16px 24px;
             border-radius: 22px;
             box-shadow: var(--shadow);
             border: 2px solid var(--border-color);
@@ -264,14 +345,14 @@
 
         .logo-section h1 {
             color: var(--accent);
-            font-size: 2em;
+            font-size: 1.5em;
             margin-bottom: 5px;
         }
 
         .user-section {
             display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 12px;
         }
 
         .user-badge {
@@ -315,7 +396,7 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 18px;
+            gap: 12px;
             margin-bottom: 24px;
         }
 
@@ -324,9 +405,9 @@
             color: #fff !important;
             border: 3px solid #4e54c8 !important;
             font-weight: bold !important;
-            font-size: 1.2em !important;
+            font-size: 1em !important;
             box-shadow: 0 8px 32px 0 rgba(76, 81, 241, 0.18) !important;
-            padding: 36px 28px;
+            padding: 28px 22px;
             border-radius: 22px;
             text-align: center;
             cursor: pointer;
@@ -335,7 +416,7 @@
             overflow: hidden;
         }
         .stat-card .stat-number {
-            font-size: 2.2em !important;
+            font-size: 1.8em !important;
             font-weight: 900 !important;
             color: #fff !important;
             margin-bottom: 12px;
@@ -417,7 +498,7 @@
         .main-layout {
             display: grid;
             grid-template-columns: 370px 1fr;
-            gap: 24px;
+            gap: 14px;
             margin-bottom: 24px;
             position: relative;
         }
@@ -425,7 +506,7 @@
         .sidebar {
             background: var(--card-bg);
             border-radius: 22px;
-            padding: 36px 28px;
+            padding: 28px 22px;
             box-shadow: var(--shadow);
             border: 2px solid var(--border-color);
             min-width: 340px;
@@ -436,7 +517,7 @@
         .content-area {
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 14px;
         }
 
         /* Enhanced Map Container */
@@ -450,7 +531,7 @@
         }
 
         .map-header {
-            padding: 20px 24px;
+            padding: 14px 18px;
             border-bottom: 2px solid var(--border-color);
             display: flex;
             justify-content: space-between;
@@ -552,7 +633,7 @@
         .data-section {
             background: var(--card-bg);
             border-radius: 22px;
-            padding: 36px 28px;
+            padding: 28px 22px;
             box-shadow: var(--shadow);
             border: 2px solid var(--border-color);
             margin-bottom: 28px;
@@ -599,7 +680,7 @@
             background: var(--primary-gradient);
             color: #fff;
             border-bottom: 1px solid var(--border-color);
-            padding: 18px 24px;
+            padding: 12px 16px;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
@@ -656,30 +737,34 @@
 
         /* Enhanced Location Display for 10k+ employees */
         .location-card {
-            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%) !important;
-            color: #7f1d1d !important;
-            border: 3px solid #f59e0b !important;
-            font-weight: bold !important;
-            font-size: 1.1em !important;
-            box-shadow: 0 8px 32px 0 rgba(245, 158, 11, 0.18) !important;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%) !important;
+            color: #1e3a8a !important;
+            border: 2px solid #6366f1 !important;
+            font-weight: 600 !important;
+            font-size: 0.85em !important;
+            box-shadow: 0 4px 12px 0 rgba(99, 102, 241, 0.15) !important;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
             transition: all 0.3s;
         }
         .location-card strong {
-            color: #7f1d1d !important;
-            font-size: 1.2em !important;
-            font-weight: 900 !important;
+            color: #1e3a8a !important;
+            font-size: 0.9em !important;
+            font-weight: 700 !important;
+        }
+        .location-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px 0 rgba(99, 102, 241, 0.25) !important;
         }
 
         .employee-status {
             display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8em;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 0.75em;
             font-weight: bold;
-            margin-right: 8px;
+            margin-right: 6px;
         }
 
         .employee-status.active {
@@ -773,6 +858,12 @@
             border-right-color: var(--checkout-color);
         }
 
+        .log-entry.user_login, .log-entry.account_login {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+            color: #3b82f6;
+            border-right-color: #3b82f6;
+        }
+
         .log-entry.center_nearby, .log-entry.movement {
             background: linear-gradient(90deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 193, 7, 0.05) 100%);
             color: var(--warning);
@@ -856,7 +947,7 @@
 
         .item-info strong {
             color: #0d223a !important;
-            font-size: 1.2em !important;
+            font-size: 1em !important;
             font-weight: 900 !important;
         }
 
@@ -947,23 +1038,59 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+            overflow-y: auto;
         }
 
         .modal-content {
             background-color: var(--card-bg);
-            margin: 5% auto;
-            padding: 36px;
+            margin: 20px auto;
+            padding: 24px;
             border-radius: 18px;
-            width: 92%;
-            max-width: 540px;
+            width: 90%;
+            max-width: 850px;
+            max-height: 90vh;
+            overflow-y: auto;
             box-shadow: var(--shadow);
+            position: relative;
         }
 
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+        }
+
+        /* تنسيق خاص للنوافذ - جعل الحقول في صفين */
+        .modal-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* تخطيط grid للحقول في النوافذ */
+        .modal-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .modal-form-grid .form-group {
+            margin-bottom: 0;
+        }
+
+        /* للأجهزة الصغيرة، نعود لعمود واحد */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                max-width: 95%;
+                padding: 20px;
+            }
+            .modal-form-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .close {
@@ -1033,7 +1160,7 @@
         @media (max-width: 768px) {
             .top-bar {
                 flex-direction: column;
-                gap: 18px;
+                gap: 12px;
                 text-align: center;
             }
             
@@ -1440,6 +1567,14 @@
         [data-theme="dark"] .data-section,
         [data-theme="dark"] .sidebar-section,
         [data-theme="dark"] .map-container,
+        [data-theme="dark"] .location-card {
+            background: linear-gradient(135deg, #312e81 0%, #1e1b4b 100%) !important;
+            color: #c7d2fe !important;
+            border-color: #818cf8 !important;
+        }
+        [data-theme="dark"] .location-card strong {
+            color: #c7d2fe !important;
+        }
         [data-theme="dark"] .location-card,
         [data-theme="dark"] .logs-container,
         [data-theme="dark"] .stat-card,
@@ -1710,7 +1845,10 @@
                                     </div>
                                     <div class="form-group">
                                         <label>فترة النسخ التلقائي (ثواني):</label>
-                                        <input type="number" id="backupInterval" value="30" min="10" max="300">
+                                        <input type="number" id="backupInterval" value="30" min="1" step="1">
+                                        <small style="color: #6c757d; font-size: 0.85em; display: block; margin-top: 5px;">
+                                            يمكنك إدخال أي قيمة (ثواني، دقائق، ساعات، أيام)
+                                        </small>
                                     </div>
                                 </div>
                             </div>
@@ -1856,30 +1994,32 @@
                 <h2 style="color: var(--text-color);">تعديل بيانات الفرد</h2>
                 <span class="close" onclick="closeModal('editEmployeeModal')">&times;</span>
             </div>
-            <div class="form-group">
-                <label>اسم الفرد</label>
-                <input type="text" id="editEmployeeName">
+            <div class="modal-form-grid">
+                <div class="form-group">
+                    <label>اسم الفرد</label>
+                    <input type="text" id="editEmployeeName">
+                </div>
+                <div class="form-group">
+                    <label>رقم الهاتف</label>
+                    <input type="text" id="editEmployeePhone">
+                </div>
+                <div class="form-group">
+                    <label>المنصب</label>
+                    <input type="text" id="editEmployeePosition">
+                </div>
+                <div class="form-group">
+                    <label>المركز</label>
+                    <select id="editEmployeeCenter"></select>
+                </div>
+                <div class="form-group">
+                    <label>الحالة</label>
+                    <select id="editEmployeeStatus">
+                        <option value="active">نشط</option>
+                        <option value="inactive">غير نشط</option>
+                    </select>
+                </div>
             </div>
-            <div class="form-group">
-                <label>رقم الهاتف</label>
-                <input type="text" id="editEmployeePhone">
-            </div>
-            <div class="form-group">
-                <label>المنصب</label>
-                <input type="text" id="editEmployeePosition">
-            </div>
-            <div class="form-group">
-                <label>المركز</label>
-                <select id="editEmployeeCenter"></select>
-            </div>
-            <div class="form-group">
-                <label>الحالة</label>
-                <select id="editEmployeeStatus">
-                    <option value="active">نشط</option>
-                    <option value="inactive">غير نشط</option>
-                </select>
-            </div>
-            <button class="btn" onclick="updateEmployee()">حفظ التغييرات</button>
+            <button class="btn" onclick="updateEmployee()" style="margin-top: 10px;">حفظ التغييرات</button>
         </div>
     </div>
 
@@ -1889,19 +2029,21 @@
                 <h2 style="color: var(--text-color);">تعديل بيانات المركز</h2>
                 <span class="close" onclick="closeModal('editCenterModal')">&times;</span>
             </div>
-            <div class="form-group">
-                <label>اسم المركز</label>
-                <input type="text" id="editCenterName">
+            <div class="modal-form-grid">
+                <div class="form-group">
+                    <label>اسم المركز</label>
+                    <input type="text" id="editCenterName">
+                </div>
+                <div class="form-group">
+                    <label>الإحداثيات</label>
+                    <input type="text" id="editCenterCoordinates" placeholder="مثال: 32.53843, 44.184436">
+                </div>
+                <div class="form-group">
+                    <label>نطاق المركز (متر)</label>
+                    <input type="number" id="editCenterRadius">
+                </div>
             </div>
-            <div class="form-group">
-                <label>الإحداثيات</label>
-                <input type="text" id="editCenterCoordinates" placeholder="مثال: 32.53843, 44.184436">
-            </div>
-            <div class="form-group">
-                <label>نطاق المركز (متر)</label>
-                <input type="number" id="editCenterRadius">
-            </div>
-            <button class="btn" onclick="updateCenter()">حفظ التغييرات</button>
+            <button class="btn" onclick="updateCenter()" style="margin-top: 10px;">حفظ التغييرات</button>
         </div>
     </div>
 
@@ -1947,34 +2089,36 @@
                 <h2 style="color: var(--text-color);">تعديل بيانات المستخدم</h2>
                 <span class="close" onclick="closeModal('editUserModal')">&times;</span>
             </div>
-            <div class="form-group">
-                <label>اسم المستخدم</label>
-                <input type="text" id="editUserUsername">
+            <div class="modal-form-grid">
+                <div class="form-group">
+                    <label>اسم المستخدم</label>
+                    <input type="text" id="editUserUsername">
+                </div>
+                <div class="form-group">
+                    <label>الاسم الكامل</label>
+                    <input type="text" id="editUserFullName">
+                </div>
+                <div class="form-group">
+                    <label>البريد الإلكتروني</label>
+                    <input type="email" id="editUserEmail">
+                </div>
+                <div class="form-group">
+                    <label>رقم الهاتف</label>
+                    <input type="text" id="editUserPhone">
+                </div>
+                <div class="form-group">
+                    <label>نوع المستخدم</label>
+                    <select id="editUserRole">
+                        <option value="user">مستخدم عادي</option>
+                        <option value="admin">مدير</option>
+                    </select>
+                </div>
             </div>
-            <div class="form-group">
-                <label>الاسم الكامل</label>
-                <input type="text" id="editUserFullName">
-            </div>
-            <div class="form-group">
-                <label>البريد الإلكتروني</label>
-                <input type="email" id="editUserEmail">
-            </div>
-            <div class="form-group">
-                <label>رقم الهاتف</label>
-                <input type="text" id="editUserPhone">
-            </div>
-            <div class="form-group">
-                <label>نوع المستخدم</label>
-                <select id="editUserRole">
-                    <option value="user">مستخدم عادي</option>
-                    <option value="admin">مدير</option>
-                </select>
-            </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-top: 10px;">
                 <label>المراكز المسموحة</label>
                 <select id="editUserCenters" multiple style="width:100%" data-placeholder="اختر مركز أو أكثر..."></select>
             </div>
-            <button class="btn" onclick="updateUser()">حفظ التغييرات</button>
+            <button class="btn" onclick="updateUser()" style="margin-top: 10px;">حفظ التغييرات</button>
         </div>
     </div>
 
@@ -2655,6 +2799,18 @@
                     appState.userPermissions = result.user.permissions;
                     localStorage.setItem('sessionData', JSON.stringify(appState.sessionData));
                     
+                    // إضافة سجل في سجل الأنشطة لتسجيل دخول الحساب
+                    try {
+                        const loginLogData = {
+                            action: 'user_login',
+                            occurred_at: new Date().toISOString(),
+                            notes: `تم تسجيل دخول المستخدم: ${result.user.username || result.user.name || username}`
+                        };
+                        await insertLogWithOfflineSupport(loginLogData);
+                    } catch (logError) {
+                        console.error('Error logging user login:', logError);
+                    }
+                    
                     showSuccess('تم تسجيل الدخول بنجاح! 🎉');
                     
                     startSessionTimeout();
@@ -2958,7 +3114,7 @@
 
                 const { data: latestLogs, error } = await appState.supabase
                     .from('logs')
-                    .select(`*, employees (id, name, status, phone)`)
+                    .select(`*, employees (id, name, status, phone, center_id), centers (name)`)
                     .in('employee_id', employeeIds)
                     .not('latitude', 'is', null)
                     .not('longitude', 'is', null)
@@ -2971,6 +3127,7 @@
                     if (log.employees && !employeeLocations[log.employees.id]) {
                         employeeLocations[log.employees.id] = {
                             employee: log.employees,
+                            center: log.centers || null,
                             location: {
                                 latitude: log.latitude,
                                 longitude: log.longitude,
@@ -2980,6 +3137,24 @@
                         };
                     }
                 });
+
+                // إذا لم يكن المركز موجوداً في السجل، نجلب بيانات المركز من جدول employees
+                const employeesWithoutCenter = Object.values(employeeLocations).filter(emp => !emp.center && emp.employee.center_id);
+                if (employeesWithoutCenter.length > 0) {
+                    const empIds = employeesWithoutCenter.map(emp => emp.employee.id);
+                    const { data: employeesWithCenters } = await appState.supabase
+                        .from('employees')
+                        .select('id, center_id, centers (name)')
+                        .in('id', empIds);
+                    
+                    if (employeesWithCenters) {
+                        employeesWithCenters.forEach(emp => {
+                            if (employeeLocations[emp.id] && emp.centers) {
+                                employeeLocations[emp.id].center = emp.centers;
+                            }
+                        });
+                    }
+                }
 
                 updateMapWithEmployees(employeeLocations);
                 
@@ -3224,6 +3399,9 @@
             if (appState.currentUser && appState.currentUser.role === 'admin') {
                 document.getElementById('backupSystemSection').style.display = 'block';
                 
+                // Load auto backup settings from localStorage
+                loadAutoBackupSettings();
+                
                 // Load existing backups from localStorage
                 loadBackupsFromStorage();
                 
@@ -3254,6 +3432,47 @@
             } catch (error) {
                 console.error('Error loading backups from storage:', error);
                 appState.autoBackup.backups = [];
+            }
+        }
+        
+        // Load auto backup settings from localStorage
+        function loadAutoBackupSettings() {
+            try {
+                const storedSettings = localStorage.getItem('autoBackupSettings');
+                if (storedSettings) {
+                    const settings = JSON.parse(storedSettings);
+                    if (settings.interval) {
+                        appState.autoBackup.interval = settings.interval;
+                    }
+                    if (settings.enabled !== undefined) {
+                        appState.autoBackup.enabled = settings.enabled;
+                    }
+                    if (settings.settings) {
+                        appState.autoBackup.settings = { ...appState.autoBackup.settings, ...settings.settings };
+                    }
+                    if (settings.maxBackups) {
+                        appState.autoBackup.maxBackups = settings.maxBackups;
+                    }
+                    console.log('⚙️ Loaded auto backup settings from storage');
+                }
+            } catch (error) {
+                console.error('Error loading auto backup settings from storage:', error);
+            }
+        }
+        
+        // Save auto backup settings to localStorage
+        function saveAutoBackupSettings() {
+            try {
+                const settings = {
+                    interval: appState.autoBackup.interval,
+                    enabled: appState.autoBackup.enabled,
+                    settings: appState.autoBackup.settings,
+                    maxBackups: appState.autoBackup.maxBackups
+                };
+                localStorage.setItem('autoBackupSettings', JSON.stringify(settings));
+                console.log('💾 Auto backup settings saved to storage');
+            } catch (error) {
+                console.error('Error saving auto backup settings to storage:', error);
             }
         }
         
@@ -3775,6 +3994,7 @@
         // Toggle auto backup
         function toggleAutoBackup() {
             appState.autoBackup.enabled = !appState.autoBackup.enabled;
+            saveAutoBackupSettings(); // Save settings to localStorage
             
             if (appState.autoBackup.enabled) {
                 startAutoBackup();
@@ -4119,12 +4339,15 @@
                     <div id="backupListContainer">
                         ${backups.length === 0 ? 
                             '<p style="text-align: center; color: var(--text-secondary);">لا توجد نسخ احتياطية</p>' :
-                            backups.map((backup, index) => `
+                            backups.map((backup, index) => {
+                                const backupDate = new Date(backup.timestamp);
+                                const dateStr = backupDate.toISOString().slice(0, 16); // Format: YYYY-MM-DDTHH:mm
+                                return `
                                 <div class="backup-item ${index === 0 ? 'latest' : ''}">
                                     <div class="backup-info">
                                         <h4>${backup.description} ${index === 0 ? '<span style="color: #28a745; font-size: 0.8em;">(الأحدث)</span>' : ''}</h4>
                                         <p>
-                                            📅 ${new Date(backup.timestamp).toLocaleString('ar-SA')} | 
+                                            📅 <input type="datetime-local" id="backup-time-${backup.id}" value="${dateStr}" style="padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9em;" onchange="updateBackupTime('${backup.id}', this.value)" /> | 
                                             📦 ${formatFileSize(backup.size)} | 
                                             🔄 ${backup.type === 'manual' ? 'يدوي' : 'تلقائي'}
                                         </p>
@@ -4152,7 +4375,8 @@
                                         </button>
                                     </div>
                                 </div>
-                            `).join('')
+                            `;
+                            }).join('')
                         }
                     </div>
                     
@@ -4165,6 +4389,43 @@
             `;
             
             document.body.appendChild(modal);
+        }
+        
+        // Update backup timestamp
+        function updateBackupTime(backupId, newDateTime) {
+            const backup = appState.autoBackup.backups.find(b => b.id === backupId);
+            if (!backup) {
+                showError('النسخة الاحتياطية غير موجودة');
+                return;
+            }
+            
+            try {
+                // Convert datetime-local value to ISO string
+                const newTimestamp = new Date(newDateTime).toISOString();
+                
+                // Update backup timestamp
+                backup.timestamp = newTimestamp;
+                
+                // Also update timestamp in backup data if it exists
+                if (backup.data && backup.data.timestamp) {
+                    backup.data.timestamp = newTimestamp;
+                }
+                
+                // Save to storage
+                saveBackupsToStorage();
+                
+                showSuccess('تم تحديث وقت النسخة الاحتياطية بنجاح ✅');
+                
+                // Refresh the backup list display
+                const modal = document.querySelector('.backup-list-modal');
+                if (modal) {
+                    modal.remove();
+                    showBackupList();
+                }
+            } catch (error) {
+                console.error('Error updating backup time:', error);
+                showError('خطأ في تحديث وقت النسخة الاحتياطية');
+            }
         }
         
         // Update backup status in UI
@@ -4230,6 +4491,7 @@
                 autoSaveCheckbox.checked = appState.autoBackup.settings.autoSaveOnChange;
                 autoSaveCheckbox.addEventListener('change', function() {
                     appState.autoBackup.settings.autoSaveOnChange = this.checked;
+                    saveAutoBackupSettings(); // Save settings to localStorage
                 });
             }
             
@@ -4237,19 +4499,45 @@
                 includeLogsCheckbox.checked = appState.autoBackup.settings.includeLogs;
                 includeLogsCheckbox.addEventListener('change', function() {
                     appState.autoBackup.settings.includeLogs = this.checked;
+                    saveAutoBackupSettings(); // Save settings to localStorage
                 });
             }
             
             if (backupIntervalInput) {
                 backupIntervalInput.value = appState.autoBackup.interval / 1000;
+                backupIntervalInput.removeAttribute('readonly');
+                backupIntervalInput.removeAttribute('disabled');
+                backupIntervalInput.removeAttribute('max'); // Remove max constraint
+                backupIntervalInput.setAttribute('min', '1'); // Set minimum to 1 second
                 backupIntervalInput.addEventListener('change', function() {
-                    const newInterval = parseInt(this.value) * 1000;
-                    if (newInterval >= 10000 && newInterval <= 300000) {
-                        appState.autoBackup.interval = newInterval;
-                        if (appState.autoBackup.enabled) {
-                            startAutoBackup();
-                        }
+                    const inputValue = parseFloat(this.value);
+                    if (isNaN(inputValue) || inputValue < 1) {
+                        showError('فترة النسخ يجب أن تكون قيمة صحيحة أكبر من 0');
+                        this.value = appState.autoBackup.interval / 1000; // Reset to current value
+                        return;
                     }
+                    
+                    const newInterval = Math.round(inputValue * 1000); // Convert to milliseconds
+                    appState.autoBackup.interval = newInterval;
+                    saveAutoBackupSettings(); // Save settings to localStorage
+                    
+                    if (appState.autoBackup.enabled) {
+                        startAutoBackup();
+                    }
+                    
+                    // Show friendly message with the interval
+                    let intervalText = '';
+                    if (inputValue < 60) {
+                        intervalText = `${inputValue} ثانية`;
+                    } else if (inputValue < 3600) {
+                        intervalText = `${(inputValue / 60).toFixed(1)} دقيقة`;
+                    } else if (inputValue < 86400) {
+                        intervalText = `${(inputValue / 3600).toFixed(1)} ساعة`;
+                    } else {
+                        intervalText = `${(inputValue / 86400).toFixed(1)} يوم`;
+                    }
+                    
+                    showSuccess(`تم تحديث فترة النسخ التلقائي إلى ${intervalText} بنجاح ✅`);
                 });
             }
         }
@@ -4583,22 +4871,22 @@
                 const maskedPhone = maskPhoneNumber(empData.employee.phone);
 
                 locationDiv.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-weight: bold; margin-bottom: 5px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
+                        <div style="flex: 1; min-width: 0;">
+                            <div style="font-weight: bold; margin-bottom: 3px; font-size: 0.9em;">
                                 ${empData.employee.name}
-                                <span class="employee-status ${empData.employee.status}">
+                                <span class="employee-status ${empData.employee.status}" style="font-size: 0.75em; padding: 2px 6px;">
                                     ${empData.employee.status === 'active' ? '🟢' : '🔴'} ${statusText}
                                 </span>
                             </div>
-                            <div style="font-size: 0.9em; margin-bottom: 3px;">
+                            <div style="font-size: 0.8em; margin-bottom: 2px; color: #4b5563;">
                                 📱 <span class="phone-masked" data-phone="${empData.employee.phone}" onclick="togglePhoneVisibility(this)">${maskedPhone}</span> • 📍 ${actionText}
                             </div>
-                            <div style="font-size: 0.8em; color: var(--text-secondary);">
+                            <div style="font-size: 0.75em; color: #6b7280;">
                                 📍 ${empData.center?.name || 'غير محدد'} • 🕐 <span class="time-ago" data-timestamp="${empData.location.time}">${timeDiff}</span>
                             </div>
                         </div>
-                        <button class="btn btn-small tooltip" onclick="focusOnEmployee(${empData.location.latitude}, ${empData.location.longitude}, '${empData.employee.name}')" data-tooltip="عرض موقع الفرد على الخريطة">
+                        <button class="btn btn-small tooltip" onclick="focusOnEmployee(${empData.location.latitude}, ${empData.location.longitude}, '${empData.employee.name}')" data-tooltip="عرض موقع الفرد على الخريطة" style="font-size: 0.8em; padding: 6px 10px; flex-shrink: 0;">
                             📍 عرض
                         </button>
                     </div>
@@ -4698,18 +4986,51 @@
                     const actionText = getActionText(log.action);
                     const actionIcon = getActionIcon(log.action);
                     
+                    // تحديد اسم المستخدم حسب نوع السجل
+                    let displayName = 'غير معروف';
+                    if (log.action === 'user_login' || log.action === 'account_login') {
+                        // لسجلات تسجيل الدخول، استخراج الاسم من notes
+                        if (log.notes && log.notes.includes('تم تسجيل دخول المستخدم: ')) {
+                            displayName = log.notes.replace('تم تسجيل دخول المستخدم: ', '');
+                        } else {
+                            displayName = log.employees?.name || 'مستخدم';
+                        }
+                    } else {
+                        displayName = log.employees?.name || 'غير معروف';
+                    }
+                    
                     let actionDisplay = actionText;
-                    if (log.action.includes('checkin') || log.action === 'in' || log.action === 'center_entry') {
-                        actionDisplay = `<span style="color: var(--checkin-color); font-weight: bold;">دخل ${log.centers?.name ? 'إلى ' + log.centers.name : ''} الساعة ${new Date(logTime).toLocaleTimeString('ar-IQ', {timeZone: 'Asia/Baghdad', hour12: true})}</span>`;
+                    if (log.action === 'user_login' || log.action === 'account_login') {
+                        // تسجيل دخول الحساب
+                        actionDisplay = `<span style="color: #3b82f6; font-weight: bold;">🔐 سجل دخول بحسابه الساعة ${new Date(logTime).toLocaleTimeString('ar-IQ', {timeZone: 'Asia/Baghdad', hour12: true})}</span>`;
+                    } else if (log.action.includes('checkin') || log.action === 'in' || log.action === 'center_entry') {
+                        // دخول إلى مركز
+                        actionDisplay = `<span style="color: var(--checkin-color); font-weight: bold;">✅ دخل ${log.centers?.name ? 'إلى ' + log.centers.name : 'إلى المركز'} الساعة ${new Date(logTime).toLocaleTimeString('ar-IQ', {timeZone: 'Asia/Baghdad', hour12: true})}</span>`;
                     } else if (log.action.includes('checkout') || log.action === 'out') {
-                        const centerName = log.centers?.name ? ` من ${log.centers.name}` : '';
-                        actionDisplay = `<span style="color: #dc2626; font-weight: bold;">خرج ${centerName} الساعة ${new Date(logTime).toLocaleTimeString('ar-IQ', {timeZone: 'Asia/Baghdad', hour12: true})}</span>`;
+                        // خروج من مركز
+                        const centerName = log.centers?.name ? ` من ${log.centers.name}` : ' من المركز';
+                        actionDisplay = `<span style="color: #dc2626; font-weight: bold;">🚪 خرج${centerName} الساعة ${new Date(logTime).toLocaleTimeString('ar-IQ', {timeZone: 'Asia/Baghdad', hour12: true})}</span>`;
+                    }
+                    
+                    // تحديد الرسالة المعروضة للسجلات اليدوية
+                    let displayNotes = '';
+                    if (log.notes && !log.notes.includes('تم تسجيل دخول المستخدم: ')) {
+                        if (log.action === 'manual_checkin') {
+                            // تغيير رسالة الدخول اليدوي
+                            displayNotes = '<span>📝 تم تسجيل دخول الفرد في هاتفه</span>';
+                        } else if (log.action === 'manual_checkout') {
+                            // تغيير رسالة الخروج اليدوي
+                            displayNotes = '<span>📝 تم تسجيل خروج الفرد من هاتفه</span>';
+                        } else {
+                            // عرض الرسالة الأصلية للسجلات الأخرى
+                            displayNotes = `<span>📝 ${log.notes}</span>`;
+                        }
                     }
                     
                     logDiv.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <strong>${actionIcon} ${log.employees?.name || 'غير معروف'}</strong>
+                                <strong>${actionIcon} ${displayName}</strong>
                                 <span style="margin: 0 10px;">•</span>
                                 <span>${actionDisplay}</span>
                             </div>
@@ -4719,7 +5040,7 @@
                         </div>
                         <div class="log-meta">
                             <span class="date-formatted">📅 ${fullTime}</span>
-                            ${log.notes ? `<span>📝 ${log.notes}</span>` : ''}
+                            ${displayNotes}
                         </div>
                     `;
                     logsContainer.appendChild(logDiv);
@@ -5688,10 +6009,12 @@
                 'center_nearby': 'اقترب من مركز',
                 'movement': 'حركة',
                 'location_update': 'تحديث موقع',
-                'checkin': 'دخول',
+                'checkin': 'دخول إلى مركز',
                 'checkout': 'خروج من المركز',
-                'in': 'دخول',
-                'out': 'خروج من المركز'
+                'in': 'دخول إلى مركز',
+                'out': 'خروج من المركز',
+                'user_login': 'تسجيل دخول الحساب',
+                'account_login': 'تسجيل دخول الحساب'
             };
             return actions[action] || action;
         }
@@ -5705,14 +6028,16 @@
                 'movement': '🚶',
                 'location_update': '📍',
                 'checkin': '✅',
-                'checkout': '🔐',
+                'checkout': '🚪',
                 'in': '✅',
-                'out': '🔐'
+                'out': '🚪',
+                'user_login': '🔐',
+                'account_login': '🔐'
             };
             return icons[action] || '📋';
         }
         function showModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
+            document.getElementById(modalId).style.display = 'flex';
         }
 
         function closeModal(modalId) {
